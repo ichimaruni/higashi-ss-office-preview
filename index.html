@@ -6,7 +6,7 @@
 <meta name="referrer" content="no-referrer">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; style-src 'unsafe-inline' blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; img-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; font-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; media-src blob: data: https://cdnjs.cloudflare.com https://cdn.jsdelivr.net https://esm.sh https://fonts.bunny.net https://fonts.googleapis.com https://fonts.gstatic.com https://unpkg.com; worker-src blob:; connect-src blob: data:; frame-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <title>東SSビル 6階 3Dプレビュー</title>
-<style>:root{color-scheme:light dark;background:light-dark(rgb(255 255 255), rgb(24 24 24))}html,body{margin:0}body{box-sizing:border-box;padding:1rem;background:inherit}iframe{display:block;width:100%;height:calc(100vh - 2rem);margin:0 auto;border:0}</style>
+<style>:root{color-scheme:light dark;background:light-dark(rgb(255 255 255), rgb(24 24 24))}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{box-sizing:border-box;padding:0;background:inherit}iframe{display:block;width:100%;height:100dvh!important;margin:0;border:0}</style>
 </head>
 <body>
 <iframe id="codex-visualization" sandbox="allow-scripts" referrerpolicy="no-referrer" title="東SSビル 6階 3Dプレビュー" data-srcdoc="&lt;!doctype html&gt;
@@ -1362,7 +1362,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     &lt;div class=&quot;ss-labels&quot; aria-hidden=&quot;true&quot;&gt;&lt;/div&gt;
     &lt;div class=&quot;ss-loading text-small&quot; role=&quot;status&quot;&gt;3Dを読み込み中…&lt;/div&gt;
   &lt;/div&gt;
-  &lt;div class=&quot;viz-row text-small text-muted&quot;&gt;&lt;span&gt;東SSビル 6階&lt;/span&gt;&lt;span&gt;電源 9箇所・36口&lt;/span&gt;&lt;span id=&quot;ss-layout-label&quot; aria-live=&quot;polite&quot;&gt;B｜西3台・東4台／伸長テーブル 2,000×1,200／50インチ画面／MacBook 6台&lt;/span&gt;&lt;span id=&quot;ss-view-label&quot; aria-live=&quot;polite&quot;&gt;全体を見渡す&lt;/span&gt;&lt;/div&gt;
+  &lt;div class=&quot;ss-footer viz-row text-small text-muted&quot;&gt;&lt;span&gt;東SSビル 6階&lt;/span&gt;&lt;span&gt;電源 9箇所・36口&lt;/span&gt;&lt;span id=&quot;ss-layout-label&quot; aria-live=&quot;polite&quot;&gt;B｜西3台・東4台／伸長テーブル 2,000×1,200／50インチ画面／MacBook 6台&lt;/span&gt;&lt;span id=&quot;ss-view-label&quot; aria-live=&quot;polite&quot;&gt;全体を見渡す&lt;/span&gt;&lt;/div&gt;
 &lt;/div&gt;
 &lt;style&gt;
 #ss-office-3d .ss-toolbar {
@@ -1587,14 +1587,17 @@ html {
 #ss-office-3d .ss-button:active{transform:translateY(1px)}
 #ss-office-3d .ss-toolbar :focus-visible{outline:2px solid var(--ss-accent);outline-offset:2px}
 @media(max-width:640px){#ss-office-3d .ss-choice-groups{grid-template-columns:1fr;gap:8px}#ss-office-3d .ss-view-options{grid-template-columns:repeat(2,minmax(0,1fr))}#ss-office-3d .ss-choice,#ss-office-3d .ss-button,#ss-office-3d .ss-toggle{min-height:44px}#ss-office-3d .ss-camera-actions{gap:4px}#ss-office-3d .ss-button{padding:6px 8px}}
-#ss-office-3d .ss-stage{position:relative;width:100%;height:560px;overflow:hidden;touch-action:none}
+#ss-office-3d{width:100%;height:100dvh;display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden}
+#ss-office-3d .ss-toolbar{margin:0;padding:8px;min-width:0}
+#ss-office-3d .ss-footer{padding:4px 8px;min-width:0}
+#ss-office-3d .ss-stage{position:relative;width:100%;height:100%;min-height:0;overflow:hidden;touch-action:none}
 #ss-office-3d canvas{display:block;width:100%;height:100%;cursor:grab}
 #ss-office-3d canvas:active{cursor:grabbing}
 #ss-office-3d .ss-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 #ss-office-3d .ss-pin{position:absolute;left:0;top:0;white-space:nowrap;pointer-events:none}
 #ss-office-3d .ss-loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted-foreground)}
 #ss-office-3d .ss-loading[hidden]{display:none}
-@media(max-width:480px){#ss-office-3d .ss-stage{height:440px}}
+
 &lt;/style&gt;
 &lt;script&gt;
 (async()=&gt;{
