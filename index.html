@@ -1332,17 +1332,17 @@ html&gt;body{padding:0}&lt;/style&gt;
       &lt;fieldset id=&quot;ss-layout&quot; class=&quot;ss-fieldset&quot;&gt;
         &lt;legend&gt;配置&lt;/legend&gt;
         &lt;div class=&quot;ss-options ss-layout-options&quot;&gt;
-          &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-layout&quot; value=&quot;A&quot;&gt;&lt;span&gt;&lt;strong&gt;A · 島型&lt;/strong&gt;&lt;small&gt;デスクを中央に&lt;/small&gt;&lt;/span&gt;&lt;/label&gt;
-          &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-layout&quot; value=&quot;B&quot; checked&gt;&lt;span&gt;&lt;strong&gt;B · 壁寄せ&lt;/strong&gt;&lt;small&gt;中央にテーブル&lt;/small&gt;&lt;/span&gt;&lt;/label&gt;
+          &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-layout&quot; value=&quot;A&quot;&gt;&lt;span&gt;A · 島型&lt;/span&gt;&lt;/label&gt;
+          &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-layout&quot; value=&quot;B&quot; checked&gt;&lt;span&gt;B · 壁寄せ&lt;/span&gt;&lt;/label&gt;
         &lt;/div&gt;
       &lt;/fieldset&gt;
       &lt;fieldset id=&quot;ss-view&quot; class=&quot;ss-fieldset&quot;&gt;
         &lt;legend&gt;視点&lt;/legend&gt;
         &lt;div class=&quot;ss-options ss-view-options&quot;&gt;
-          &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-view&quot; value=&quot;overview&quot; checked&gt;&lt;span&gt;全体を見渡す&lt;/span&gt;&lt;/label&gt;
-          &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-view&quot; value=&quot;inside&quot;&gt;&lt;span&gt;室内から見る&lt;/span&gt;&lt;/label&gt;
-          &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-view&quot; value=&quot;reverse&quot;&gt;&lt;span&gt;窓側から入口を見る&lt;/span&gt;&lt;/label&gt;
-          &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-view&quot; value=&quot;top&quot;&gt;&lt;span&gt;真上から見る&lt;/span&gt;&lt;/label&gt;
+          &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-view&quot; value=&quot;overview&quot; checked&gt;&lt;span&gt;全体&lt;/span&gt;&lt;/label&gt;
+          &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-view&quot; value=&quot;inside&quot;&gt;&lt;span&gt;室内&lt;/span&gt;&lt;/label&gt;
+          &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-view&quot; value=&quot;reverse&quot;&gt;&lt;span&gt;入口方向&lt;/span&gt;&lt;/label&gt;
+          &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-view&quot; value=&quot;top&quot;&gt;&lt;span&gt;真上&lt;/span&gt;&lt;/label&gt;
         &lt;/div&gt;
       &lt;/fieldset&gt;
     &lt;/div&gt;
@@ -1357,7 +1357,6 @@ html&gt;body{padding:0}&lt;/style&gt;
         &lt;button type=&quot;button&quot; class=&quot;ss-button&quot; id=&quot;ss-reset&quot;&gt;視点を戻す&lt;/button&gt;
       &lt;/div&gt;
     &lt;/div&gt;
-    &lt;p class=&quot;ss-help&quot;&gt;ドラッグで回転 · スクロール／ピンチで拡大・縮小&lt;/p&gt;
   &lt;/section&gt;
   &lt;div class=&quot;ss-stage&quot; role=&quot;img&quot; aria-label=&quot;東SSビル6階。デスク7台、会議席4脚、フォンブース2台、冷蔵庫、食品棚、窓、ベランダ、電源9箇所を配置した回転可能な3Dモデル。&quot;&gt;
     &lt;div class=&quot;ss-labels&quot; aria-hidden=&quot;true&quot;&gt;&lt;/div&gt;
@@ -1366,30 +1365,228 @@ html&gt;body{padding:0}&lt;/style&gt;
   &lt;div class=&quot;viz-row text-small text-muted&quot;&gt;&lt;span&gt;東SSビル 6階&lt;/span&gt;&lt;span&gt;電源 9箇所・36口&lt;/span&gt;&lt;span id=&quot;ss-layout-label&quot; aria-live=&quot;polite&quot;&gt;B｜西3台・東4台／伸長テーブル 2,000×1,200／50インチ画面／MacBook 6台&lt;/span&gt;&lt;span id=&quot;ss-view-label&quot; aria-live=&quot;polite&quot;&gt;全体を見渡す&lt;/span&gt;&lt;/div&gt;
 &lt;/div&gt;
 &lt;style&gt;
-#ss-office-3d .ss-toolbar{--ss-ink:light-dark(#26343d,#e6edf2);--ss-muted:light-dark(#64747f,#aab7c1);--ss-line:light-dark(#dce3e8,#46515a);--ss-surface:light-dark(#f7f9fa,#242c32);--ss-choice:light-dark(#fff,#303b43);--ss-selected:light-dark(#e8f1f6,#263f50);--ss-accent:light-dark(#285671,#acd6ef);color:var(--ss-ink);background:var(--ss-surface);border:1px solid var(--ss-line);border-radius:16px;padding:16px;margin-bottom:12px;font:14px/1.45 system-ui,sans-serif}
-#ss-office-3d .ss-choice-groups{display:grid;grid-template-columns:minmax(230px,.85fr) minmax(330px,1.3fr);gap:20px}
+#ss-office-3d .ss-toolbar {
+
+
+  /* DADS primitive colors. No hue is assigned as the main color here. */
+  --color-blue-50: #e8f1fe;
+  --color-blue-100: #d9e6ff;
+  --color-blue-200: #c5d7fb;
+  --color-blue-300: #9db7f9;
+  --color-blue-400: #7096f8;
+  --color-blue-500: #4979f5;
+  --color-blue-600: #3460fb;
+  --color-blue-700: #264af4;
+  --color-blue-800: #0031d8;
+  --color-blue-900: #0017c1;
+  --color-blue-1000: #00118f;
+  --color-blue-1100: #000071;
+  --color-blue-1200: #000060;
+
+  --color-light-blue-50: #f0f9ff;
+  --color-light-blue-100: #dcf0ff;
+  --color-light-blue-200: #c0e4ff;
+  --color-light-blue-300: #97d3ff;
+  --color-light-blue-400: #57b8ff;
+  --color-light-blue-500: #39abff;
+  --color-light-blue-600: #008bf2;
+  --color-light-blue-700: #0877d7;
+  --color-light-blue-800: #0066be;
+  --color-light-blue-900: #0055ad;
+  --color-light-blue-1000: #00428c;
+  --color-light-blue-1100: #00316a;
+  --color-light-blue-1200: #00234b;
+
+  --color-cyan-50: #e9f7f9;
+  --color-cyan-100: #c8f8ff;
+  --color-cyan-200: #99f2ff;
+  --color-cyan-300: #79e2f2;
+  --color-cyan-400: #2bc8e4;
+  --color-cyan-500: #01b7d6;
+  --color-cyan-600: #00a3bf;
+  --color-cyan-700: #008da6;
+  --color-cyan-800: #008299;
+  --color-cyan-900: #006f83;
+  --color-cyan-1000: #006173;
+  --color-cyan-1100: #004c59;
+  --color-cyan-1200: #003741;
+
+  --color-green-50: #e6f5ec;
+  --color-green-100: #c2e5d1;
+  --color-green-200: #9bd4b5;
+  --color-green-300: #71c598;
+  --color-green-400: #51b883;
+  --color-green-500: #2cac6e;
+  --color-green-600: #259d63;
+  --color-green-700: #1d8b56;
+  --color-green-800: #197a4b;
+  --color-green-900: #115a36;
+  --color-green-1000: #0c472a;
+  --color-green-1100: #08351f;
+  --color-green-1200: #032213;
+
+  --color-lime-50: #ebfad9;
+  --color-lime-100: #d0f5a2;
+  --color-lime-200: #c0f354;
+  --color-lime-300: #ade830;
+  --color-lime-400: #9ddd15;
+  --color-lime-500: #8cc80c;
+  --color-lime-600: #7eb40d;
+  --color-lime-700: #6fa104;
+  --color-lime-800: #618e00;
+  --color-lime-900: #507500;
+  --color-lime-1000: #3e5a00;
+  --color-lime-1100: #2c4100;
+  --color-lime-1200: #1e2d00;
+
+  --color-yellow-50: #fbf5e0;
+  --color-yellow-100: #fff0b3;
+  --color-yellow-200: #ffe380;
+  --color-yellow-300: #ffd43d;
+  --color-yellow-400: #ffc700;
+  --color-yellow-500: #ebb700;
+  --color-yellow-600: #d2a400;
+  --color-yellow-700: #b78f00;
+  --color-yellow-800: #a58000;
+  --color-yellow-900: #927200;
+  --color-yellow-1000: #806300;
+  --color-yellow-1100: #6e5600;
+  --color-yellow-1200: #604b00;
+
+  --color-orange-50: #ffeee2;
+  --color-orange-100: #ffdfca;
+  --color-orange-200: #ffc199;
+  --color-orange-300: #ffa66d;
+  --color-orange-400: #ff8d44;
+  --color-orange-500: #ff7628;
+  --color-orange-600: #fb5b01;
+  --color-orange-700: #e25100;
+  --color-orange-800: #c74700;
+  --color-orange-900: #ac3e00;
+  --color-orange-1000: #8b3200;
+  --color-orange-1100: #6d2700;
+  --color-orange-1200: #541e00;
+
+  --color-red-50: #fdeeee;
+  --color-red-100: #ffdada;
+  --color-red-200: #ffbbbb;
+  --color-red-300: #ff9696;
+  --color-red-400: #ff7171;
+  --color-red-500: #ff5454;
+  --color-red-600: #fe3939;
+  --color-red-700: #fa0000;
+  --color-red-800: #ec0000;
+  --color-red-900: #ce0000;
+  --color-red-1000: #a90000;
+  --color-red-1100: #850000;
+  --color-red-1200: #620000;
+
+  --color-magenta-50: #f3e5f4;
+  --color-magenta-100: #ffd0ff;
+  --color-magenta-200: #ffaeff;
+  --color-magenta-300: #ff8eff;
+  --color-magenta-400: #f661f6;
+  --color-magenta-500: #f137f1;
+  --color-magenta-600: #db00db;
+  --color-magenta-700: #c000c0;
+  --color-magenta-800: #aa00aa;
+  --color-magenta-900: #8b008b;
+  --color-magenta-1000: #6c006c;
+  --color-magenta-1100: #500050;
+  --color-magenta-1200: #3b003b;
+
+  --color-purple-50: #f1eafa;
+  --color-purple-100: #ecddff;
+  --color-purple-200: #ddc2ff;
+  --color-purple-300: #cda6ff;
+  --color-purple-400: #bb87ff;
+  --color-purple-500: #a565f8;
+  --color-purple-600: #8843e1;
+  --color-purple-700: #6f23d0;
+  --color-purple-800: #5c10be;
+  --color-purple-900: #5109ad;
+  --color-purple-1000: #41048e;
+  --color-purple-1100: #30016c;
+  --color-purple-1200: #21004b;
+
+  --color-white: #ffffff;
+  --color-black: #000000;
+  --color-gray-50: #f2f2f2;
+  --color-gray-100: #e6e6e6;
+  --color-gray-200: #cccccc;
+  --color-gray-300: #b3b3b3;
+  --color-gray-400: #999999;
+  --color-gray-420: #949494;
+  --color-gray-500: #7f7f7f;
+  --color-gray-536: #767676;
+  --color-gray-600: #666666;
+  --color-gray-700: #4d4d4d;
+  --color-gray-800: #333333;
+  --color-gray-900: #1a1a1a;
+
+  --font-family-sans: &quot;BIZ UDPGothic&quot;, &quot;Yu Gothic&quot;, &quot;Hiragino Kaku Gothic ProN&quot;, Meiryo, sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-bold: 700;
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 20px;
+  --font-size-xl: 24px;
+  --font-size-2xl: 32px;
+  --font-size-display: 40px;
+  --line-height-heading: 1.4;
+  --line-height-body: 1.7;
+  --line-height-note: 1.5;
+
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+  --space-8: 64px;
+
+  --radius-none: 0;
+  --radius-small: 8px;
+  --radius-medium: 16px;
+  --radius-full: 9999px;
+
+  --elevation-0: none;
+  --elevation-1: 0 2px 8px rgba(0, 0, 0, 0.12);
+  --elevation-2: 0 8px 24px rgba(0, 0, 0, 0.16);
+}
+
+html {
+  font-family: var(--font-family-sans);
+  color: var(--color-gray-900);
+  background: var(--color-white);
+  font-weight: var(--font-weight-regular);
+  font-feature-settings: &quot;palt&quot; 1;
+  font-kerning: normal;
+}
+
+
+/* Roles: neutral text and surfaces; Light Blue for selection and focus. */
+#ss-office-3d .ss-toolbar{--ss-ink:light-dark(var(--color-gray-900),var(--color-gray-50));--ss-muted:light-dark(var(--color-gray-600),var(--color-gray-300));--ss-line:light-dark(var(--color-gray-536),var(--color-gray-420));--ss-choice:light-dark(var(--color-white),var(--color-gray-900));--ss-selected:light-dark(var(--color-light-blue-50),var(--color-light-blue-1200));--ss-accent:light-dark(var(--color-light-blue-900),var(--color-light-blue-300));color:var(--ss-ink);padding:4px 0 8px;margin-bottom:8px;border-bottom:1px solid var(--ss-line);font:var(--font-size-sm)/1.4 var(--font-family-sans)}
+#ss-office-3d .ss-choice-groups{display:grid;grid-template-columns:220px minmax(0,1fr);gap:16px}
 #ss-office-3d .ss-fieldset{border:0;margin:0;padding:0;min-width:0}
-#ss-office-3d .ss-fieldset legend{padding:0;margin-bottom:8px;font-size:12px;font-weight:600;color:var(--ss-muted)}
-#ss-office-3d .ss-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
-#ss-office-3d .ss-choice{display:flex;align-items:center;gap:8px;min-height:44px;padding:9px 10px;box-sizing:border-box;border:1px solid var(--ss-line);border-radius:10px;background:var(--ss-choice);cursor:pointer;transition:background .12s,border-color .12s}
-#ss-office-3d .ss-choice:has(input:checked){background:var(--ss-selected);border-color:var(--ss-accent);color:var(--ss-accent)}
+#ss-office-3d .ss-fieldset legend{padding:0;margin-bottom:4px;font-size:var(--font-size-xs);color:var(--ss-muted)}
+#ss-office-3d .ss-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
+#ss-office-3d .ss-view-options{grid-template-columns:repeat(4,minmax(0,1fr))}
+#ss-office-3d .ss-choice{display:flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:6px 8px;box-sizing:border-box;border:1px solid var(--ss-line);border-radius:var(--radius-small);background:var(--ss-choice);cursor:pointer;white-space:nowrap}
+#ss-office-3d .ss-choice:has(input:checked){background:var(--ss-selected);border-color:var(--ss-accent);color:var(--ss-accent);font-weight:var(--font-weight-bold)}
 #ss-office-3d .ss-choice:hover{border-color:var(--ss-accent)}
 #ss-office-3d .ss-choice input{margin:0;width:16px;height:16px;flex:0 0 16px;accent-color:var(--ss-accent)}
-#ss-office-3d .ss-choice strong{display:block;font-size:14px;font-weight:600}
-#ss-office-3d .ss-choice small{display:block;margin-top:3px;color:var(--ss-muted);font-size:12px}
-#ss-office-3d .ss-layout-options .ss-choice{min-height:96px}
-#ss-office-3d .ss-settings-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--ss-line);margin-top:16px;padding-top:12px}
+#ss-office-3d .ss-settings-row{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;margin-top:8px}
 #ss-office-3d .ss-display-options,#ss-office-3d .ss-camera-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
-#ss-office-3d .ss-toggle{display:flex;align-items:center;gap:7px;min-height:44px;cursor:pointer;padding-right:6px}
-#ss-office-3d .ss-toggle input{margin:0;width:17px;height:17px;accent-color:var(--ss-accent)}
+#ss-office-3d .ss-toggle{display:flex;align-items:center;gap:6px;min-height:36px;cursor:pointer}
+#ss-office-3d .ss-toggle input{margin:0;width:16px;height:16px;accent-color:var(--ss-accent)}
 #ss-office-3d .ss-button-pair{display:flex;gap:4px}
-#ss-office-3d .ss-button{appearance:none;border:1px solid var(--ss-line);background:var(--ss-choice);color:var(--ss-ink);font:inherit;border-radius:8px;min-height:40px;padding:8px 11px;cursor:pointer}
+#ss-office-3d .ss-button{appearance:none;border:1px solid var(--ss-line);background:var(--ss-choice);color:var(--ss-ink);font:inherit;border-radius:var(--radius-small);min-height:36px;padding:6px 9px;cursor:pointer}
 #ss-office-3d .ss-button:hover{border-color:var(--ss-accent);background:var(--ss-selected)}
 #ss-office-3d .ss-button:active{transform:translateY(1px)}
-#ss-office-3d .ss-toolbar :focus-visible{outline:2px solid var(--ss-accent);outline-offset:3px}
-#ss-office-3d .ss-help{font-size:12px;color:var(--ss-muted);margin:9px 0 0}
-@media(max-width:640px){#ss-office-3d .ss-choice-groups{grid-template-columns:1fr;gap:14px}#ss-office-3d .ss-layout-options .ss-choice{min-height:72px}#ss-office-3d .ss-toolbar{padding:12px}#ss-office-3d .ss-camera-actions{gap:6px}#ss-office-3d .ss-button{min-height:44px;padding:8px}#ss-office-3d .ss-choice{min-height:48px}}
-
+#ss-office-3d .ss-toolbar :focus-visible{outline:2px solid var(--ss-accent);outline-offset:2px}
+@media(max-width:640px){#ss-office-3d .ss-choice-groups{grid-template-columns:1fr;gap:8px}#ss-office-3d .ss-view-options{grid-template-columns:repeat(2,minmax(0,1fr))}#ss-office-3d .ss-choice,#ss-office-3d .ss-button,#ss-office-3d .ss-toggle{min-height:44px}#ss-office-3d .ss-camera-actions{gap:4px}#ss-office-3d .ss-button{padding:6px 8px}}
 #ss-office-3d .ss-stage{position:relative;width:100%;height:560px;overflow:hidden;touch-action:none}
 #ss-office-3d canvas{display:block;width:100%;height:100%;cursor:grab}
 #ss-office-3d canvas:active{cursor:grabbing}
