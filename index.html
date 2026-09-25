@@ -1327,30 +1327,38 @@ html&gt;body{padding:0}&lt;/style&gt;
 })();
 &lt;/script&gt;
 &lt;div id=&quot;ss-office-3d&quot;&gt;
-  &lt;div class=&quot;viz-controls&quot;&gt;
-    &lt;label class=&quot;form-label&quot;&gt;配置
-      &lt;select class=&quot;form-select&quot; id=&quot;ss-layout&quot;&gt;
-        &lt;option value=&quot;A&quot;&gt;A｜デスクを1つの島に&lt;/option&gt;
-        &lt;option value=&quot;B&quot; selected&gt;B｜壁寄せ・伸長テーブル&lt;/option&gt;
-      &lt;/select&gt;
-    &lt;/label&gt;
-    &lt;label class=&quot;form-label&quot;&gt;視点
-      &lt;select class=&quot;form-select&quot; id=&quot;ss-view&quot;&gt;
-        &lt;option value=&quot;overview&quot;&gt;全体を見渡す&lt;/option&gt;
-        &lt;option value=&quot;inside&quot;&gt;室内から見る&lt;/option&gt;
-        &lt;option value=&quot;reverse&quot;&gt;窓側から入口を見る&lt;/option&gt;
-        &lt;option value=&quot;top&quot;&gt;真上から見る&lt;/option&gt;
-      &lt;/select&gt;
-    &lt;/label&gt;
-    &lt;label class=&quot;form-check form-switch&quot;&gt;&lt;input class=&quot;form-check-input&quot; id=&quot;ss-power&quot; type=&quot;checkbox&quot; checked&gt;&lt;span class=&quot;form-check-label&quot;&gt;電源位置&lt;/span&gt;&lt;/label&gt;
-    &lt;label class=&quot;form-check form-switch&quot;&gt;&lt;input class=&quot;form-check-input&quot; id=&quot;ss-walls&quot; type=&quot;checkbox&quot;&gt;&lt;span class=&quot;form-check-label&quot;&gt;外壁を透かす&lt;/span&gt;&lt;/label&gt;
-  &lt;/div&gt;
-  &lt;div class=&quot;viz-row&quot;&gt;
-    &lt;button type=&quot;button&quot; class=&quot;btn&quot; id=&quot;ss-left&quot;&gt;左へ回転&lt;/button&gt;
-    &lt;button type=&quot;button&quot; class=&quot;btn&quot; id=&quot;ss-right&quot;&gt;右へ回転&lt;/button&gt;
-    &lt;button type=&quot;button&quot; class=&quot;btn&quot; id=&quot;ss-near&quot;&gt;近づく&lt;/button&gt;
-    &lt;button type=&quot;button&quot; class=&quot;btn&quot; id=&quot;ss-far&quot;&gt;離れる&lt;/button&gt;
-  &lt;/div&gt;
+  &lt;section class=&quot;ss-toolbar&quot; aria-label=&quot;3D表示の操作&quot;&gt;
+    &lt;div class=&quot;ss-choice-groups&quot;&gt;
+      &lt;fieldset id=&quot;ss-layout&quot; class=&quot;ss-fieldset&quot;&gt;
+        &lt;legend&gt;配置&lt;/legend&gt;
+        &lt;div class=&quot;ss-options ss-layout-options&quot;&gt;
+          &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-layout&quot; value=&quot;A&quot;&gt;&lt;span&gt;&lt;strong&gt;A · 島型&lt;/strong&gt;&lt;small&gt;デスクを中央に&lt;/small&gt;&lt;/span&gt;&lt;/label&gt;
+          &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-layout&quot; value=&quot;B&quot; checked&gt;&lt;span&gt;&lt;strong&gt;B · 壁寄せ&lt;/strong&gt;&lt;small&gt;中央にテーブル&lt;/small&gt;&lt;/span&gt;&lt;/label&gt;
+        &lt;/div&gt;
+      &lt;/fieldset&gt;
+      &lt;fieldset id=&quot;ss-view&quot; class=&quot;ss-fieldset&quot;&gt;
+        &lt;legend&gt;視点&lt;/legend&gt;
+        &lt;div class=&quot;ss-options ss-view-options&quot;&gt;
+          &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-view&quot; value=&quot;overview&quot; checked&gt;&lt;span&gt;全体を見渡す&lt;/span&gt;&lt;/label&gt;
+          &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-view&quot; value=&quot;inside&quot;&gt;&lt;span&gt;室内から見る&lt;/span&gt;&lt;/label&gt;
+          &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-view&quot; value=&quot;reverse&quot;&gt;&lt;span&gt;窓側から入口を見る&lt;/span&gt;&lt;/label&gt;
+          &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-view&quot; value=&quot;top&quot;&gt;&lt;span&gt;真上から見る&lt;/span&gt;&lt;/label&gt;
+        &lt;/div&gt;
+      &lt;/fieldset&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;ss-settings-row&quot;&gt;
+      &lt;div class=&quot;ss-display-options&quot; role=&quot;group&quot; aria-label=&quot;表示設定&quot;&gt;
+        &lt;label class=&quot;ss-toggle&quot;&gt;&lt;input id=&quot;ss-power&quot; type=&quot;checkbox&quot; checked&gt;&lt;span&gt;電源位置&lt;/span&gt;&lt;/label&gt;
+        &lt;label class=&quot;ss-toggle&quot;&gt;&lt;input id=&quot;ss-walls&quot; type=&quot;checkbox&quot;&gt;&lt;span&gt;外壁を透かす&lt;/span&gt;&lt;/label&gt;
+      &lt;/div&gt;
+      &lt;div class=&quot;ss-camera-actions&quot; role=&quot;group&quot; aria-label=&quot;カメラ操作&quot;&gt;
+        &lt;div class=&quot;ss-button-pair&quot;&gt;&lt;button type=&quot;button&quot; class=&quot;ss-button&quot; id=&quot;ss-left&quot; aria-label=&quot;左へ回転&quot;&gt;↶ 左へ&lt;/button&gt;&lt;button type=&quot;button&quot; class=&quot;ss-button&quot; id=&quot;ss-right&quot; aria-label=&quot;右へ回転&quot;&gt;右へ ↷&lt;/button&gt;&lt;/div&gt;
+        &lt;div class=&quot;ss-button-pair&quot;&gt;&lt;button type=&quot;button&quot; class=&quot;ss-button&quot; id=&quot;ss-far&quot; aria-label=&quot;離れる&quot;&gt;− 縮小&lt;/button&gt;&lt;button type=&quot;button&quot; class=&quot;ss-button&quot; id=&quot;ss-near&quot; aria-label=&quot;近づく&quot;&gt;＋ 拡大&lt;/button&gt;&lt;/div&gt;
+        &lt;button type=&quot;button&quot; class=&quot;ss-button&quot; id=&quot;ss-reset&quot;&gt;視点を戻す&lt;/button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;p class=&quot;ss-help&quot;&gt;ドラッグで回転 · スクロール／ピンチで拡大・縮小&lt;/p&gt;
+  &lt;/section&gt;
   &lt;div class=&quot;ss-stage&quot; role=&quot;img&quot; aria-label=&quot;東SSビル6階。デスク7台、会議席4脚、フォンブース2台、冷蔵庫、食品棚、窓、ベランダ、電源9箇所を配置した回転可能な3Dモデル。&quot;&gt;
     &lt;div class=&quot;ss-labels&quot; aria-hidden=&quot;true&quot;&gt;&lt;/div&gt;
     &lt;div class=&quot;ss-loading text-small&quot; role=&quot;status&quot;&gt;3Dを読み込み中…&lt;/div&gt;
@@ -1358,6 +1366,30 @@ html&gt;body{padding:0}&lt;/style&gt;
   &lt;div class=&quot;viz-row text-small text-muted&quot;&gt;&lt;span&gt;東SSビル 6階&lt;/span&gt;&lt;span&gt;電源 9箇所・36口&lt;/span&gt;&lt;span id=&quot;ss-layout-label&quot; aria-live=&quot;polite&quot;&gt;B｜西3台・東4台／伸長テーブル 2,000×1,200／50インチ画面／MacBook 6台&lt;/span&gt;&lt;span id=&quot;ss-view-label&quot; aria-live=&quot;polite&quot;&gt;全体を見渡す&lt;/span&gt;&lt;/div&gt;
 &lt;/div&gt;
 &lt;style&gt;
+#ss-office-3d .ss-toolbar{--ss-ink:light-dark(#26343d,#e6edf2);--ss-muted:light-dark(#64747f,#aab7c1);--ss-line:light-dark(#dce3e8,#46515a);--ss-surface:light-dark(#f7f9fa,#242c32);--ss-choice:light-dark(#fff,#303b43);--ss-selected:light-dark(#e8f1f6,#263f50);--ss-accent:light-dark(#285671,#acd6ef);color:var(--ss-ink);background:var(--ss-surface);border:1px solid var(--ss-line);border-radius:16px;padding:16px;margin-bottom:12px;font:14px/1.45 system-ui,sans-serif}
+#ss-office-3d .ss-choice-groups{display:grid;grid-template-columns:minmax(230px,.85fr) minmax(330px,1.3fr);gap:20px}
+#ss-office-3d .ss-fieldset{border:0;margin:0;padding:0;min-width:0}
+#ss-office-3d .ss-fieldset legend{padding:0;margin-bottom:8px;font-size:12px;font-weight:600;color:var(--ss-muted)}
+#ss-office-3d .ss-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+#ss-office-3d .ss-choice{display:flex;align-items:center;gap:8px;min-height:44px;padding:9px 10px;box-sizing:border-box;border:1px solid var(--ss-line);border-radius:10px;background:var(--ss-choice);cursor:pointer;transition:background .12s,border-color .12s}
+#ss-office-3d .ss-choice:has(input:checked){background:var(--ss-selected);border-color:var(--ss-accent);color:var(--ss-accent)}
+#ss-office-3d .ss-choice:hover{border-color:var(--ss-accent)}
+#ss-office-3d .ss-choice input{margin:0;width:16px;height:16px;flex:0 0 16px;accent-color:var(--ss-accent)}
+#ss-office-3d .ss-choice strong{display:block;font-size:14px;font-weight:600}
+#ss-office-3d .ss-choice small{display:block;margin-top:3px;color:var(--ss-muted);font-size:12px}
+#ss-office-3d .ss-layout-options .ss-choice{min-height:96px}
+#ss-office-3d .ss-settings-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--ss-line);margin-top:16px;padding-top:12px}
+#ss-office-3d .ss-display-options,#ss-office-3d .ss-camera-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+#ss-office-3d .ss-toggle{display:flex;align-items:center;gap:7px;min-height:44px;cursor:pointer;padding-right:6px}
+#ss-office-3d .ss-toggle input{margin:0;width:17px;height:17px;accent-color:var(--ss-accent)}
+#ss-office-3d .ss-button-pair{display:flex;gap:4px}
+#ss-office-3d .ss-button{appearance:none;border:1px solid var(--ss-line);background:var(--ss-choice);color:var(--ss-ink);font:inherit;border-radius:8px;min-height:40px;padding:8px 11px;cursor:pointer}
+#ss-office-3d .ss-button:hover{border-color:var(--ss-accent);background:var(--ss-selected)}
+#ss-office-3d .ss-button:active{transform:translateY(1px)}
+#ss-office-3d .ss-toolbar :focus-visible{outline:2px solid var(--ss-accent);outline-offset:3px}
+#ss-office-3d .ss-help{font-size:12px;color:var(--ss-muted);margin:9px 0 0}
+@media(max-width:640px){#ss-office-3d .ss-choice-groups{grid-template-columns:1fr;gap:14px}#ss-office-3d .ss-layout-options .ss-choice{min-height:72px}#ss-office-3d .ss-toolbar{padding:12px}#ss-office-3d .ss-camera-actions{gap:6px}#ss-office-3d .ss-button{min-height:44px;padding:8px}#ss-office-3d .ss-choice{min-height:48px}}
+
 #ss-office-3d .ss-stage{position:relative;width:100%;height:560px;overflow:hidden;touch-action:none}
 #ss-office-3d canvas{display:block;width:100%;height:100%;cursor:grab}
 #ss-office-3d canvas:active{cursor:grabbing}
@@ -1826,24 +1858,24 @@ function streetscape(west){
  const plane=new THREE.Mesh(new THREE.PlaneGeometry(21,10.5),new THREE.MeshBasicMaterial({map:tex,side:THREE.DoubleSide}));plane.rotation.y=west?Math.PI/2:-Math.PI/2;plane.position.set(west?-8:8,-.6,0);surroundings.add(plane);
 }
 streetscape(true);streetscape(false);
-const viewSelect=root.querySelector(&#x27;#ss-view&#x27;),powerToggle=root.querySelector(&#x27;#ss-power&#x27;),wallToggle=root.querySelector(&#x27;#ss-walls&#x27;);
-const layoutSelect=root.querySelector(&#x27;#ss-layout&#x27;),layoutLabel=root.querySelector(&#x27;#ss-layout-label&#x27;);
+const viewGroup=root.querySelector(&#x27;#ss-view&#x27;),powerToggle=root.querySelector(&#x27;#ss-power&#x27;),wallToggle=root.querySelector(&#x27;#ss-walls&#x27;);
+const layoutGroup=root.querySelector(&#x27;#ss-layout&#x27;),layoutLabel=root.querySelector(&#x27;#ss-layout-label&#x27;);
 const label=root.querySelector(&#x27;#ss-view-label&#x27;);let view=&#x27;overview&#x27;,lastFit=1,layout=&#x27;B&#x27;;
 function interior(){return view===&#x27;inside&#x27;||view===&#x27;reverse&#x27;}
 function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&amp;&amp;!powerToggle.checked)||(p.layout&amp;&amp;p.layout!==layout)||interior()||v.z&gt;1||v.z&lt; -1||Math.abs(v.x)&gt;.97||Math.abs(v.y)&gt;.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
 function render(){renderer.render(scene,camera);projectPins();root.dataset.camera=camera.position.toArray().map(v=&gt;v.toFixed(3)).join(&#x27;,&#x27;);root.dataset.layout=layout;root.dataset.desks=deskObjects.length;root.dataset.meetingChairs=meetingGroup.visible?&#x27;4&#x27;:&#x27;0&#x27;;root.dataset.roundTable=roundGroup.visible?&#x27;2000x1200&#x27;:&#x27;0&#x27;;root.dataset.tableShape=roundGroup.visible?&#x27;capsule&#x27;:&#x27;&#x27;;root.dataset.sharedDisplay=roundGroup.visible?&#x27;50&#x27;:&#x27;0&#x27;;root.dataset.macbooks=roundGroup.visible?String(laptops.length):&#x27;0&#x27;;root.dataset.roundTableCenterMm=roundGroup.visible?&#x27;3350,2950&#x27;:&#x27;&#x27;;root.dataset.trashBins=String(trashBins.length);root.dataset.storageBoxes=String(storageBoxes.length);root.dataset.cordlessVacuums=&#x27;1&#x27;}
-function setLayout(next){layout=next===&#x27;A&#x27;?&#x27;A&#x27;:&#x27;B&#x27;;layoutSelect.value=layout;trashBins.forEach((g,i)=&gt;{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4)});deskObjects.forEach((g,i)=&gt;{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout===&#x27;A&#x27;;roundGroup.visible=layout===&#x27;B&#x27;;layoutShadows.A.visible=layout===&#x27;A&#x27;;layoutShadows.B.visible=layout===&#x27;B&#x27;;layoutLabel.textContent=layout===&#x27;B&#x27;?&#x27;B｜西3台・東4台／伸長テーブル 2,000×1,200／50インチ画面／MacBook 6台&#x27;:&#x27;A｜デスク7台の島／会議席4脚&#x27;;stage.setAttribute(&#x27;aria-label&#x27;,`東SSビル6階・配置${layout}。FLEXISPOT EF1 7台、Xiaomi A27Ui 27インチ7台、${layout===&#x27;B&#x27;?&#x27;北寄りのモダンデコ伸長テーブル2000×1200mm、高さ717mm、オーク色の格子脚。テーブル上に50インチディスプレイと14インチMacBook6台、会議用の椅子なし&#x27;:&#x27;会議テーブルと会議チェア4脚&#x27;}、フォンブース2台、冷蔵庫、食品棚、ゴミ箱3個、白い段ボール8箱、ダイソンのコードレス掃除機1台、窓、ベランダ、電源9箇所。`);render()}
+function setLayout(next){layout=next===&#x27;A&#x27;?&#x27;A&#x27;:&#x27;B&#x27;;layoutGroup.querySelectorAll(&#x27;input&#x27;).forEach(input=&gt;input.checked=input.value===layout);trashBins.forEach((g,i)=&gt;{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4)});deskObjects.forEach((g,i)=&gt;{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout===&#x27;A&#x27;;roundGroup.visible=layout===&#x27;B&#x27;;layoutShadows.A.visible=layout===&#x27;A&#x27;;layoutShadows.B.visible=layout===&#x27;B&#x27;;layoutLabel.textContent=layout===&#x27;B&#x27;?&#x27;B｜西3台・東4台／伸長テーブル 2,000×1,200／50インチ画面／MacBook 6台&#x27;:&#x27;A｜デスク7台の島／会議席4脚&#x27;;stage.setAttribute(&#x27;aria-label&#x27;,`東SSビル6階・配置${layout}。FLEXISPOT EF1 7台、Xiaomi A27Ui 27インチ7台、${layout===&#x27;B&#x27;?&#x27;北寄りのモダンデコ伸長テーブル2000×1200mm、高さ717mm、オーク色の格子脚。テーブル上に50インチディスプレイと14インチMacBook6台、会議用の椅子なし&#x27;:&#x27;会議テーブルと会議チェア4脚&#x27;}、フォンブース2台、冷蔵庫、食品棚、ゴミ箱3個、白い段ボール8箱、ダイソンのコードレス掃除機1台、窓、ベランダ、電源9箇所。`);render()}
 function wallTransparency(){outer.traverse(o=&gt;{if(!o.isMesh)return;if(o.material===glass)return;if(!o.userData.original)o.userData.original=o.material;o.material=wallToggle.checked?o.userData.original.clone():o.userData.original;if(wallToggle.checked){o.material.transparent=true;o.material.opacity=.13;o.material.depthWrite=false;o.castShadow=false}else o.castShadow=true});render()}
-function setView(next){view=next;viewSelect.value=next;ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
+function setView(next){view=next;viewGroup.querySelectorAll(&#x27;input&#x27;).forEach(input=&gt;input.checked=input.value===next);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
  if(next===&#x27;overview&#x27;){camera.position.set(.6,9.1,10.4);controls.target.set(0,.55,-.35);controls.maxPolarAngle=Math.PI*.49}
  if(next===&#x27;inside&#x27;){camera.position.set(.25,1.6,2.25);controls.target.set(-.25,1.35,-2.5);controls.maxPolarAngle=Math.PI*.72}
  if(next===&#x27;reverse&#x27;){camera.position.set(-2.25,1.6,-2.15);controls.target.set(.45,1.30,2.60);controls.maxPolarAngle=Math.PI*.72}
  if(next===&#x27;top&#x27;){camera.position.set(0,16.8,.02);controls.target.set(0,0,-.32);controls.maxPolarAngle=Math.PI*.49}
- lastFit=1;resize();controls.update();label.textContent=viewSelect.options[viewSelect.selectedIndex].text;render();
+ lastFit=1;resize();controls.update();label.textContent=viewGroup.querySelector(&#x27;input:checked&#x27;).nextElementSibling.textContent;render();
 }
 function save(){window.openai?.setWidgetState?.({modelContent:{view,layout,desks:7,monitor:&#x27;Xiaomi A27Ui 27インチ&#x27;,meetingTableShape:layout===&#x27;B&#x27;?&#x27;capsule&#x27;:null,meetingTableSizeMm:layout===&#x27;B&#x27;?[2000,1200,717]:null,roundTableCenterMm:layout===&#x27;B&#x27;?[3350,2950]:null,sharedDisplayInches:layout===&#x27;B&#x27;?50:null,macbooks:layout===&#x27;B&#x27;?6:0,trashBins:3,trashBinSizeMm:[400,410,700],storageBoxes:8,storageBoxSizeMm:[400,300,300],cordlessVacuums:1,powerPoints:9},privateContent:{view,layout,power:powerToggle.checked,walls:wallToggle.checked,camera:camera.position.toArray(),target:controls.target.toArray()}})?.catch(()=&gt;{})}
-layoutSelect.addEventListener(&#x27;change&#x27;,()=&gt;{setLayout(layoutSelect.value);save()});
-viewSelect.addEventListener(&#x27;change&#x27;,()=&gt;{setView(viewSelect.value);save()});
+layoutGroup.addEventListener(&#x27;change&#x27;,event=&gt;{setLayout(event.target.value);save()});
+viewGroup.addEventListener(&#x27;change&#x27;,event=&gt;{setView(event.target.value);save()});
 powerToggle.addEventListener(&#x27;change&#x27;,()=&gt;{render();save()});wallToggle.addEventListener(&#x27;change&#x27;,()=&gt;{wallTransparency();save()});
 controls.addEventListener(&#x27;change&#x27;,render);controls.addEventListener(&#x27;end&#x27;,save);
 function turn(angle){camera.position.sub(controls.target).applyAxisAngle(new THREE.Vector3(0,1,0),angle).add(controls.target);controls.update();render();save()}
@@ -1852,6 +1884,7 @@ root.querySelector(&#x27;#ss-left&#x27;).addEventListener(&#x27;click&#x27;,()=&
 root.querySelector(&#x27;#ss-right&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;turn(Math.PI/8));
 root.querySelector(&#x27;#ss-near&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;zoom(.8));
 root.querySelector(&#x27;#ss-far&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;zoom(1.25));
+root.querySelector(&#x27;#ss-reset&#x27;).addEventListener(&#x27;click&#x27;,()=&gt;{setView(view);save()});
 function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();const fit=interior()?1:Math.max(1,1.15/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
 new ResizeObserver(resize).observe(stage);
 setLayout(&#x27;B&#x27;);
