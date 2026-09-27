@@ -1552,18 +1552,19 @@ html&gt;body{padding:0}&lt;/style&gt;
     &lt;/div&gt;
     &lt;fieldset id=&quot;ss-table-picker&quot; class=&quot;ss-fieldset&quot;&gt;
       &lt;legend&gt;中央テーブル（配置B）&lt;/legend&gt;
-      &lt;div class=&quot;ss-options ss-table-options&quot;&gt;
-        &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-table&quot; value=&quot;modern&quot; checked&gt;&lt;span&gt;MODERN DECO · 200×120&lt;/span&gt;&lt;/label&gt;
-        &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-table&quot; value=&quot;oneLux&quot;&gt;&lt;span&gt;ONE LUX · φ190&lt;/span&gt;&lt;/label&gt;
-        &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-table&quot; value=&quot;centraRound&quot;&gt;&lt;span&gt;Centra · φ180&lt;/span&gt;&lt;/label&gt;
-        &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-table&quot; value=&quot;centraOval&quot;&gt;&lt;span&gt;Centra · 240×140&lt;/span&gt;&lt;/label&gt;
-        &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-table&quot; value=&quot;oneLuxOval&quot;&gt;&lt;span&gt;ONE LUX · 220×120&lt;/span&gt;&lt;/label&gt;
-        &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-table&quot; value=&quot;civicRound&quot;&gt;&lt;span&gt;Civic · φ200&lt;/span&gt;&lt;/label&gt;
-        &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-table&quot; value=&quot;teamFlat&quot;&gt;&lt;span&gt;チームフラット · 240×120&lt;/span&gt;&lt;/label&gt;
-        &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-table&quot; value=&quot;slTable&quot;&gt;&lt;span&gt;SL · 240×100&lt;/span&gt;&lt;/label&gt;
-        &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-table&quot; value=&quot;kamuy&quot;&gt;&lt;span&gt;KAMUY · 240×100&lt;/span&gt;&lt;/label&gt;
-        &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-table&quot; value=&quot;viena2&quot;&gt;&lt;span&gt;ビエナ2 · 210×105&lt;/span&gt;&lt;/label&gt;
-      &lt;/div&gt;
+      &lt;select id=&quot;ss-table-select&quot; aria-label=&quot;中央テーブルを選択&quot;&gt;
+        &lt;option value=&quot;rughaus&quot; selected&gt;RUGHAUS · 175×80（島型と同じ）&lt;/option&gt;
+        &lt;option value=&quot;modern&quot;&gt;MODERN DECO · 200×120&lt;/option&gt;
+        &lt;option value=&quot;oneLux&quot;&gt;ONE LUX · φ190&lt;/option&gt;
+        &lt;option value=&quot;centraRound&quot;&gt;Centra · φ180&lt;/option&gt;
+        &lt;option value=&quot;centraOval&quot;&gt;Centra · 240×140&lt;/option&gt;
+        &lt;option value=&quot;oneLuxOval&quot;&gt;ONE LUX · 220×120&lt;/option&gt;
+        &lt;option value=&quot;civicRound&quot;&gt;Civic · φ200&lt;/option&gt;
+        &lt;option value=&quot;teamFlat&quot;&gt;チームフラット · 240×120&lt;/option&gt;
+        &lt;option value=&quot;slTable&quot;&gt;SL · 240×100&lt;/option&gt;
+        &lt;option value=&quot;kamuy&quot;&gt;KAMUY · 240×100&lt;/option&gt;
+        &lt;option value=&quot;viena2&quot;&gt;ビエナ2 · 210×105&lt;/option&gt;
+      &lt;/select&gt;
     &lt;/fieldset&gt;
     &lt;div class=&quot;ss-settings-row&quot;&gt;
       &lt;fieldset id=&quot;ss-floor&quot; class=&quot;ss-fieldset ss-floor-options&quot;&gt;&lt;legend&gt;床&lt;/legend&gt;&lt;div class=&quot;ss-options&quot;&gt;
@@ -1585,7 +1586,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     &lt;div class=&quot;ss-labels&quot; aria-hidden=&quot;true&quot;&gt;&lt;/div&gt;
     &lt;div class=&quot;ss-loading text-small&quot; role=&quot;status&quot;&gt;3Dを読み込み中…&lt;/div&gt;
   &lt;/div&gt;
-  &lt;div class=&quot;ss-footer viz-row text-small text-muted&quot;&gt;&lt;span&gt;東SSビル 6階&lt;/span&gt;&lt;span&gt;電源 9箇所・36口&lt;/span&gt;&lt;span id=&quot;ss-layout-label&quot; aria-live=&quot;polite&quot;&gt;B｜西3台・東4台／MODERN DECO 2,000×1,200／50インチ画面／MacBook 6台&lt;/span&gt;&lt;span id=&quot;ss-view-label&quot; aria-live=&quot;polite&quot;&gt;全体を見渡す&lt;/span&gt;&lt;/div&gt;
+  &lt;div class=&quot;ss-footer viz-row text-small text-muted&quot;&gt;&lt;span&gt;東SSビル 6階&lt;/span&gt;&lt;span&gt;電源 9箇所・36口&lt;/span&gt;&lt;span id=&quot;ss-layout-label&quot; aria-live=&quot;polite&quot;&gt;B｜西3台・東4台／RUGHAUS 1,750×800／50インチ画面／MacBook 6台&lt;/span&gt;&lt;span id=&quot;ss-view-label&quot; aria-live=&quot;polite&quot;&gt;全体を見渡す&lt;/span&gt;&lt;/div&gt;
 &lt;/div&gt;
 &lt;style&gt;
 #ss-office-3d .ss-toolbar {
@@ -1796,10 +1797,9 @@ html {
 #ss-office-3d .ss-fieldset legend{padding:0;margin-bottom:4px;font-size:var(--font-size-xs);color:var(--ss-muted)}
 #ss-office-3d .ss-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
 #ss-office-3d .ss-view-options{grid-template-columns:repeat(4,minmax(0,1fr))}
-#ss-office-3d #ss-table-picker{margin-top:8px}
-#ss-office-3d .ss-table-options{grid-template-columns:repeat(5,minmax(0,1fr))}
-#ss-office-3d .ss-table-options .ss-choice{white-space:normal;text-align:center}
-@media(max-width:1100px){#ss-office-3d .ss-table-options{grid-template-columns:repeat(4,minmax(0,1fr))}}
+#ss-office-3d #ss-table-picker{display:flex;align-items:center;gap:10px;margin-top:8px}
+#ss-office-3d #ss-table-picker legend{float:left;margin:0}
+#ss-office-3d #ss-table-select{box-sizing:border-box;width:min(100%,360px);min-height:36px;padding:6px 32px 6px 10px;border:1px solid var(--ss-line);border-radius:var(--radius-small);background:var(--ss-choice);color:var(--ss-ink);font:inherit;cursor:pointer}
 #ss-office-3d[data-layout=&quot;A&quot;] #ss-table-picker{display:none}
 #ss-office-3d .ss-choice{display:flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:6px 8px;box-sizing:border-box;border:1px solid var(--ss-line);border-radius:var(--radius-small);background:var(--ss-choice);cursor:pointer;white-space:nowrap}
 #ss-office-3d .ss-choice:has(input:checked){background:var(--ss-selected);border-color:var(--ss-accent);color:var(--ss-accent);font-weight:var(--font-weight-bold)}
@@ -1816,7 +1816,7 @@ html {
 #ss-office-3d .ss-button:hover{border-color:var(--ss-accent);background:var(--ss-selected)}
 #ss-office-3d .ss-button:active{transform:translateY(1px)}
 #ss-office-3d .ss-toolbar :focus-visible{outline:2px solid var(--ss-accent);outline-offset:2px}
-@media(max-width:640px){#ss-office-3d .ss-choice-groups{grid-template-columns:1fr;gap:8px}#ss-office-3d .ss-view-options,#ss-office-3d .ss-table-options{grid-template-columns:repeat(2,minmax(0,1fr))}#ss-office-3d .ss-choice,#ss-office-3d .ss-button,#ss-office-3d .ss-toggle{min-height:44px}#ss-office-3d .ss-camera-actions{gap:4px}#ss-office-3d .ss-button{padding:6px 8px}}
+@media(max-width:640px){#ss-office-3d .ss-choice-groups{grid-template-columns:1fr;gap:8px}#ss-office-3d .ss-view-options{grid-template-columns:repeat(2,minmax(0,1fr))}#ss-office-3d #ss-table-picker{align-items:stretch;flex-direction:column;gap:4px}#ss-office-3d #ss-table-picker legend{float:none}#ss-office-3d #ss-table-select{width:100%;min-height:44px}#ss-office-3d .ss-choice,#ss-office-3d .ss-button,#ss-office-3d .ss-toggle{min-height:44px}#ss-office-3d .ss-camera-actions{gap:4px}#ss-office-3d .ss-button{padding:6px 8px}}
 #ss-office-3d{width:100%;height:100dvh;display:grid;grid-template-rows:auto minmax(0,1fr) auto;overflow:hidden}
 #ss-office-3d .ss-toolbar{margin:0;padding:8px;min-width:0}
 #ss-office-3d .ss-footer{padding:4px 8px;min-width:0}
@@ -2055,6 +2055,8 @@ function wireChair(x,z,rot){
  rod(g,[-.23,.04,-.24],[.15,.4,.15],.0045,M.metal);rod(g,[.23,.04,-.24],[-.15,.4,.15],.0045,M.metal);
 }
 wireChair(4.5,2.075,-Math.PI/2);wireChair(4.5,2.975,-Math.PI/2);wireChair(6.1,2.075,Math.PI/2);wireChair(6.1,2.975,Math.PI/2);
+const rughaus=table.clone(true);rughaus.name=&#x27;RUGHAUS 島型と同じ会議テーブル 1750 × 800&#x27;;
+rughaus.position.set(0,0,-1.05);roundGroup.add(rughaus);
 // MODERN DECO skdt01, fully extended: 2,000 × 1,200 mm.
 // Official dimension drawing: H717, leg H642, lower width630, inside gap800.
 const roundTable=group(&#x27;MODERN DECO skdt01 伸長時 2000 × 1200 × H717&#x27;,3.35,2.95,0,roundGroup);
@@ -2399,8 +2401,9 @@ streetscape(true);streetscape(false);
 const viewGroup=root.querySelector(&#x27;#ss-view&#x27;),powerToggle=root.querySelector(&#x27;#ss-power&#x27;),wallToggle=root.querySelector(&#x27;#ss-walls&#x27;);
 const layoutGroup=root.querySelector(&#x27;#ss-layout&#x27;),layoutLabel=root.querySelector(&#x27;#ss-layout-label&#x27;);
 const floorGroup=root.querySelector(&#x27;#ss-floor&#x27;),tableGroup=root.querySelector(&#x27;#ss-table-picker&#x27;);
-const label=root.querySelector(&#x27;#ss-view-label&#x27;);let view=&#x27;overview&#x27;,lastFit=1,layout=&#x27;B&#x27;,floorFinish=&#x27;linoleum&#x27;,tableChoice=&#x27;modern&#x27;;
+const label=root.querySelector(&#x27;#ss-view-label&#x27;);let view=&#x27;overview&#x27;,lastFit=1,layout=&#x27;B&#x27;,floorFinish=&#x27;linoleum&#x27;,tableChoice=&#x27;rughaus&#x27;;
 const tableOptions={
+ rughaus:{name:&#x27;RUGHAUS&#x27;,size:&#x27;1,750×800&#x27;,mm:[1750,800,720],shape:&#x27;rectangle&#x27;,height:.720,displayZ:-.59,laptopX:.23,laptopZ:[-.31,.05,.41],pinZ:-.75},
  modern:{name:&#x27;MODERN DECO&#x27;,size:&#x27;2,000×1,200&#x27;,mm:[2000,1200,717],shape:&#x27;capsule&#x27;,height:.717,displayZ:-.78,laptopX:.37,laptopZ:[-.43,.065,.56],pinZ:-.85},
  oneLux:{name:&#x27;ONE LUX&#x27;,size:&#x27;φ1,900&#x27;,mm:[1900,1900,710],shape:&#x27;round&#x27;,height:.710,displayZ:-.73,laptopX:.40,laptopZ:[-.38,.08,.54],pinZ:-.88},
  centraRound:{name:&#x27;Centra 円形&#x27;,size:&#x27;φ1,800&#x27;,mm:[1800,1800,721],shape:&#x27;round&#x27;,height:.721,displayZ:-.68,laptopX:.39,laptopZ:[-.29,.08,.47],pinZ:-.83},
@@ -2412,10 +2415,10 @@ const tableOptions={
  kamuy:{name:&#x27;KAMUY LUX&#x27;,size:&#x27;2,400×1,000&#x27;,mm:[2400,1000,710],shape:&#x27;rounded-rectangle&#x27;,height:.710,displayZ:-1.0,laptopX:.33,laptopZ:[-.59,.08,.73],pinZ:-1.08},
  viena2:{name:&#x27;ビエナ2 楕円形&#x27;,size:&#x27;2,100×1,050&#x27;,mm:[2100,1050,720],shape:&#x27;capsule&#x27;,height:.720,displayZ:-.84,laptopX:.35,laptopZ:[-.46,.07,.59],pinZ:-.96}
 };
-const tableMeshes={modern:roundTable,oneLux,centraRound,centraOval,oneLuxOval,civicRound,teamFlat,slTable,kamuy,viena2};
+const tableMeshes={rughaus,modern:roundTable,oneLux,centraRound,centraOval,oneLuxOval,civicRound,teamFlat,slTable,kamuy,viena2};
 function setTable(next){
- tableChoice=tableOptions[next]?next:&#x27;modern&#x27;;const option=tableOptions[tableChoice];
- tableGroup.querySelectorAll(&#x27;input&#x27;).forEach(input=&gt;input.checked=input.value===tableChoice);
+ tableChoice=tableOptions[next]?next:&#x27;rughaus&#x27;;const option=tableOptions[tableChoice];
+ tableGroup.querySelector(&#x27;select&#x27;).value=tableChoice;
  for(const [key,mesh] of Object.entries(tableMeshes))mesh.visible=key===tableChoice;
  equipment.position.y=option.height-.717;sharedDisplay.position.z=option.displayZ;
  laptops.forEach((g,i)=&gt;{const side=i&lt;3?-1:1;g.position.x=side*option.laptopX;g.position.z=option.laptopZ[i%3]});
@@ -2436,7 +2439,7 @@ function setView(next){view=next;viewGroup.querySelectorAll(&#x27;input&#x27;).f
  if(next===&#x27;top&#x27;){camera.position.set(0,16.8,.02);controls.target.set(0,0,-.32);controls.maxPolarAngle=Math.PI*.49}
  lastFit=1;resize();controls.update();label.textContent=viewGroup.querySelector(&#x27;input:checked&#x27;).nextElementSibling.textContent;render();
 }
-function save(){window.openai?.setWidgetState?.({modelContent:{view,layout,tableChoice,floorFinish,desks:7,monitor:&#x27;Xiaomi A27Ui 27インチ&#x27;,meetingTableShape:layout===&#x27;B&#x27;?tableOptions[tableChoice].shape:null,meetingTableSizeMm:layout===&#x27;B&#x27;?tableOptions[tableChoice].mm:null,roundTableCenterMm:layout===&#x27;B&#x27;?[3350,2950]:null,sharedDisplayInches:layout===&#x27;B&#x27;?50:null,macbooks:layout===&#x27;B&#x27;?6:0,trashBins:3,trashBinSizeMm:[400,410,700],storageBoxes:8,storageBoxSizeMm:[400,300,300],cordlessVacuums:1,powerPoints:9},privateContent:{view,layout,tableChoice,floorFinish,power:powerToggle.checked,walls:wallToggle.checked,camera:camera.position.toArray(),target:controls.target.toArray()}})?.catch(()=&gt;{})}
+function save(){window.openai?.setWidgetState?.({modelContent:{view,layout,tableChoice,floorFinish,desks:7,monitor:&#x27;Xiaomi A27Ui 27インチ&#x27;,meetingTableShape:layout===&#x27;B&#x27;?tableOptions[tableChoice].shape:null,meetingTableSizeMm:layout===&#x27;B&#x27;?tableOptions[tableChoice].mm:null,roundTableCenterMm:layout===&#x27;B&#x27;?[3350,2950]:null,sharedDisplayInches:layout===&#x27;B&#x27;?50:null,macbooks:layout===&#x27;B&#x27;?6:0,trashBins:3,trashBinSizeMm:[400,410,700],storageBoxes:8,storageBoxSizeMm:[400,300,300],cordlessVacuums:1,powerPoints:9},privateContent:{view,layout,tableChoice,tablePickerVersion:2,floorFinish,power:powerToggle.checked,walls:wallToggle.checked,camera:camera.position.toArray(),target:controls.target.toArray()}})?.catch(()=&gt;{})}
 floorGroup.addEventListener(&#x27;change&#x27;,event=&gt;{setFloor(event.target.value);save()});
 layoutGroup.addEventListener(&#x27;change&#x27;,event=&gt;{setLayout(event.target.value);save()});
 tableGroup.addEventListener(&#x27;change&#x27;,event=&gt;{setTable(event.target.value);save()});
@@ -2453,11 +2456,11 @@ root.querySelector(&#x27;#ss-reset&#x27;).addEventListener(&#x27;click&#x27;,()=
 function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();const fit=interior()?1:Math.max(1,1.15/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
 new ResizeObserver(resize).observe(stage);
 setFloor(&#x27;linoleum&#x27;);
-setTable(&#x27;modern&#x27;);
+setTable(&#x27;rughaus&#x27;);
 setLayout(&#x27;B&#x27;);
 setView(&#x27;overview&#x27;);
 const saved=window.openai?.widgetState?.privateContent;
-function restore(s){if(!s)return;setFloor(s.floorFinish||&#x27;linoleum&#x27;);setTable(s.tableChoice||&#x27;modern&#x27;);setLayout(s.layout===&#x27;A&#x27;?&#x27;A&#x27;:&#x27;B&#x27;);powerToggle.checked=s.power!==false;wallToggle.checked=!!s.walls;setView([&#x27;overview&#x27;,&#x27;inside&#x27;,&#x27;reverse&#x27;,&#x27;top&#x27;].includes(s.view)?s.view:&#x27;overview&#x27;);if(Array.isArray(s.camera)&amp;&amp;s.camera.length===3&amp;&amp;Array.isArray(s.target)&amp;&amp;s.target.length===3){camera.position.fromArray(s.camera);controls.target.fromArray(s.target);controls.update()}wallTransparency()}
+function restore(s){if(!s)return;setFloor(s.floorFinish||&#x27;linoleum&#x27;);setTable(s.tablePickerVersion===2?s.tableChoice:&#x27;rughaus&#x27;);setLayout(s.layout===&#x27;A&#x27;?&#x27;A&#x27;:&#x27;B&#x27;);powerToggle.checked=s.power!==false;wallToggle.checked=!!s.walls;setView([&#x27;overview&#x27;,&#x27;inside&#x27;,&#x27;reverse&#x27;,&#x27;top&#x27;].includes(s.view)?s.view:&#x27;overview&#x27;);if(Array.isArray(s.camera)&amp;&amp;s.camera.length===3&amp;&amp;Array.isArray(s.target)&amp;&amp;s.target.length===3){camera.position.fromArray(s.camera);controls.target.fromArray(s.target);controls.update()}wallTransparency()}
 restore(saved);window.addEventListener(&#x27;openai:set_globals&#x27;,e=&gt;restore(e.detail?.globals?.widgetState?.privateContent));
 root.querySelector(&#x27;.ss-loading&#x27;).hidden=true;
 root.dataset.ready=&#x27;true&#x27;;
