@@ -1557,6 +1557,12 @@ html&gt;body{padding:0}&lt;/style&gt;
         &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-table&quot; value=&quot;oneLux&quot;&gt;&lt;span&gt;ONE LUX · φ190&lt;/span&gt;&lt;/label&gt;
         &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-table&quot; value=&quot;centraRound&quot;&gt;&lt;span&gt;Centra · φ180&lt;/span&gt;&lt;/label&gt;
         &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-table&quot; value=&quot;centraOval&quot;&gt;&lt;span&gt;Centra · 240×140&lt;/span&gt;&lt;/label&gt;
+        &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-table&quot; value=&quot;oneLuxOval&quot;&gt;&lt;span&gt;ONE LUX · 220×120&lt;/span&gt;&lt;/label&gt;
+        &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-table&quot; value=&quot;civicRound&quot;&gt;&lt;span&gt;Civic · φ200&lt;/span&gt;&lt;/label&gt;
+        &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-table&quot; value=&quot;teamFlat&quot;&gt;&lt;span&gt;チームフラット · 240×120&lt;/span&gt;&lt;/label&gt;
+        &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-table&quot; value=&quot;slTable&quot;&gt;&lt;span&gt;SL · 240×100&lt;/span&gt;&lt;/label&gt;
+        &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-table&quot; value=&quot;kamuy&quot;&gt;&lt;span&gt;KAMUY · 240×100&lt;/span&gt;&lt;/label&gt;
+        &lt;label class=&quot;ss-choice&quot;&gt;&lt;input type=&quot;radio&quot; name=&quot;ss-table&quot; value=&quot;viena2&quot;&gt;&lt;span&gt;ビエナ2 · 210×105&lt;/span&gt;&lt;/label&gt;
       &lt;/div&gt;
     &lt;/fieldset&gt;
     &lt;div class=&quot;ss-settings-row&quot;&gt;
@@ -1791,7 +1797,7 @@ html {
 #ss-office-3d .ss-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
 #ss-office-3d .ss-view-options{grid-template-columns:repeat(4,minmax(0,1fr))}
 #ss-office-3d #ss-table-picker{margin-top:8px}
-#ss-office-3d .ss-table-options{grid-template-columns:repeat(4,minmax(0,1fr))}
+#ss-office-3d .ss-table-options{grid-template-columns:repeat(5,minmax(0,1fr))}
 #ss-office-3d[data-layout=&quot;A&quot;] #ss-table-picker{display:none}
 #ss-office-3d .ss-choice{display:flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:6px 8px;box-sizing:border-box;border:1px solid var(--ss-line);border-radius:var(--radius-small);background:var(--ss-choice);cursor:pointer;white-space:nowrap}
 #ss-office-3d .ss-choice:has(input:checked){background:var(--ss-selected);border-color:var(--ss-accent);color:var(--ss-accent);font-weight:var(--font-weight-bold)}
@@ -2117,6 +2123,65 @@ addCentraUnderframe(centraRound,.817,.817);
 const centraOvalTop=new THREE.Mesh(capsuleGeometry(.7,.5,.025),centraTopMat);
 centraOvalTop.position.y=.696;centraOvalTop.castShadow=true;centraOvalTop.receiveShadow=true;centraOval.add(centraOvalTop);
 addCentraUnderframe(centraOval,.6,1.117);
+// Additional candidates use published outer dimensions. Bases are simplified
+// silhouettes for comparing leg clearance, not manufacturer CAD drawings.
+function roundedTableGeometry(width,length,corner,depth){
+ const x=width/2,z=length/2,r=Math.min(corner,x,z),s=new THREE.Shape();
+ s.moveTo(-x+r,-z);s.lineTo(x-r,-z);s.quadraticCurveTo(x,-z,x,-z+r);
+ s.lineTo(x,z-r);s.quadraticCurveTo(x,z,x-r,z);
+ s.lineTo(-x+r,z);s.quadraticCurveTo(-x,z,-x,z-r);
+ s.lineTo(-x,-z+r);s.quadraticCurveTo(-x,-z,-x+r,-z);
+ const g=new THREE.ExtrudeGeometry(s,{depth,bevelEnabled:false,curveSegments:12});g.rotateX(-Math.PI/2);return g;
+}
+function tabletop(parent,geometry,height,material){
+ const top=new THREE.Mesh(geometry,material);top.position.y=height-.03;
+ top.castShadow=true;top.receiveShadow=true;parent.add(top);return top;
+}
+const oneLuxOval=group(&#x27;ONE LUX 小判形 2200 × 1200 × H710&#x27;,3.35,2.95,0,roundGroup);
+tabletop(oneLuxOval,capsuleGeometry(.6,.5,.03),.710,oneLuxOak);
+const ovalPedestal=new THREE.Mesh(new THREE.CylinderGeometry(.27,.39,.665,64),oneLuxOak);
+ovalPedestal.scale.z=1.35;ovalPedestal.position.y=.333;ovalPedestal.castShadow=true;oneLuxOval.add(ovalPedestal);
+for(let i=0;i&lt;36;i++){
+ const a=i*Math.PI/18;
+ curve(oneLuxOval,[[.39*Math.sin(a),.015,.52*Math.cos(a)],[.33*Math.sin(a),.35,.44*Math.cos(a)],[.27*Math.sin(a),.665,.36*Math.cos(a)]],.0024,seamWood);
+}
+const civicRound=group(&#x27;Herman Miller Civic 円形 φ2000&#x27;,3.35,2.95,0,roundGroup);
+const civicTopMat=mat(0xb7ada0,.62),civicBase=mat(0x555c61,.42,.38);
+const civicTop=tabletop(civicRound,new THREE.CylinderGeometry(1,1,.03,96),.740,civicTopMat);
+civicTop.position.y=.725;
+const civicColumn=new THREE.Mesh(new THREE.CylinderGeometry(.16,.19,.675,48),civicBase);
+civicColumn.position.y=.355;civicColumn.castShadow=true;civicRound.add(civicColumn);
+const civicFoot=new THREE.Mesh(new THREE.CylinderGeometry(.49,.49,.026,72),civicBase);
+civicFoot.position.y=.023;civicFoot.castShadow=true;civicRound.add(civicFoot);
+const teamFlat=group(&#x27;コクヨ チームフラット 長円形 2400 × 1200 × H720&#x27;,3.35,2.95,0,roundGroup);
+const teamTop=mat(0xd1b896,.7),teamFrame=mat(0xe1e0dc,.45,.16);
+tabletop(teamFlat,capsuleGeometry(.6,.6,.03),.720,teamTop);
+for(const z of [-.73,.73]){
+ box(teamFlat,.45,.035,.13,0,.035,z,teamFrame,&#x27;脚の接地部&#x27;);
+ box(teamFlat,.095,.64,.095,0,.35,z,teamFrame,&#x27;配線できる脚&#x27;);
+ box(teamFlat,.5,.026,.08,0,.665,z,teamFrame);
+}
+const slTable=group(&#x27;カンディハウス SL ソリッドテーブル 2400 × 1000 × H710&#x27;,3.35,2.95,0,roundGroup);
+const slOak=new THREE.MeshStandardMaterial({map:woodTex,color:0xb69b78,roughness:.62});
+tabletop(slTable,roundedTableGeometry(1,2.4,.055,.035),.710,slOak);
+for(const x of [-.37,.37])for(const z of [-.80,.80]){
+ box(slTable,.072,.652,.072,x,.33,z,slOak,&#x27;内側に寄せた脚&#x27;);
+}
+const kamuy=group(&#x27;カンディハウス KAMUY LUX 2400 × 1000 × H710&#x27;,3.35,2.95,0,roundGroup);
+const kamuyTop=new THREE.MeshStandardMaterial({map:woodTex,color:0xb58668,roughness:.57});
+tabletop(kamuy,roundedTableGeometry(1,2.4,.19,.035),.710,kamuyTop);
+for(const x of [-1,1])for(const z of [-1,1]){
+ rod(kamuy,[x*.36,.67,z*.74],[x*.41,.035,z*.86],.038,kamuyTop);
+}
+const viena2=group(&#x27;コクヨ ビエナ2 楕円形 2100 × 1050 × H720&#x27;,3.35,2.95,0,roundGroup);
+const vienaTop=mat(0xc5bda9,.71),vienaFrame=mat(0x70777a,.42,.38);
+tabletop(viena2,capsuleGeometry(.525,.525,.03),.720,vienaTop);
+for(const z of [-.70,.70]){
+ box(viena2,.72,.028,.085,0,.029,z,vienaFrame,&#x27;T字脚の接地部&#x27;);
+ const col=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.65,24),vienaFrame);
+ col.position.set(0,.354,z);col.castShadow=true;viena2.add(col);
+ box(viena2,.65,.025,.065,0,.672,z,vienaFrame);
+}
 const equipment=group(&#x27;共有画面とMacBook 6台&#x27;,3.35,2.95,0,roundGroup);
 // Approximately 14 mm remains between each north stand corner and the edge.
 const sharedDisplay=new THREE.Group();sharedDisplay.name=&#x27;テーブル上の共有ディスプレイ 50インチ&#x27;;sharedDisplay.position.set(0,-.003,-.78);equipment.add(sharedDisplay);
@@ -2337,9 +2402,15 @@ const tableOptions={
  modern:{name:&#x27;MODERN DECO&#x27;,size:&#x27;2,000×1,200&#x27;,mm:[2000,1200,717],shape:&#x27;capsule&#x27;,height:.717,displayZ:-.78,laptopX:.37,laptopZ:[-.43,.065,.56],pinZ:-.85},
  oneLux:{name:&#x27;ONE LUX&#x27;,size:&#x27;φ1,900&#x27;,mm:[1900,1900,710],shape:&#x27;round&#x27;,height:.710,displayZ:-.73,laptopX:.40,laptopZ:[-.38,.08,.54],pinZ:-.88},
  centraRound:{name:&#x27;Centra 円形&#x27;,size:&#x27;φ1,800&#x27;,mm:[1800,1800,721],shape:&#x27;round&#x27;,height:.721,displayZ:-.68,laptopX:.39,laptopZ:[-.29,.08,.47],pinZ:-.83},
- centraOval:{name:&#x27;Centra 長円形&#x27;,size:&#x27;2,400×1,400&#x27;,mm:[2400,1400,721],shape:&#x27;capsule&#x27;,height:.721,displayZ:-1.0,laptopX:.46,laptopZ:[-.57,.08,.72],pinZ:-1.05}
+ centraOval:{name:&#x27;Centra 長円形&#x27;,size:&#x27;2,400×1,400&#x27;,mm:[2400,1400,721],shape:&#x27;capsule&#x27;,height:.721,displayZ:-1.0,laptopX:.46,laptopZ:[-.57,.08,.72],pinZ:-1.05},
+ oneLuxOval:{name:&#x27;ONE LUX 小判形&#x27;,size:&#x27;2,200×1,200&#x27;,mm:[2200,1200,710],shape:&#x27;capsule&#x27;,height:.710,displayZ:-.88,laptopX:.39,laptopZ:[-.49,.07,.64],pinZ:-1.0},
+ civicRound:{name:&#x27;Civic 円形&#x27;,size:&#x27;φ2,000&#x27;,mm:[2000,2000,740],shape:&#x27;round&#x27;,height:.740,displayZ:-.79,laptopX:.42,laptopZ:[-.43,.08,.59],pinZ:-.94},
+ teamFlat:{name:&#x27;チームフラット 長円形&#x27;,size:&#x27;2,400×1,200&#x27;,mm:[2400,1200,720],shape:&#x27;capsule&#x27;,height:.720,displayZ:-1.0,laptopX:.39,laptopZ:[-.59,.08,.73],pinZ:-1.08},
+ slTable:{name:&#x27;SL ソリッドテーブル&#x27;,size:&#x27;2,400×1,000&#x27;,mm:[2400,1000,710],shape:&#x27;rounded-rectangle&#x27;,height:.710,displayZ:-1.0,laptopX:.33,laptopZ:[-.59,.08,.73],pinZ:-1.08},
+ kamuy:{name:&#x27;KAMUY LUX&#x27;,size:&#x27;2,400×1,000&#x27;,mm:[2400,1000,710],shape:&#x27;rounded-rectangle&#x27;,height:.710,displayZ:-1.0,laptopX:.33,laptopZ:[-.59,.08,.73],pinZ:-1.08},
+ viena2:{name:&#x27;ビエナ2 楕円形&#x27;,size:&#x27;2,100×1,050&#x27;,mm:[2100,1050,720],shape:&#x27;capsule&#x27;,height:.720,displayZ:-.84,laptopX:.35,laptopZ:[-.46,.07,.59],pinZ:-.96}
 };
-const tableMeshes={modern:roundTable,oneLux,centraRound,centraOval};
+const tableMeshes={modern:roundTable,oneLux,centraRound,centraOval,oneLuxOval,civicRound,teamFlat,slTable,kamuy,viena2};
 function setTable(next){
  tableChoice=tableOptions[next]?next:&#x27;modern&#x27;;const option=tableOptions[tableChoice];
  tableGroup.querySelectorAll(&#x27;input&#x27;).forEach(input=&gt;input.checked=input.value===tableChoice);
