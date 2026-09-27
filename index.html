@@ -2153,10 +2153,13 @@ const civicRound=group(&#x27;Herman Miller Civic 円形 φ2000&#x27;,3.35,2.95,0
 const civicTopMat=mat(0xb7ada0,.62),civicBase=mat(0x555c61,.42,.38);
 const civicTop=tabletop(civicRound,new THREE.CylinderGeometry(1,1,.03,96),.740,civicTopMat);
 civicTop.position.y=.725;
-const civicColumn=new THREE.Mesh(new THREE.CylinderGeometry(.16,.19,.675,48),civicBase);
-civicColumn.position.y=.355;civicColumn.castShadow=true;civicRound.add(civicColumn);
-const civicFoot=new THREE.Mesh(new THREE.CylinderGeometry(.49,.49,.026,72),civicBase);
-civicFoot.position.y=.023;civicFoot.castShadow=true;civicRound.add(civicFoot);
+// Herman Miller&#x27;s 2000 mm round Civic uses four columns, not the single pedestal of smaller sizes.
+for(const x of [-.42,.42])for(const z of [-.42,.42]){
+ const civicColumn=new THREE.Mesh(new THREE.CylinderGeometry(.075,.09,.675,32),civicBase);
+ civicColumn.position.set(x,.355,z);civicColumn.castShadow=true;civicRound.add(civicColumn);
+ const civicFoot=new THREE.Mesh(new THREE.CylinderGeometry(.14,.14,.026,32),civicBase);
+ civicFoot.position.set(x,.023,z);civicFoot.castShadow=true;civicRound.add(civicFoot);
+}
 const teamFlat=group(&#x27;コクヨ チームフラット 長円形 2400 × 1200 × H720&#x27;,3.35,2.95,0,roundGroup);
 const teamTop=mat(0xd1b896,.7),teamFrame=mat(0xe1e0dc,.45,.16);
 tabletop(teamFlat,capsuleGeometry(.6,.6,.03),.720,teamTop);
