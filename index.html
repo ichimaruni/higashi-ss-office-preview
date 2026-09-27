@@ -1798,6 +1798,8 @@ html {
 #ss-office-3d .ss-view-options{grid-template-columns:repeat(4,minmax(0,1fr))}
 #ss-office-3d #ss-table-picker{margin-top:8px}
 #ss-office-3d .ss-table-options{grid-template-columns:repeat(5,minmax(0,1fr))}
+#ss-office-3d .ss-table-options .ss-choice{white-space:normal;text-align:center}
+@media(max-width:1100px){#ss-office-3d .ss-table-options{grid-template-columns:repeat(4,minmax(0,1fr))}}
 #ss-office-3d[data-layout=&quot;A&quot;] #ss-table-picker{display:none}
 #ss-office-3d .ss-choice{display:flex;align-items:center;justify-content:center;gap:6px;min-height:36px;padding:6px 8px;box-sizing:border-box;border:1px solid var(--ss-line);border-radius:var(--radius-small);background:var(--ss-choice);cursor:pointer;white-space:nowrap}
 #ss-office-3d .ss-choice:has(input:checked){background:var(--ss-selected);border-color:var(--ss-accent);color:var(--ss-accent);font-weight:var(--font-weight-bold)}
