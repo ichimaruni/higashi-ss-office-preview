@@ -2037,9 +2037,11 @@ for(const [name,x,z,rot] of desks){
 }
 const table=group(&#x27;M1&#x27;,5.3,2.525,Math.PI/2,meetingGroup);
 box(table,1.75,.035,.8,0,.7025,0,M.dark);
-for(const x of [-.7,.7])for(const z of [-.28,.28]){
- const a=new THREE.Vector3(x,.69,z),b=new THREE.Vector3(x*1.13,.04,z*1.17),mid=a.clone().add(b).multiplyScalar(.5);
- const leg=box(table,.085,a.distanceTo(b),.045,mid.x,mid.y,mid.z,M.red);leg.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),a.sub(b).normalize());
+// Steel blade legs: wide under the top, tapering to a narrow foot, splayed toward the ends.
+for(const sign of [-1,1])for(const z of [-.35,.35]){
+ const s=new THREE.Shape();s.moveTo(sign*.55,.685);s.lineTo(sign*.72,.685);s.lineTo(sign*.84,0);s.lineTo(sign*.80,0);s.closePath();
+ const g=new THREE.ExtrudeGeometry(s,{depth:.02,bevelEnabled:false});g.translate(0,0,z-.01);
+ const leg=new THREE.Mesh(g,M.red);leg.castShadow=true;leg.receiveShadow=true;leg.name=&#x27;テーパー脚&#x27;;table.add(leg);
 }
 function wireChair(x,z,rot){
  const g=group(&#x27;会議チェア&#x27;,x,z,rot,meetingGroup);
@@ -2095,15 +2097,15 @@ const oneLux=group(&#x27;ONE LUX φ1900 × H710&#x27;,3.35,2.95,0,roundGroup);
 const oneLuxOak=new THREE.MeshStandardMaterial({map:woodTex,color:0xd6b489,roughness:.58});
 const luxTop=new THREE.Mesh(new THREE.CylinderGeometry(.95,.95,.034,96),oneLuxOak);
 luxTop.position.y=.693;luxTop.castShadow=true;luxTop.receiveShadow=true;oneLux.add(luxTop);
-const luxPedestal=new THREE.Mesh(new THREE.CylinderGeometry(.26,.3375,.668,72),oneLuxOak);
-luxPedestal.position.y=.334;luxPedestal.castShadow=true;luxPedestal.receiveShadow=true;oneLux.add(luxPedestal);
+const luxPedestal=new THREE.Mesh(new THREE.CylinderGeometry(.26,.3375,.676,72),oneLuxOak);
+luxPedestal.position.y=.338;luxPedestal.castShadow=true;luxPedestal.receiveShadow=true;oneLux.add(luxPedestal);
 for(let i=0;i&lt;36;i++){
  const a=i*Math.PI/18;
- curve(oneLux,[[.338*Math.sin(a),.018,.338*Math.cos(a)],[.305*Math.sin(a),.34,.305*Math.cos(a)],[.26*Math.sin(a),.668,.26*Math.cos(a)]],.0024,seamWood);
+ curve(oneLux,[[.338*Math.sin(a),.018,.338*Math.cos(a)],[.305*Math.sin(a),.34,.305*Math.cos(a)],[.26*Math.sin(a),.676,.26*Math.cos(a)]],.0024,seamWood);
 }
 // ITOKI Centra: its published drawing shows four splayed legs and a cross-frame.
-const centraRound=group(&#x27;Centra 円形 φ1800 × H721&#x27;,3.35,2.95,0,roundGroup);
-const centraOval=group(&#x27;Centra 両R 2400 × 1400 × H721&#x27;,3.35,2.95,0,roundGroup);
+const centraRound=group(&#x27;Centra 円形 φ1800 × H720&#x27;,3.35,2.95,0,roundGroup);
+const centraOval=group(&#x27;Centra 両R 2400 × 1400 × H720&#x27;,3.35,2.95,0,roundGroup);
 const centraTopMat=new THREE.MeshStandardMaterial({map:woodTex,color:0xd8b994,roughness:.66});
 const centraFrame=mat(0x77716a,.67,.28);
 function centraLeg(parent,top,bottom){
@@ -2117,15 +2119,15 @@ function addCentraUnderframe(parent,xFoot,zFoot){
  box(parent,xFoot*2-.13,.035,.06,0,.58,0,centraFrame);
  box(parent,.06,.035,zFoot*2-.13,0,.58,0,centraFrame);
  for(const sign of [-1,1]){
-  centraLeg(parent,[sign*(xFoot-.13),.69,0],[sign*xFoot,.035,0]);
-  centraLeg(parent,[0,.69,sign*(zFoot-.13)],[0,.035,sign*zFoot]);
+  centraLeg(parent,[sign*(xFoot-.13),.695,0],[sign*xFoot,.035,0]);
+  centraLeg(parent,[0,.695,sign*(zFoot-.13)],[0,.035,sign*zFoot]);
  }
 }
 const centraRoundTop=new THREE.Mesh(new THREE.CylinderGeometry(.9,.9,.025,96),centraTopMat);
-centraRoundTop.position.y=.7085;centraRoundTop.castShadow=true;centraRoundTop.receiveShadow=true;centraRound.add(centraRoundTop);
+centraRoundTop.position.y=.7075;centraRoundTop.castShadow=true;centraRoundTop.receiveShadow=true;centraRound.add(centraRoundTop);
 addCentraUnderframe(centraRound,.817,.817);
 const centraOvalTop=new THREE.Mesh(capsuleGeometry(.7,.5,.025),centraTopMat);
-centraOvalTop.position.y=.696;centraOvalTop.castShadow=true;centraOvalTop.receiveShadow=true;centraOval.add(centraOvalTop);
+centraOvalTop.position.y=.695;centraOvalTop.castShadow=true;centraOvalTop.receiveShadow=true;centraOval.add(centraOvalTop);
 addCentraUnderframe(centraOval,.6,1.117);
 // Additional candidates use published outer dimensions. Bases are simplified
 // silhouettes for comparing leg clearance, not manufacturer CAD drawings.
@@ -2137,17 +2139,17 @@ function roundedTableGeometry(width,length,corner,depth){
  s.lineTo(-x,-z+r);s.quadraticCurveTo(-x,-z,-x+r,-z);
  const g=new THREE.ExtrudeGeometry(s,{depth,bevelEnabled:false,curveSegments:12});g.rotateX(-Math.PI/2);return g;
 }
-function tabletop(parent,geometry,height,material){
- const top=new THREE.Mesh(geometry,material);top.position.y=height-.03;
+function tabletop(parent,geometry,height,material,thickness=.03){
+ const top=new THREE.Mesh(geometry,material);top.position.y=height-thickness;
  top.castShadow=true;top.receiveShadow=true;parent.add(top);return top;
 }
 const oneLuxOval=group(&#x27;ONE LUX 小判形 2200 × 1200 × H710&#x27;,3.35,2.95,0,roundGroup);
 tabletop(oneLuxOval,capsuleGeometry(.6,.5,.03),.710,oneLuxOak);
-const ovalPedestal=new THREE.Mesh(new THREE.CylinderGeometry(.27,.39,.665,64),oneLuxOak);
-ovalPedestal.scale.z=1.35;ovalPedestal.position.y=.333;ovalPedestal.castShadow=true;oneLuxOval.add(ovalPedestal);
+const ovalPedestal=new THREE.Mesh(new THREE.CylinderGeometry(.27,.39,.68,64),oneLuxOak);
+ovalPedestal.scale.z=1.35;ovalPedestal.position.y=.34;ovalPedestal.castShadow=true;oneLuxOval.add(ovalPedestal);
 for(let i=0;i&lt;36;i++){
  const a=i*Math.PI/18;
- curve(oneLuxOval,[[.39*Math.sin(a),.015,.52*Math.cos(a)],[.33*Math.sin(a),.35,.44*Math.cos(a)],[.27*Math.sin(a),.665,.36*Math.cos(a)]],.0024,seamWood);
+ curve(oneLuxOval,[[.39*Math.sin(a),.015,.52*Math.cos(a)],[.33*Math.sin(a),.35,.44*Math.cos(a)],[.27*Math.sin(a),.68,.36*Math.cos(a)]],.0024,seamWood);
 }
 const civicRound=group(&#x27;Herman Miller Civic 円形 φ2000&#x27;,3.35,2.95,0,roundGroup);
 const civicTopMat=mat(0xb7ada0,.62),civicBase=mat(0x555c61,.42,.38);
@@ -2155,8 +2157,8 @@ const civicTop=tabletop(civicRound,new THREE.CylinderGeometry(1,1,.03,96),.740,c
 civicTop.position.y=.725;
 // Herman Miller&#x27;s 2000 mm round Civic uses four columns, not the single pedestal of smaller sizes.
 for(const x of [-.42,.42])for(const z of [-.42,.42]){
- const civicColumn=new THREE.Mesh(new THREE.CylinderGeometry(.075,.09,.675,32),civicBase);
- civicColumn.position.set(x,.355,z);civicColumn.castShadow=true;civicRound.add(civicColumn);
+ const civicColumn=new THREE.Mesh(new THREE.CylinderGeometry(.075,.09,.674,32),civicBase);
+ civicColumn.position.set(x,.373,z);civicColumn.castShadow=true;civicRound.add(civicColumn);
  const civicFoot=new THREE.Mesh(new THREE.CylinderGeometry(.14,.14,.026,32),civicBase);
  civicFoot.position.set(x,.023,z);civicFoot.castShadow=true;civicRound.add(civicFoot);
 }
@@ -2166,28 +2168,31 @@ tabletop(teamFlat,capsuleGeometry(.6,.6,.03),.720,teamTop);
 for(const z of [-.73,.73]){
  box(teamFlat,.45,.035,.13,0,.035,z,teamFrame,&#x27;脚の接地部&#x27;);
  box(teamFlat,.095,.64,.095,0,.35,z,teamFrame,&#x27;配線できる脚&#x27;);
- box(teamFlat,.5,.026,.08,0,.665,z,teamFrame);
+ box(teamFlat,.5,.026,.08,0,.677,z,teamFrame);
 }
 const slTable=group(&#x27;カンディハウス SL ソリッドテーブル 2400 × 1000 × H710&#x27;,3.35,2.95,0,roundGroup);
 const slOak=new THREE.MeshStandardMaterial({map:woodTex,color:0xb69b78,roughness:.62});
-tabletop(slTable,roundedTableGeometry(1,2.4,.055,.035),.710,slOak);
-for(const x of [-.37,.37])for(const z of [-.80,.80]){
- box(slTable,.072,.652,.072,x,.33,z,slOak,&#x27;内側に寄せた脚&#x27;);
+tabletop(slTable,roundedTableGeometry(1,2.4,.055,.035),.710,slOak,.035);
+// W2400: legs 1,600 mm inside / 1,820 mm outside; plate underside 675, under-rail underside 635.
+for(const z of [-.855,.855]){
+ for(const x of [-.37,.37])box(slTable,.072,.671,.11,x,.3395,z,slOak,&#x27;内側に寄せた脚&#x27;);
+ box(slTable,.812,.04,.06,0,.655,z,slOak,&#x27;取付プレートと裏桟&#x27;);
 }
 const kamuy=group(&#x27;カンディハウス KAMUY LUX 2400 × 1000 × H710&#x27;,3.35,2.95,0,roundGroup);
 const kamuyTop=new THREE.MeshStandardMaterial({map:woodTex,color:0xb58668,roughness:.57});
-tabletop(kamuy,roundedTableGeometry(1,2.4,.19,.035),.710,kamuyTop);
+tabletop(kamuy,roundedTableGeometry(1,2.4,.19,.04),.710,kamuyTop,.04);
+// 240×100: legs 1,440 mm inside under the top, 2,085 mm outside at the floor.
 for(const x of [-1,1])for(const z of [-1,1]){
- rod(kamuy,[x*.36,.67,z*.74],[x*.41,.035,z*.86],.038,kamuyTop);
+ rod(kamuy,[x*.36,.67,z*.758],[x*.41,.01,z*1.0045],.038,kamuyTop);
 }
 const viena2=group(&#x27;コクヨ ビエナ2 楕円形 2100 × 1050 × H720&#x27;,3.35,2.95,0,roundGroup);
 const vienaTop=mat(0xc5bda9,.71),vienaFrame=mat(0x70777a,.42,.38);
-tabletop(viena2,capsuleGeometry(.525,.525,.03),.720,vienaTop);
+tabletop(viena2,capsuleGeometry(.525,.525,.025),.720,vienaTop,.025);
 for(const z of [-.70,.70]){
  box(viena2,.72,.028,.085,0,.029,z,vienaFrame,&#x27;T字脚の接地部&#x27;);
  const col=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.65,24),vienaFrame);
  col.position.set(0,.354,z);col.castShadow=true;viena2.add(col);
- box(viena2,.65,.025,.065,0,.672,z,vienaFrame);
+ box(viena2,.65,.025,.065,0,.6825,z,vienaFrame);
 }
 const equipment=group(&#x27;共有画面とMacBook 6台&#x27;,3.35,2.95,0,roundGroup);
 // Approximately 14 mm remains between each north stand corner and the edge.
@@ -2409,8 +2414,8 @@ const tableOptions={
  rughaus:{name:&#x27;RUGHAUS&#x27;,size:&#x27;1,750×800&#x27;,mm:[1750,800,720],shape:&#x27;rectangle&#x27;,height:.720,displayZ:-.59,laptopX:.23,laptopZ:[-.31,.05,.41],pinZ:-.75},
  modern:{name:&#x27;MODERN DECO&#x27;,size:&#x27;2,000×1,200&#x27;,mm:[2000,1200,717],shape:&#x27;capsule&#x27;,height:.717,displayZ:-.78,laptopX:.37,laptopZ:[-.43,.065,.56],pinZ:-.85},
  oneLux:{name:&#x27;ONE LUX&#x27;,size:&#x27;φ1,900&#x27;,mm:[1900,1900,710],shape:&#x27;round&#x27;,height:.710,displayZ:-.73,laptopX:.40,laptopZ:[-.38,.08,.54],pinZ:-.88},
- centraRound:{name:&#x27;Centra 円形&#x27;,size:&#x27;φ1,800&#x27;,mm:[1800,1800,721],shape:&#x27;round&#x27;,height:.721,displayZ:-.68,laptopX:.39,laptopZ:[-.29,.08,.47],pinZ:-.83},
- centraOval:{name:&#x27;Centra 長円形&#x27;,size:&#x27;2,400×1,400&#x27;,mm:[2400,1400,721],shape:&#x27;capsule&#x27;,height:.721,displayZ:-1.0,laptopX:.46,laptopZ:[-.57,.08,.72],pinZ:-1.05},
+ centraRound:{name:&#x27;Centra 円形&#x27;,size:&#x27;φ1,800&#x27;,mm:[1800,1800,720],shape:&#x27;round&#x27;,height:.720,displayZ:-.68,laptopX:.39,laptopZ:[-.29,.08,.47],pinZ:-.83},
+ centraOval:{name:&#x27;Centra 長円形&#x27;,size:&#x27;2,400×1,400&#x27;,mm:[2400,1400,720],shape:&#x27;capsule&#x27;,height:.720,displayZ:-1.0,laptopX:.46,laptopZ:[-.57,.08,.72],pinZ:-1.05},
  oneLuxOval:{name:&#x27;ONE LUX 小判形&#x27;,size:&#x27;2,200×1,200&#x27;,mm:[2200,1200,710],shape:&#x27;capsule&#x27;,height:.710,displayZ:-.88,laptopX:.39,laptopZ:[-.49,.07,.64],pinZ:-1.0},
  civicRound:{name:&#x27;Civic 円形&#x27;,size:&#x27;φ2,000&#x27;,mm:[2000,2000,740],shape:&#x27;round&#x27;,height:.740,displayZ:-.79,laptopX:.42,laptopZ:[-.43,.08,.59],pinZ:-.94},
  teamFlat:{name:&#x27;チームフラット 長円形&#x27;,size:&#x27;2,400×1,200&#x27;,mm:[2400,1200,720],shape:&#x27;capsule&#x27;,height:.720,displayZ:-1.0,laptopX:.39,laptopZ:[-.59,.08,.73],pinZ:-1.08},
