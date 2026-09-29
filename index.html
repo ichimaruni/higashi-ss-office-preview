@@ -2265,8 +2265,9 @@ const lid=new THREE.Mesh(new THREE.SphereGeometry(.075,16,8,0,Math.PI*2,0,Math.P
 curve(pantry,[[-.06,1.04,.27],[-.15,1.035,.27],[-.15,.91,.27],[-.065,.90,.27]],.013,M.white);
 rod(pantry,[.06,1.015,.27],[.125,1.065,.27],.023,M.white);
 // CRAFT GT-135: three white cardboard bins, W400 × D410 × H700 mm.
+// B: one column in the corner east of the balcony door, backed onto the kitchenette wall.
 const binWhite=mat(0xe7e4dd,.95),cardboardEdge=mat(0xbba88c,1);
-const trashBins=[],binLayouts={A:[[1.50,2.20],[1.50,2.63],[1.50,3.06]],B:[[1.48,2.35],[1.91,2.35],[2.34,2.35]]};
+const trashBins=[],binLayouts={A:[[1.50,2.20],[1.50,2.63],[1.50,3.06]],B:[[2.36,.805],[2.36,1.235],[2.36,1.665]]};
 function sticker(parent,text,w,h,x,y,z){
  const c=document.createElement(&#x27;canvas&#x27;);c.width=512;c.height=192;const ctx=c.getContext(&#x27;2d&#x27;);
  ctx.fillStyle=&#x27;#efeee9&#x27;;ctx.fillRect(0,0,512,192);ctx.fillStyle=&#x27;#3d4649&#x27;;ctx.font=&#x27;500 84px sans-serif&#x27;;ctx.textAlign=&#x27;center&#x27;;ctx.textBaseline=&#x27;middle&#x27;;ctx.fillText(text,256,96);
