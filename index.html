@@ -2058,10 +2058,10 @@ function wireChair(x,z,rot){
 }
 wireChair(4.5,2.075,-Math.PI/2);wireChair(4.5,2.975,-Math.PI/2);wireChair(6.1,2.075,Math.PI/2);wireChair(6.1,2.975,Math.PI/2);
 const rughaus=table.clone(true);rughaus.name=&#x27;RUGHAUS 島型と同じ会議テーブル 1750 × 800&#x27;;
-rughaus.position.set(0,0,-1.05);roundGroup.add(rughaus);
+rughaus.position.set(0,0,0);roundGroup.add(rughaus);
 // MODERN DECO skdt01, fully extended: 2,000 × 1,200 mm.
 // Official dimension drawing: H717, leg H642, lower width630, inside gap800.
-const roundTable=group(&#x27;MODERN DECO skdt01 伸長時 2000 × 1200 × H717&#x27;,3.35,2.95,0,roundGroup);
+const roundTable=group(&#x27;MODERN DECO skdt01 伸長時 2000 × 1200 × H717&#x27;,3.35,4.0,0,roundGroup);
 function capsuleGeometry(radius,halfStraight,depth){
  const shape=new THREE.Shape();shape.moveTo(radius,-halfStraight);shape.lineTo(radius,halfStraight);
  shape.absarc(0,halfStraight,radius,0,Math.PI,false);shape.lineTo(-radius,-halfStraight);
@@ -2093,7 +2093,7 @@ for(const sign of [-1,1]){
 }
 // Product silhouettes follow the published tabletop and underframe dimensions.
 // ONE LUX: 1900 mm round top, H710, central pedestal with a 675 mm footprint.
-const oneLux=group(&#x27;ONE LUX φ1900 × H710&#x27;,3.35,2.95,0,roundGroup);
+const oneLux=group(&#x27;ONE LUX φ1900 × H710&#x27;,3.35,4.0,0,roundGroup);
 const oneLuxOak=new THREE.MeshStandardMaterial({map:woodTex,color:0xd6b489,roughness:.58});
 const luxTop=new THREE.Mesh(new THREE.CylinderGeometry(.95,.95,.034,96),oneLuxOak);
 luxTop.position.y=.693;luxTop.castShadow=true;luxTop.receiveShadow=true;oneLux.add(luxTop);
@@ -2104,8 +2104,8 @@ for(let i=0;i&lt;36;i++){
  curve(oneLux,[[.338*Math.sin(a),.018,.338*Math.cos(a)],[.305*Math.sin(a),.34,.305*Math.cos(a)],[.26*Math.sin(a),.676,.26*Math.cos(a)]],.0024,seamWood);
 }
 // ITOKI Centra: its published drawing shows four splayed legs and a cross-frame.
-const centraRound=group(&#x27;Centra 円形 φ1800 × H720&#x27;,3.35,2.95,0,roundGroup);
-const centraOval=group(&#x27;Centra 両R 2400 × 1400 × H720&#x27;,3.35,2.95,0,roundGroup);
+const centraRound=group(&#x27;Centra 円形 φ1800 × H720&#x27;,3.35,4.0,0,roundGroup);
+const centraOval=group(&#x27;Centra 両R 2400 × 1400 × H720&#x27;,3.35,4.0,0,roundGroup);
 const centraTopMat=new THREE.MeshStandardMaterial({map:woodTex,color:0xd8b994,roughness:.66});
 const centraFrame=mat(0x77716a,.67,.28);
 function centraLeg(parent,top,bottom){
@@ -2143,7 +2143,7 @@ function tabletop(parent,geometry,height,material,thickness=.03){
  const top=new THREE.Mesh(geometry,material);top.position.y=height-thickness;
  top.castShadow=true;top.receiveShadow=true;parent.add(top);return top;
 }
-const oneLuxOval=group(&#x27;ONE LUX 小判形 2200 × 1200 × H710&#x27;,3.35,2.95,0,roundGroup);
+const oneLuxOval=group(&#x27;ONE LUX 小判形 2200 × 1200 × H710&#x27;,3.35,4.0,0,roundGroup);
 tabletop(oneLuxOval,capsuleGeometry(.6,.5,.03),.710,oneLuxOak);
 const ovalPedestal=new THREE.Mesh(new THREE.CylinderGeometry(.27,.39,.68,64),oneLuxOak);
 ovalPedestal.scale.z=1.35;ovalPedestal.position.y=.34;ovalPedestal.castShadow=true;oneLuxOval.add(ovalPedestal);
@@ -2151,7 +2151,7 @@ for(let i=0;i&lt;36;i++){
  const a=i*Math.PI/18;
  curve(oneLuxOval,[[.39*Math.sin(a),.015,.52*Math.cos(a)],[.33*Math.sin(a),.35,.44*Math.cos(a)],[.27*Math.sin(a),.68,.36*Math.cos(a)]],.0024,seamWood);
 }
-const civicRound=group(&#x27;Herman Miller Civic 円形 φ2000&#x27;,3.35,2.95,0,roundGroup);
+const civicRound=group(&#x27;Herman Miller Civic 円形 φ2000&#x27;,3.35,4.0,0,roundGroup);
 const civicTopMat=mat(0xb7ada0,.62),civicBase=mat(0x555c61,.42,.38);
 const civicTop=tabletop(civicRound,new THREE.CylinderGeometry(1,1,.03,96),.740,civicTopMat);
 civicTop.position.y=.725;
@@ -2162,7 +2162,7 @@ for(const x of [-.42,.42])for(const z of [-.42,.42]){
  const civicFoot=new THREE.Mesh(new THREE.CylinderGeometry(.14,.14,.026,32),civicBase);
  civicFoot.position.set(x,.023,z);civicFoot.castShadow=true;civicRound.add(civicFoot);
 }
-const teamFlat=group(&#x27;コクヨ チームフラット 長円形 2400 × 1200 × H720&#x27;,3.35,2.95,0,roundGroup);
+const teamFlat=group(&#x27;コクヨ チームフラット 長円形 2400 × 1200 × H720&#x27;,3.35,4.0,0,roundGroup);
 const teamTop=mat(0xd1b896,.7),teamFrame=mat(0xe1e0dc,.45,.16);
 tabletop(teamFlat,capsuleGeometry(.6,.6,.03),.720,teamTop);
 for(const z of [-.73,.73]){
@@ -2170,7 +2170,7 @@ for(const z of [-.73,.73]){
  box(teamFlat,.095,.64,.095,0,.35,z,teamFrame,&#x27;配線できる脚&#x27;);
  box(teamFlat,.5,.026,.08,0,.677,z,teamFrame);
 }
-const slTable=group(&#x27;カンディハウス SL ソリッドテーブル 2400 × 1000 × H710&#x27;,3.35,2.95,0,roundGroup);
+const slTable=group(&#x27;カンディハウス SL ソリッドテーブル 2400 × 1000 × H710&#x27;,3.35,4.0,0,roundGroup);
 const slOak=new THREE.MeshStandardMaterial({map:woodTex,color:0xb69b78,roughness:.62});
 tabletop(slTable,roundedTableGeometry(1,2.4,.055,.035),.710,slOak,.035);
 // W2400: legs 1,600 mm inside / 1,820 mm outside; plate underside 675, under-rail underside 635.
@@ -2178,14 +2178,14 @@ for(const z of [-.855,.855]){
  for(const x of [-.37,.37])box(slTable,.072,.671,.11,x,.3395,z,slOak,&#x27;内側に寄せた脚&#x27;);
  box(slTable,.812,.04,.06,0,.655,z,slOak,&#x27;取付プレートと裏桟&#x27;);
 }
-const kamuy=group(&#x27;カンディハウス KAMUY LUX 2400 × 1000 × H710&#x27;,3.35,2.95,0,roundGroup);
+const kamuy=group(&#x27;カンディハウス KAMUY LUX 2400 × 1000 × H710&#x27;,3.35,4.0,0,roundGroup);
 const kamuyTop=new THREE.MeshStandardMaterial({map:woodTex,color:0xb58668,roughness:.57});
 tabletop(kamuy,roundedTableGeometry(1,2.4,.19,.04),.710,kamuyTop,.04);
 // 240×100: legs 1,440 mm inside under the top, 2,085 mm outside at the floor.
 for(const x of [-1,1])for(const z of [-1,1]){
  rod(kamuy,[x*.36,.67,z*.758],[x*.41,.01,z*1.0045],.038,kamuyTop);
 }
-const viena2=group(&#x27;コクヨ ビエナ2 楕円形 2100 × 1050 × H720&#x27;,3.35,2.95,0,roundGroup);
+const viena2=group(&#x27;コクヨ ビエナ2 楕円形 2100 × 1050 × H720&#x27;,3.35,4.0,0,roundGroup);
 const vienaTop=mat(0xc5bda9,.71),vienaFrame=mat(0x70777a,.42,.38);
 tabletop(viena2,capsuleGeometry(.525,.525,.025),.720,vienaTop,.025);
 for(const z of [-.70,.70]){
@@ -2194,7 +2194,7 @@ for(const z of [-.70,.70]){
  col.position.set(0,.354,z);col.castShadow=true;viena2.add(col);
  box(viena2,.65,.025,.065,0,.6825,z,vienaFrame);
 }
-const equipment=group(&#x27;共有画面とMacBook 6台&#x27;,3.35,2.95,0,roundGroup);
+const equipment=group(&#x27;共有画面とMacBook 6台&#x27;,3.35,4.0,0,roundGroup);
 // Approximately 14 mm remains between each north stand corner and the edge.
 const sharedDisplay=new THREE.Group();sharedDisplay.name=&#x27;テーブル上の共有ディスプレイ 50インチ&#x27;;sharedDisplay.position.set(0,-.003,-.78);equipment.add(sharedDisplay);
 box(sharedDisplay,1.127,.643,.048,0,1.168,0,M.black,&#x27;50インチ ディスプレイ&#x27;);
@@ -2330,7 +2330,7 @@ for(const [id,x,z] of powerData){
 }
 pin(&#x27;北&#x27;,[.2,.1,-5.48],false);
 pin(&#x27;ベランダ&#x27;,[-2.25,.25,-4.42],false);
-const tableDimensionPin=pin(&#x27;2,000 × 1,200&#x27;,[0,.80,-.85],false);tableDimensionPin.layout=&#x27;B&#x27;;
+const tableDimensionPin=pin(&#x27;2,000 × 1,200&#x27;,[0,.80,.20],false);tableDimensionPin.layout=&#x27;B&#x27;;
 // Photographed finishes: acoustic panels, recessed twin fluorescent tubes,
 // four-way cassette air conditioners, access panels and ventilation grilles.
 const seamMat=mat(0xc5c5be,1),fixtureMat=mat(0xcacabe,.48,.15);
@@ -2389,7 +2389,7 @@ function contactShadow(parent,x,z,w,d){const mesh=new THREE.Mesh(new THREE.Plane
 for(const p of [[4.2,7.5,1.7,1.7],[5.5,7.5,1.7,1.7],[.64,1.57,1.2,1.5],[.55,2.75,1.1,1.5]])contactShadow(model,...p);
 for(const p of [[2.275,4.55,2.6,5.8],[5.3,2.525,2.4,3]])contactShadow(layoutShadows.A,...p);
 for(const [x,z] of deskLayouts.B)contactShadow(layoutShadows.B,x,z,1.4,1.7);
-contactShadow(layoutShadows.B,3.35,2.95,1.8,2.6);
+contactShadow(layoutShadows.B,3.35,4.0,1.8,2.6);
 for(const k of [&#x27;A&#x27;,&#x27;B&#x27;])for(const [x,z] of binLayouts[k])contactShadow(layoutShadows[k],x,z,.57,.59);
 contactShadow(model,5.26,.80,1.10,.60);contactShadow(model,5.89,.90,.40,.38);
 // Low-detail context beyond the glazing; not a surveyed exterior model.
@@ -2411,17 +2411,17 @@ const layoutGroup=root.querySelector(&#x27;#ss-layout&#x27;),layoutLabel=root.qu
 const floorGroup=root.querySelector(&#x27;#ss-floor&#x27;),tableGroup=root.querySelector(&#x27;#ss-table-picker&#x27;);
 const label=root.querySelector(&#x27;#ss-view-label&#x27;);let view=&#x27;overview&#x27;,lastFit=1,layout=&#x27;B&#x27;,floorFinish=&#x27;linoleum&#x27;,tableChoice=&#x27;rughaus&#x27;;
 const tableOptions={
- rughaus:{name:&#x27;RUGHAUS&#x27;,size:&#x27;1,750×800&#x27;,mm:[1750,800,720],shape:&#x27;rectangle&#x27;,height:.720,displayZ:-.59,laptopX:.23,laptopZ:[-.31,.05,.41],pinZ:-.75},
- modern:{name:&#x27;MODERN DECO&#x27;,size:&#x27;2,000×1,200&#x27;,mm:[2000,1200,717],shape:&#x27;capsule&#x27;,height:.717,displayZ:-.78,laptopX:.37,laptopZ:[-.43,.065,.56],pinZ:-.85},
- oneLux:{name:&#x27;ONE LUX&#x27;,size:&#x27;φ1,900&#x27;,mm:[1900,1900,710],shape:&#x27;round&#x27;,height:.710,displayZ:-.73,laptopX:.40,laptopZ:[-.38,.08,.54],pinZ:-.88},
- centraRound:{name:&#x27;Centra 円形&#x27;,size:&#x27;φ1,800&#x27;,mm:[1800,1800,720],shape:&#x27;round&#x27;,height:.720,displayZ:-.68,laptopX:.39,laptopZ:[-.29,.08,.47],pinZ:-.83},
- centraOval:{name:&#x27;Centra 長円形&#x27;,size:&#x27;2,400×1,400&#x27;,mm:[2400,1400,720],shape:&#x27;capsule&#x27;,height:.720,displayZ:-1.0,laptopX:.46,laptopZ:[-.57,.08,.72],pinZ:-1.05},
- oneLuxOval:{name:&#x27;ONE LUX 小判形&#x27;,size:&#x27;2,200×1,200&#x27;,mm:[2200,1200,710],shape:&#x27;capsule&#x27;,height:.710,displayZ:-.88,laptopX:.39,laptopZ:[-.49,.07,.64],pinZ:-1.0},
- civicRound:{name:&#x27;Civic 円形&#x27;,size:&#x27;φ2,000&#x27;,mm:[2000,2000,740],shape:&#x27;round&#x27;,height:.740,displayZ:-.79,laptopX:.42,laptopZ:[-.43,.08,.59],pinZ:-.94},
- teamFlat:{name:&#x27;チームフラット 長円形&#x27;,size:&#x27;2,400×1,200&#x27;,mm:[2400,1200,720],shape:&#x27;capsule&#x27;,height:.720,displayZ:-1.0,laptopX:.39,laptopZ:[-.59,.08,.73],pinZ:-1.08},
- slTable:{name:&#x27;SL ソリッドテーブル&#x27;,size:&#x27;2,400×1,000&#x27;,mm:[2400,1000,710],shape:&#x27;rounded-rectangle&#x27;,height:.710,displayZ:-1.0,laptopX:.33,laptopZ:[-.59,.08,.73],pinZ:-1.08},
- kamuy:{name:&#x27;KAMUY LUX&#x27;,size:&#x27;2,400×1,000&#x27;,mm:[2400,1000,710],shape:&#x27;rounded-rectangle&#x27;,height:.710,displayZ:-1.0,laptopX:.33,laptopZ:[-.59,.08,.73],pinZ:-1.08},
- viena2:{name:&#x27;ビエナ2 楕円形&#x27;,size:&#x27;2,100×1,050&#x27;,mm:[2100,1050,720],shape:&#x27;capsule&#x27;,height:.720,displayZ:-.84,laptopX:.35,laptopZ:[-.46,.07,.59],pinZ:-.96}
+ rughaus:{name:&#x27;RUGHAUS&#x27;,size:&#x27;1,750×800&#x27;,mm:[1750,800,720],shape:&#x27;rectangle&#x27;,height:.720,displayZ:-.59,laptopX:.23,laptopZ:[-.31,.05,.41],pinZ:0.3},
+ modern:{name:&#x27;MODERN DECO&#x27;,size:&#x27;2,000×1,200&#x27;,mm:[2000,1200,717],shape:&#x27;capsule&#x27;,height:.717,displayZ:-.78,laptopX:.37,laptopZ:[-.43,.065,.56],pinZ:0.2},
+ oneLux:{name:&#x27;ONE LUX&#x27;,size:&#x27;φ1,900&#x27;,mm:[1900,1900,710],shape:&#x27;round&#x27;,height:.710,displayZ:-.73,laptopX:.40,laptopZ:[-.38,.08,.54],pinZ:0.17},
+ centraRound:{name:&#x27;Centra 円形&#x27;,size:&#x27;φ1,800&#x27;,mm:[1800,1800,720],shape:&#x27;round&#x27;,height:.720,displayZ:-.68,laptopX:.39,laptopZ:[-.29,.08,.47],pinZ:0.22},
+ centraOval:{name:&#x27;Centra 長円形&#x27;,size:&#x27;2,400×1,400&#x27;,mm:[2400,1400,720],shape:&#x27;capsule&#x27;,height:.720,displayZ:-1.0,laptopX:.46,laptopZ:[-.57,.08,.72],pinZ:0},
+ oneLuxOval:{name:&#x27;ONE LUX 小判形&#x27;,size:&#x27;2,200×1,200&#x27;,mm:[2200,1200,710],shape:&#x27;capsule&#x27;,height:.710,displayZ:-.88,laptopX:.39,laptopZ:[-.49,.07,.64],pinZ:0.05},
+ civicRound:{name:&#x27;Civic 円形&#x27;,size:&#x27;φ2,000&#x27;,mm:[2000,2000,740],shape:&#x27;round&#x27;,height:.740,displayZ:-.79,laptopX:.42,laptopZ:[-.43,.08,.59],pinZ:0.11},
+ teamFlat:{name:&#x27;チームフラット 長円形&#x27;,size:&#x27;2,400×1,200&#x27;,mm:[2400,1200,720],shape:&#x27;capsule&#x27;,height:.720,displayZ:-1.0,laptopX:.39,laptopZ:[-.59,.08,.73],pinZ:-0.03},
+ slTable:{name:&#x27;SL ソリッドテーブル&#x27;,size:&#x27;2,400×1,000&#x27;,mm:[2400,1000,710],shape:&#x27;rounded-rectangle&#x27;,height:.710,displayZ:-1.0,laptopX:.33,laptopZ:[-.59,.08,.73],pinZ:-0.03},
+ kamuy:{name:&#x27;KAMUY LUX&#x27;,size:&#x27;2,400×1,000&#x27;,mm:[2400,1000,710],shape:&#x27;rounded-rectangle&#x27;,height:.710,displayZ:-1.0,laptopX:.33,laptopZ:[-.59,.08,.73],pinZ:-0.03},
+ viena2:{name:&#x27;ビエナ2 楕円形&#x27;,size:&#x27;2,100×1,050&#x27;,mm:[2100,1050,720],shape:&#x27;capsule&#x27;,height:.720,displayZ:-.84,laptopX:.35,laptopZ:[-.46,.07,.59],pinZ:0.09}
 };
 const tableMeshes={rughaus,modern:roundTable,oneLux,centraRound,centraOval,oneLuxOval,civicRound,teamFlat,slTable,kamuy,viena2};
 function setTable(next){
@@ -2437,8 +2437,8 @@ function setTable(next){
 function setFloor(next){floorFinish=next===&#x27;carpet&#x27;?&#x27;carpet&#x27;:&#x27;linoleum&#x27;;officeFloor.material=floorFinish===&#x27;carpet&#x27;?M.carpet:sheetMaterial;floorGroup.querySelectorAll(&#x27;input&#x27;).forEach(input=&gt;input.checked=input.value===floorFinish);render()}
 function interior(){return view===&#x27;inside&#x27;||view===&#x27;reverse&#x27;}
 function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&amp;&amp;!powerToggle.checked)||(p.layout&amp;&amp;p.layout!==layout)||interior()||v.z&gt;1||v.z&lt; -1||Math.abs(v.x)&gt;.97||Math.abs(v.y)&gt;.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
-function render(){renderer.render(scene,camera);projectPins();root.dataset.camera=camera.position.toArray().map(v=&gt;v.toFixed(3)).join(&#x27;,&#x27;);root.dataset.layout=layout;root.dataset.floorFinish=floorFinish;root.dataset.desks=deskObjects.length;root.dataset.meetingChairs=meetingGroup.visible?&#x27;4&#x27;:&#x27;0&#x27;;root.dataset.roundTable=roundGroup.visible?tableOptions[tableChoice].mm.slice(0,2).join(&#x27;x&#x27;):&#x27;0&#x27;;root.dataset.tableModel=roundGroup.visible?tableChoice:&#x27;&#x27;;root.dataset.tableShape=roundGroup.visible?tableOptions[tableChoice].shape:&#x27;&#x27;;root.dataset.sharedDisplay=roundGroup.visible?&#x27;50&#x27;:&#x27;0&#x27;;root.dataset.macbooks=roundGroup.visible?String(laptops.length):&#x27;0&#x27;;root.dataset.roundTableCenterMm=roundGroup.visible?&#x27;3350,2950&#x27;:&#x27;&#x27;;root.dataset.trashBins=String(trashBins.length);root.dataset.storageBoxes=String(storageBoxes.length);root.dataset.cordlessVacuums=&#x27;1&#x27;}
-function setLayout(next){layout=next===&#x27;A&#x27;?&#x27;A&#x27;:&#x27;B&#x27;;layoutGroup.querySelectorAll(&#x27;input&#x27;).forEach(input=&gt;input.checked=input.value===layout);trashBins.forEach((g,i)=&gt;{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4)});deskObjects.forEach((g,i)=&gt;{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout===&#x27;A&#x27;;roundGroup.visible=layout===&#x27;B&#x27;;layoutShadows.A.visible=layout===&#x27;A&#x27;;layoutShadows.B.visible=layout===&#x27;B&#x27;;const table=tableOptions[tableChoice];layoutLabel.textContent=layout===&#x27;B&#x27;?`B｜西3台・東4台／${table.name} ${table.size}／50インチ画面／MacBook 6台`:&#x27;A｜デスク7台の島／会議席4脚&#x27;;stage.setAttribute(&#x27;aria-label&#x27;,`東SSビル6階・配置${layout}。FLEXISPOT EF1 7台、Xiaomi A27Ui 27インチ7台、${layout===&#x27;B&#x27;?`北寄りの${table.name} ${table.size}mm、高さ${table.mm[2]}mm。テーブル上に50インチディスプレイと14インチMacBook6台、会議用の椅子なし`:&#x27;会議テーブルと会議チェア4脚&#x27;}、フォンブース2台、冷蔵庫、食品棚、ゴミ箱3個、白い段ボール8箱、ダイソンのコードレス掃除機1台、窓、ベランダ、電源9箇所。`);render()}
+function render(){renderer.render(scene,camera);projectPins();root.dataset.camera=camera.position.toArray().map(v=&gt;v.toFixed(3)).join(&#x27;,&#x27;);root.dataset.layout=layout;root.dataset.floorFinish=floorFinish;root.dataset.desks=deskObjects.length;root.dataset.meetingChairs=meetingGroup.visible?&#x27;4&#x27;:&#x27;0&#x27;;root.dataset.roundTable=roundGroup.visible?tableOptions[tableChoice].mm.slice(0,2).join(&#x27;x&#x27;):&#x27;0&#x27;;root.dataset.tableModel=roundGroup.visible?tableChoice:&#x27;&#x27;;root.dataset.tableShape=roundGroup.visible?tableOptions[tableChoice].shape:&#x27;&#x27;;root.dataset.sharedDisplay=roundGroup.visible?&#x27;50&#x27;:&#x27;0&#x27;;root.dataset.macbooks=roundGroup.visible?String(laptops.length):&#x27;0&#x27;;root.dataset.roundTableCenterMm=roundGroup.visible?&#x27;3350,4000&#x27;:&#x27;&#x27;;root.dataset.trashBins=String(trashBins.length);root.dataset.storageBoxes=String(storageBoxes.length);root.dataset.cordlessVacuums=&#x27;1&#x27;}
+function setLayout(next){layout=next===&#x27;A&#x27;?&#x27;A&#x27;:&#x27;B&#x27;;layoutGroup.querySelectorAll(&#x27;input&#x27;).forEach(input=&gt;input.checked=input.value===layout);trashBins.forEach((g,i)=&gt;{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4)});deskObjects.forEach((g,i)=&gt;{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout===&#x27;A&#x27;;roundGroup.visible=layout===&#x27;B&#x27;;layoutShadows.A.visible=layout===&#x27;A&#x27;;layoutShadows.B.visible=layout===&#x27;B&#x27;;const table=tableOptions[tableChoice];layoutLabel.textContent=layout===&#x27;B&#x27;?`B｜西3台・東4台／${table.name} ${table.size}／50インチ画面／MacBook 6台`:&#x27;A｜デスク7台の島／会議席4脚&#x27;;stage.setAttribute(&#x27;aria-label&#x27;,`東SSビル6階・配置${layout}。FLEXISPOT EF1 7台、Xiaomi A27Ui 27インチ7台、${layout===&#x27;B&#x27;?`中央の${table.name} ${table.size}mm、高さ${table.mm[2]}mm。テーブル上に50インチディスプレイと14インチMacBook6台、会議用の椅子なし`:&#x27;会議テーブルと会議チェア4脚&#x27;}、フォンブース2台、冷蔵庫、食品棚、ゴミ箱3個、白い段ボール8箱、ダイソンのコードレス掃除機1台、窓、ベランダ、電源9箇所。`);render()}
 function wallTransparency(){outer.traverse(o=&gt;{if(!o.isMesh)return;if(o.material===glass)return;if(!o.userData.original)o.userData.original=o.material;o.material=wallToggle.checked?o.userData.original.clone():o.userData.original;if(wallToggle.checked){o.material.transparent=true;o.material.opacity=.13;o.material.depthWrite=false;o.castShadow=false}else o.castShadow=true});render()}
 function setView(next){view=next;viewGroup.querySelectorAll(&#x27;input&#x27;).forEach(input=&gt;input.checked=input.value===next);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
  if(next===&#x27;overview&#x27;){camera.position.set(.6,9.1,10.4);controls.target.set(0,.55,-.35);controls.maxPolarAngle=Math.PI*.49}
@@ -2447,7 +2447,7 @@ function setView(next){view=next;viewGroup.querySelectorAll(&#x27;input&#x27;).f
  if(next===&#x27;top&#x27;){camera.position.set(0,16.8,.02);controls.target.set(0,0,-.32);controls.maxPolarAngle=Math.PI*.49}
  lastFit=1;resize();controls.update();label.textContent=viewGroup.querySelector(&#x27;input:checked&#x27;).nextElementSibling.textContent;render();
 }
-function save(){window.openai?.setWidgetState?.({modelContent:{view,layout,tableChoice,floorFinish,desks:7,monitor:&#x27;Xiaomi A27Ui 27インチ&#x27;,meetingTableShape:layout===&#x27;B&#x27;?tableOptions[tableChoice].shape:null,meetingTableSizeMm:layout===&#x27;B&#x27;?tableOptions[tableChoice].mm:null,roundTableCenterMm:layout===&#x27;B&#x27;?[3350,2950]:null,sharedDisplayInches:layout===&#x27;B&#x27;?50:null,macbooks:layout===&#x27;B&#x27;?6:0,trashBins:3,trashBinSizeMm:[400,410,700],storageBoxes:8,storageBoxSizeMm:[400,300,300],cordlessVacuums:1,powerPoints:9},privateContent:{view,layout,tableChoice,tablePickerVersion:2,floorFinish,power:powerToggle.checked,walls:wallToggle.checked,camera:camera.position.toArray(),target:controls.target.toArray()}})?.catch(()=&gt;{})}
+function save(){window.openai?.setWidgetState?.({modelContent:{view,layout,tableChoice,floorFinish,desks:7,monitor:&#x27;Xiaomi A27Ui 27インチ&#x27;,meetingTableShape:layout===&#x27;B&#x27;?tableOptions[tableChoice].shape:null,meetingTableSizeMm:layout===&#x27;B&#x27;?tableOptions[tableChoice].mm:null,roundTableCenterMm:layout===&#x27;B&#x27;?[3350,4000]:null,sharedDisplayInches:layout===&#x27;B&#x27;?50:null,macbooks:layout===&#x27;B&#x27;?6:0,trashBins:3,trashBinSizeMm:[400,410,700],storageBoxes:8,storageBoxSizeMm:[400,300,300],cordlessVacuums:1,powerPoints:9},privateContent:{view,layout,tableChoice,tablePickerVersion:2,floorFinish,power:powerToggle.checked,walls:wallToggle.checked,camera:camera.position.toArray(),target:controls.target.toArray()}})?.catch(()=&gt;{})}
 floorGroup.addEventListener(&#x27;change&#x27;,event=&gt;{setFloor(event.target.value);save()});
 layoutGroup.addEventListener(&#x27;change&#x27;,event=&gt;{setLayout(event.target.value);save()});
 tableGroup.addEventListener(&#x27;change&#x27;,event=&gt;{setTable(event.target.value);save()});
