@@ -578,6 +578,12 @@ for(const z of [-.70,.70]){
  col.position.set(0,.354,z);col.castShadow=true;viena2.add(col);
  box(viena2,.65,.025,.065,0,.6825,z,vienaFrame);
 }
+// shop G-FIELD ceramic round table: φ1600 × H750, one tulip-style pedestal.
+const gfield=group('セラミック丸テーブル φ1600 × H750',3.35,4.0,0,roundGroup);
+const gfieldTop=mat(0xf0eeea,.55),gfieldBase=mat(0xeceae5,.6);
+tabletop(gfield,new THREE.CylinderGeometry(.8,.8,.03,96),.765,gfieldTop);
+const tulip=new THREE.Mesh(new THREE.LatheGeometry([[0,0],[.24,0],[.24,.012],[.17,.05],[.085,.2],[.065,.42],[.09,.6],[.16,.69],[.2,.72],[0,.72]].map(([x,y])=>new THREE.Vector2(x,y)),64),gfieldBase);
+tulip.castShadow=true;tulip.receiveShadow=true;gfield.add(tulip);
 const equipment=group('共有画面・MacBook 6台・iPad電話',3.35,4.0,0,roundGroup);
 // Approximately 14 mm remains between each north stand corner and the edge.
 const sharedDisplay=new THREE.Group();sharedDisplay.name='テーブル上の共有ディスプレイ 50インチ';sharedDisplay.position.set(0,-.003,-.78);equipment.add(sharedDisplay);
@@ -820,6 +826,9 @@ const tableOptions={
  oneLux:{name:'ONE LUX ダイニング ラウンドテーブル',short:'ONE LUX 円形',maker:'カンディハウス',shape:'round',shapeLabel:'円形',mm:[1900,1900,710],note:'一本脚。天板は北海道産ナラ無垢 34mm',
   price:{kind:'range',min:783200,max:1421200,text:'¥783,200〜¥1,421,200',basis:'税込・公式通販の価格帯。φ1,900の価格は樹種などで変わるため要確認'},url:'https://condehouse.co.jp/products/onelxrtb',
   height:.710,displayZ:-.73,laptopX:.40,laptopZ:[-.38,.08,.54],pinZ:.17},
+ gfield:{name:'丸ダイニングテーブル セラミック 直径160cm',short:'セラミック丸 φ160',maker:'shop G-FIELD・楽天',shape:'round',shapeLabel:'円形',mm:[1600,1600,750],note:'セラミック天板。中央1本のチューリップ型の脚。天板だけで約62kg',
+  price:{kind:'fixed',min:104165,text:'¥104,165',basis:'税込・楽天の直径160cm（ホワイト）の価格'},url:'https://item.rakuten.co.jp/shop-gfield/jy2082424ac30/',
+  height:.750,displayZ:-.6,laptopX:.35,laptopZ:[-.24,.07,.40],pinZ:.2},
  centraRound:{name:'Centra 円形',short:'Centra 円形',maker:'イトーキ',shape:'round',shapeLabel:'円形',mm:[1800,1800,720],note:'4本脚と十字の脚フレーム',
   price:{kind:'quote',min:null,text:'要見積',basis:'公開価格なし。シリーズ代表機種（異形 W4800）は税込¥1,420,650〜'},url:'https://www.itoki.jp/special/centra/index.html',
   height:.720,displayZ:-.68,laptopX:.39,laptopZ:[-.29,.08,.47],pinZ:.22},
@@ -845,7 +854,7 @@ const tableOptions={
   price:{kind:'street',min:151000,text:'約¥151,000',basis:'税込・販売店の実売価格（定価は¥237,600）'},url:'https://www.office-com.jp/products/detail.php?product_id=458005',
   height:.720,displayZ:-.84,laptopX:.35,laptopZ:[-.46,.07,.59],pinZ:.09}
 };
-const tableMeshes={rughaus,modern:roundTable,oneLux,centraRound,centraOval,oneLuxOval,civicRound,teamFlat,slTable,kamuy,viena2};
+const tableMeshes={rughaus,modern:roundTable,gfield,oneLux,centraRound,centraOval,oneLuxOval,civicRound,teamFlat,slTable,kamuy,viena2};
 const fmt=n=>n.toLocaleString('ja-JP');
 function topArea(o){const [w,d]=o.mm,m2=w*d/1e6;if(o.shape==='round')return Math.PI/4*m2;if(o.shape==='capsule')return m2-(1-Math.PI/4)*(d/1000)**2;return m2}
 function shortPrice(p){if(p.kind==='quote')return '要見積';if(p.kind==='fixed')return p.text;if(p.kind==='street')return p.text;const man=(p.min/10000).toFixed(1).replace(/\.0$/,'');return `¥${man}万〜`}
@@ -860,7 +869,7 @@ const ledger=$('#ledger'),card=$('#table-card'),select=$('#table-select'),drawer
 let view='overview',lastFit=1,layout='B',floorFinish='linoleum',tableChoice='rughaus',sortKey='price';
 const store={get(){try{return JSON.parse(localStorage.getItem('ss-office-3d')||'null')}catch{return null}},set(v){try{localStorage.setItem('ss-office-3d',JSON.stringify(v))}catch{}}};
 
-select.append(...Object.entries(tableOptions).map(([key,o])=>new Option(`${o.short}（${o.maker}）`,key)));
+select.append(...Object.entries(tableOptions).map(([key,o])=>new Option(`${o.short}　${shortPrice(o.price)}`,key)));
 
 function renderCard(){
  const o=tableOptions[tableChoice];
