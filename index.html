@@ -1586,7 +1586,7 @@ html&gt;body{padding:0}&lt;/style&gt;
     &lt;div class=&quot;ss-labels&quot; aria-hidden=&quot;true&quot;&gt;&lt;/div&gt;
     &lt;div class=&quot;ss-loading text-small&quot; role=&quot;status&quot;&gt;3Dを読み込み中…&lt;/div&gt;
   &lt;/div&gt;
-  &lt;div class=&quot;ss-footer viz-row text-small text-muted&quot;&gt;&lt;span&gt;東SSビル 6階&lt;/span&gt;&lt;span&gt;電源 9箇所・36口&lt;/span&gt;&lt;span id=&quot;ss-layout-label&quot; aria-live=&quot;polite&quot;&gt;B｜西3台・東4台／RUGHAUS 1,750×800／50インチ画面／MacBook 6台／卓上電話&lt;/span&gt;&lt;span id=&quot;ss-view-label&quot; aria-live=&quot;polite&quot;&gt;全体を見渡す&lt;/span&gt;&lt;/div&gt;
+  &lt;div class=&quot;ss-footer viz-row text-small text-muted&quot;&gt;&lt;span&gt;東SSビル 6階&lt;/span&gt;&lt;span&gt;電源 9箇所・36口&lt;/span&gt;&lt;span id=&quot;ss-layout-label&quot; aria-live=&quot;polite&quot;&gt;B｜西3台・東4台／RUGHAUS 1,750×800／50インチ画面／MacBook 6台／iPad電話&lt;/span&gt;&lt;span id=&quot;ss-view-label&quot; aria-live=&quot;polite&quot;&gt;全体を見渡す&lt;/span&gt;&lt;/div&gt;
 &lt;/div&gt;
 &lt;style&gt;
 #ss-office-3d .ss-toolbar {
@@ -2194,7 +2194,7 @@ for(const z of [-.70,.70]){
  col.position.set(0,.354,z);col.castShadow=true;viena2.add(col);
  box(viena2,.65,.025,.065,0,.6825,z,vienaFrame);
 }
-const equipment=group(&#x27;共有画面・MacBook 6台・卓上電話&#x27;,3.35,4.0,0,roundGroup);
+const equipment=group(&#x27;共有画面・MacBook 6台・iPad電話&#x27;,3.35,4.0,0,roundGroup);
 // Approximately 14 mm remains between each north stand corner and the edge.
 const sharedDisplay=new THREE.Group();sharedDisplay.name=&#x27;テーブル上の共有ディスプレイ 50インチ&#x27;;sharedDisplay.position.set(0,-.003,-.78);equipment.add(sharedDisplay);
 box(sharedDisplay,1.127,.643,.048,0,1.168,0,M.black,&#x27;50インチ ディスプレイ&#x27;);
@@ -2236,17 +2236,20 @@ for(const [index,[x,z,angle]] of laptopPlaces.entries()){
  box(lid,.295,.186,.001,0,.108,.005,laptopScreenMat);
  box(lid,.041,.011,.0015,0,.195,.006,M.black,&#x27;ノッチ&#x27;);
 }
-// Desk phone at the south end, facing the seat opposite the shared display.
-// Model undecided: a generic handset phone, about W210 × D190 mm.
-const deskPhone=new THREE.Group();deskPhone.name=&#x27;卓上電話機&#x27;;deskPhone.position.set(0,.717,.745);equipment.add(deskPhone);
+// Desk phone at the south end, opposite the shared display: an iPad running the
+// IVRy app on a stand, with an EliteStation Bluetooth handset on its charging
+// cradle (cradle 170 × 70 × 43 mm, handset 46.2 × 175 × 20.1 mm).
+const deskPhone=new THREE.Group();deskPhone.name=&#x27;卓上電話 iPad＋Bluetooth受話器&#x27;;deskPhone.position.set(0,.717,.745);equipment.add(deskPhone);
 const phoneWhite=mat(0xf1f0ec,.55),phoneGray=mat(0xc9cbc8,.5);
-box(deskPhone,.21,.03,.19,0,.015,0,phoneWhite,&#x27;電話機本体&#x27;);
-box(deskPhone,.21,.03,.08,0,.045,-.055,phoneWhite);
-box(deskPhone,.07,.002,.035,.045,.061,-.055,M.screen,&#x27;表示部&#x27;);
-box(deskPhone,.055,.032,.2,-.07,.046,.005,phoneWhite,&#x27;受話器&#x27;);
-for(const z of [-.08,.09])box(deskPhone,.06,.02,.045,-.07,.072,z,phoneWhite);
-box(deskPhone,.057,.002,.006,-.07,.0625,.005,phoneGray);
-for(let r=0;r&lt;4;r++)for(let c=0;c&lt;3;c++)box(deskPhone,.017,.005,.013,.02+c*.024,.032,-.003+r*.024,phoneGray);
+box(deskPhone,.13,.008,.12,0,.004,-.06,laptopSilver,&#x27;iPadスタンド&#x27;);
+box(deskPhone,.03,.11,.012,0,.06,-.105,laptopSilver);
+const ipad=new THREE.Group();ipad.name=&#x27;iPad 11インチ&#x27;;ipad.position.set(0,.012,-.035);ipad.rotation.x=-.32;deskPhone.add(ipad);
+box(ipad,.2486,.1795,.007,0,.0898,0,laptopSilver,&#x27;iPad本体&#x27;);
+box(ipad,.24,.171,.001,0,.0898,.0036,M.black);
+box(ipad,.232,.163,.001,0,.0898,.0042,laptopScreenMat);
+box(deskPhone,.17,.043,.07,0,.0215,.065,phoneWhite,&#x27;EliteStation 充電クレードル&#x27;);
+box(deskPhone,.175,.0201,.0462,0,.0532,.065,phoneWhite,&#x27;Bluetooth受話器&#x27;);
+for(const x of [-.07,.07])box(deskPhone,.03,.004,.034,x,.0644,.065,phoneGray);
 for(const [id,x] of [[&#x27;P1&#x27;,4.2],[&#x27;P2&#x27;,5.5]]){
  const g=group(id,x,7.5);
  box(g,1.2,.10,1.2,0,.05,0,M.black);box(g,1.08,.015,1.08,0,.108,0,M.dark);
@@ -2451,7 +2454,7 @@ function setFloor(next){floorFinish=next===&#x27;carpet&#x27;?&#x27;carpet&#x27;
 function interior(){return view===&#x27;inside&#x27;||view===&#x27;reverse&#x27;}
 function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&amp;&amp;!powerToggle.checked)||(p.layout&amp;&amp;p.layout!==layout)||interior()||v.z&gt;1||v.z&lt; -1||Math.abs(v.x)&gt;.97||Math.abs(v.y)&gt;.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
 function render(){renderer.render(scene,camera);projectPins();root.dataset.camera=camera.position.toArray().map(v=&gt;v.toFixed(3)).join(&#x27;,&#x27;);root.dataset.layout=layout;root.dataset.floorFinish=floorFinish;root.dataset.desks=deskObjects.length;root.dataset.meetingChairs=meetingGroup.visible?&#x27;4&#x27;:&#x27;0&#x27;;root.dataset.roundTable=roundGroup.visible?tableOptions[tableChoice].mm.slice(0,2).join(&#x27;x&#x27;):&#x27;0&#x27;;root.dataset.tableModel=roundGroup.visible?tableChoice:&#x27;&#x27;;root.dataset.tableShape=roundGroup.visible?tableOptions[tableChoice].shape:&#x27;&#x27;;root.dataset.sharedDisplay=roundGroup.visible?&#x27;50&#x27;:&#x27;0&#x27;;root.dataset.macbooks=roundGroup.visible?String(laptops.length):&#x27;0&#x27;;root.dataset.roundTableCenterMm=roundGroup.visible?&#x27;3350,4000&#x27;:&#x27;&#x27;;root.dataset.trashBins=String(trashBins.length);root.dataset.storageBoxes=String(storageBoxes.length);root.dataset.cordlessVacuums=&#x27;1&#x27;}
-function setLayout(next){layout=next===&#x27;A&#x27;?&#x27;A&#x27;:&#x27;B&#x27;;layoutGroup.querySelectorAll(&#x27;input&#x27;).forEach(input=&gt;input.checked=input.value===layout);trashBins.forEach((g,i)=&gt;{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4)});deskObjects.forEach((g,i)=&gt;{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout===&#x27;A&#x27;;roundGroup.visible=layout===&#x27;B&#x27;;layoutShadows.A.visible=layout===&#x27;A&#x27;;layoutShadows.B.visible=layout===&#x27;B&#x27;;const table=tableOptions[tableChoice];layoutLabel.textContent=layout===&#x27;B&#x27;?`B｜西3台・東4台／${table.name} ${table.size}／50インチ画面／MacBook 6台／卓上電話`:&#x27;A｜デスク7台の島／会議席4脚&#x27;;stage.setAttribute(&#x27;aria-label&#x27;,`東SSビル6階・配置${layout}。FLEXISPOT EF1 7台、Xiaomi A27Ui 27インチ7台、${layout===&#x27;B&#x27;?`中央の${table.name} ${table.size}mm、高さ${table.mm[2]}mm。テーブル上に50インチディスプレイと14インチMacBook6台と卓上電話機、会議用の椅子なし`:&#x27;会議テーブルと会議チェア4脚&#x27;}、フォンブース2台、冷蔵庫、食品棚、ゴミ箱3個、白い段ボール8箱、ダイソンのコードレス掃除機1台、窓、ベランダ、電源9箇所。`);render()}
+function setLayout(next){layout=next===&#x27;A&#x27;?&#x27;A&#x27;:&#x27;B&#x27;;layoutGroup.querySelectorAll(&#x27;input&#x27;).forEach(input=&gt;input.checked=input.value===layout);trashBins.forEach((g,i)=&gt;{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4)});deskObjects.forEach((g,i)=&gt;{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout===&#x27;A&#x27;;roundGroup.visible=layout===&#x27;B&#x27;;layoutShadows.A.visible=layout===&#x27;A&#x27;;layoutShadows.B.visible=layout===&#x27;B&#x27;;const table=tableOptions[tableChoice];layoutLabel.textContent=layout===&#x27;B&#x27;?`B｜西3台・東4台／${table.name} ${table.size}／50インチ画面／MacBook 6台／iPad電話`:&#x27;A｜デスク7台の島／会議席4脚&#x27;;stage.setAttribute(&#x27;aria-label&#x27;,`東SSビル6階・配置${layout}。FLEXISPOT EF1 7台、Xiaomi A27Ui 27インチ7台、${layout===&#x27;B&#x27;?`中央の${table.name} ${table.size}mm、高さ${table.mm[2]}mm。テーブル上に50インチディスプレイと14インチMacBook6台、iPadとBluetooth受話器の卓上電話、会議用の椅子なし`:&#x27;会議テーブルと会議チェア4脚&#x27;}、フォンブース2台、冷蔵庫、食品棚、ゴミ箱3個、白い段ボール8箱、ダイソンのコードレス掃除機1台、窓、ベランダ、電源9箇所。`);render()}
 function wallTransparency(){outer.traverse(o=&gt;{if(!o.isMesh)return;if(o.material===glass)return;if(!o.userData.original)o.userData.original=o.material;o.material=wallToggle.checked?o.userData.original.clone():o.userData.original;if(wallToggle.checked){o.material.transparent=true;o.material.opacity=.13;o.material.depthWrite=false;o.castShadow=false}else o.castShadow=true});render()}
 function setView(next){view=next;viewGroup.querySelectorAll(&#x27;input&#x27;).forEach(input=&gt;input.checked=input.value===next);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
  if(next===&#x27;overview&#x27;){camera.position.set(.6,9.1,10.4);controls.target.set(0,.55,-.35);controls.maxPolarAngle=Math.PI*.49}
