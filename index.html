@@ -10,7 +10,7 @@
   --bg:#f4f3ef;--panel:#ffffff;--ink:#1c2024;--muted:#5d646b;--faint:#8a9096;
   --line:#dddad3;--line-strong:#c3c0b8;--hover:#f2f1ec;--selected:#ecf1f8;--accent:#2457a6;
   --font:"Hiragino Sans","Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic UI",system-ui,sans-serif;
-  --radius:6px;
+  --radius:6px;--shadow:0 1px 3px rgba(0,0,0,.10),0 4px 14px rgba(0,0,0,.06);
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
@@ -19,24 +19,34 @@ button,input,select{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .num{font-variant-numeric:tabular-nums}
 
-/* Page frame: header on top, 3D on the left, details on the right. */
-.app{display:grid;grid-template-columns:minmax(0,1fr) 400px;grid-template-rows:auto minmax(0,1fr);height:100dvh}
-.top{grid-column:1/-1;display:flex;align-items:center;gap:16px;padding:10px 16px;background:var(--panel);border-bottom:1px solid var(--line)}
-.top h1{margin:0;font-size:15px;font-weight:700;letter-spacing:.02em;white-space:nowrap}
-.top .sub{color:var(--muted);font-size:12px;white-space:nowrap}
+/* The 3D stage fills the page; everything else is a light layer on top of it. */
+.app{display:grid;grid-template-rows:auto minmax(0,1fr);height:100dvh}
+.top{display:flex;align-items:center;gap:10px 18px;flex-wrap:wrap;padding:8px 14px;background:var(--panel);border-bottom:1px solid var(--line)}
+.top h1{margin:0;font-size:15px;font-weight:700;white-space:nowrap}
 .top .spacer{flex:1}
+.ctl{display:flex;align-items:center;gap:8px}
+.ctl-label{font-size:12px;color:var(--muted)}
 
 /* Segmented controls (radio inputs inside labels). */
 .seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden;background:var(--panel)}
-.seg label{position:relative;display:flex;align-items:center;min-height:34px;padding:0 14px;cursor:pointer;white-space:nowrap;border-left:1px solid var(--line)}
+.seg label{position:relative;display:flex;align-items:center;justify-content:center;min-height:32px;padding:0 12px;cursor:pointer;white-space:nowrap;border-left:1px solid var(--line)}
 .seg label:first-child{border-left:0}
 .seg input{position:absolute;opacity:0;pointer-events:none}
 .seg label:hover{background:var(--hover)}
 .seg label:has(input:checked){background:var(--ink);color:#fff}
 .seg label:has(input:focus-visible){outline:2px solid var(--accent);outline-offset:-2px}
-.seg-label{font-size:12px;color:var(--muted);margin-right:8px}
 
-/* 3D stage with floating controls. */
+/* Display settings popover. */
+.menu{position:relative}
+.menu summary{list-style:none;display:flex;align-items:center;gap:6px;min-height:32px;padding:0 12px;border:1px solid var(--line-strong);border-radius:var(--radius);cursor:pointer;background:var(--panel)}
+.menu summary::-webkit-details-marker{display:none}
+.menu summary:hover{background:var(--hover)}
+.menu summary::after{content:"";width:6px;height:6px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg) translateY(-2px)}
+.menu[open] summary::after{transform:rotate(-135deg) translateY(-1px)}
+.menu-body{position:absolute;right:0;top:calc(100% + 6px);z-index:20;width:250px;padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);display:grid;gap:10px}
+.check{display:flex;align-items:center;gap:8px;cursor:pointer;min-height:28px}
+.check input{width:16px;height:16px;margin:0;accent-color:var(--accent)}
+
 .stage-wrap{position:relative;min-width:0;min-height:0}
 .ss-stage{position:absolute;inset:0;overflow:hidden;touch-action:none}
 .ss-stage canvas{display:block;width:100%;height:100%;cursor:grab}
@@ -46,56 +56,46 @@ button,input,select{font:inherit;color:inherit}
 .ss-pin span{display:block;padding:1px 6px;font-size:11px;line-height:1.5;background:rgba(255,255,255,.92);border:1px solid var(--line-strong);border-radius:4px;color:var(--ink)}
 .ss-loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted)}
 .ss-loading[hidden]{display:none}
-.float{position:absolute;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.float.views{left:12px;bottom:12px}
-.float.camera{right:12px;bottom:12px}
-.float .seg,.icon-btn{box-shadow:0 1px 2px rgba(0,0,0,.08)}
-.icon-btn{display:inline-grid;place-items:center;min-width:36px;height:36px;padding:0 10px;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--panel);cursor:pointer}
+.hint{position:absolute;left:12px;top:10px;margin:0;font-size:12px;color:var(--muted);background:rgba(244,243,239,.85);padding:2px 8px;border-radius:4px;pointer-events:none}
+.status{position:absolute;right:12px;top:10px;margin:0;max-width:min(560px,60%);font-size:12px;color:var(--muted);text-align:right;background:rgba(244,243,239,.85);padding:2px 8px;border-radius:4px;pointer-events:none}
+
+/* Camera controls. */
+.camera{position:absolute;right:12px;bottom:12px;display:flex;gap:8px}
+.icon-btn{display:inline-grid;place-items:center;min-width:36px;height:36px;padding:0 10px;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--panel);cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,.08)}
 .icon-btn:hover{background:var(--hover)}
 .btn-group{display:inline-flex}
 .btn-group .icon-btn{border-radius:0;margin-left:-1px}
 .btn-group .icon-btn:first-child{border-radius:var(--radius) 0 0 var(--radius);margin-left:0}
 .btn-group .icon-btn:last-child{border-radius:0 var(--radius) var(--radius) 0}
-.hint{position:absolute;left:12px;top:10px;font-size:12px;color:var(--muted);background:rgba(244,243,239,.85);padding:2px 8px;border-radius:4px}
 
-/* Side panel. */
-.panel{background:var(--panel);border-left:1px solid var(--line);overflow:auto;min-height:0}
-.section{padding:16px 18px;border-bottom:1px solid var(--line)}
-.detail{position:sticky;top:0;z-index:2;background:var(--panel)}
-.section h2{margin:0 0 10px;font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.04em}
-.note{margin:0 0 12px;font-size:12px;color:var(--muted)}
-.note button{padding:0;border:0;background:none;color:var(--accent);text-decoration:underline;cursor:pointer}
-.note button:hover{color:#163d7a}
+/* Small table card: what is on the central table right now. */
+.table-card{position:absolute;left:12px;bottom:12px;width:min(360px,calc(100% - 24px));padding:10px 12px;background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+.table-card[hidden]{display:none}
+.table-card .row1{display:flex;align-items:center;gap:8px}
+.table-card .k{font-size:12px;color:var(--muted);white-space:nowrap}
+.table-card select{flex:1;min-width:0;min-height:32px;padding:4px 8px;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--panel)}
+.table-card .spec{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:2px 10px;margin-top:6px}
+.table-card .dims{white-space:nowrap}
+.table-card .dims{font-size:13px}
+.table-card .price{font-size:14px;font-weight:700;white-space:nowrap}
+.table-card .row3{display:flex;justify-content:space-between;gap:8px;margin-top:2px;font-size:11px;color:var(--muted)}
+.link-btn{padding:0;border:0;background:none;color:var(--accent);text-decoration:underline;cursor:pointer;font-size:12px;white-space:nowrap}
+.link-btn:hover{color:#163d7a}
 
-/* Selected table detail. */
-.detail .maker{font-size:12px;color:var(--muted)}
-.detail .name{margin:2px 0 12px;font-size:18px;font-weight:700;line-height:1.35}
-.dims{display:grid;grid-template-columns:repeat(3,1fr);border:1px solid var(--line);border-radius:var(--radius)}
-.dims div{padding:8px 10px;border-left:1px solid var(--line)}
-.dims div:first-child{border-left:0}
-.dims dt{font-size:11px;color:var(--muted)}
-.dims dd{margin:0;font-size:20px;font-weight:600}
-.dims dd small{font-size:11px;font-weight:400;color:var(--muted);margin-left:2px}
-.facts{margin:10px 0 0;display:grid;grid-template-columns:auto 1fr;gap:4px 14px;font-size:13px}
-.facts dt{color:var(--muted)}
-.facts dd{margin:0}
-.price{margin-top:14px;padding-top:12px;border-top:1px solid var(--line)}
-.price .label{font-size:11px;color:var(--muted)}
-.price .amount{font-size:22px;font-weight:700;line-height:1.3}
-.price .amount.quote{font-size:18px}
-.price .basis{font-size:12px;color:var(--muted);margin-top:2px}
-.price a{display:inline-block;margin-top:6px;font-size:13px;color:var(--accent);text-decoration:underline}
-.price a:hover{color:#163d7a}
-
-/* Comparison ledger. */
-.ledger-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
-.ledger-head h2{margin:0}
+/* Comparison drawer, opened on demand. */
+.drawer{position:absolute;top:12px;right:12px;bottom:60px;width:min(420px,calc(100% - 24px));display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);z-index:10}
+.drawer[hidden]{display:none}
+.drawer-head{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.drawer-head h2{margin:0;font-size:14px;flex:1}
 .sort{display:inline-flex;gap:2px;font-size:12px}
 .sort button{border:0;background:none;padding:2px 6px;border-radius:4px;color:var(--muted);cursor:pointer}
 .sort button[aria-pressed="true"]{color:var(--ink);font-weight:600;background:var(--hover)}
-.ledger{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.close{border:0;background:none;width:32px;height:32px;border-radius:4px;cursor:pointer;font-size:18px;line-height:1;color:var(--muted)}
+.close:hover{background:var(--hover);color:var(--ink)}
+.drawer-body{overflow:auto;min-height:0}
+.ledger{list-style:none;margin:0;padding:0}
 .ledger li{border-bottom:1px solid var(--line)}
-.row{display:grid;grid-template-columns:16px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:9px 6px;border:0;background:none;text-align:left;cursor:pointer}
+.row{display:grid;grid-template-columns:16px minmax(0,1fr) auto;gap:10px;align-items:center;width:100%;padding:9px 12px;border:0;background:none;text-align:left;cursor:pointer}
 .row:hover{background:var(--hover)}
 .row[aria-checked="true"]{background:var(--selected)}
 .row .dot{width:14px;height:14px;border:1.5px solid var(--line-strong);border-radius:50%}
@@ -104,29 +104,26 @@ button,input,select{font:inherit;color:inherit}
 .row .s{font-size:12px;color:var(--muted)}
 .row .p{font-size:13px;text-align:right;white-space:nowrap}
 .row .p small{display:block;font-size:11px;color:var(--muted)}
-.ledger-foot{margin:8px 0 0;font-size:11px;color:var(--faint)}
+.more{padding:0 12px 10px 38px;background:var(--selected);font-size:12px;color:var(--muted)}
+.more dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:2px 12px}
+.more dt{color:var(--faint)}
+.more dd{margin:0;color:var(--ink)}
+.more a{color:var(--accent)}
+.drawer-foot{margin:0;padding:8px 12px;font-size:11px;color:var(--faint);border-top:1px solid var(--line)}
 
-/* Display settings. */
-.settings{display:grid;gap:10px}
-.check{display:flex;align-items:center;gap:8px;cursor:pointer;min-height:28px}
-.check input{width:16px;height:16px;margin:0;accent-color:var(--accent)}
-.facts-small{font-size:12px;color:var(--muted);margin:0}
-
-@media (max-width:900px){
-  .app{display:block;height:auto}
-  .top{position:sticky;top:0;z-index:5;flex-wrap:wrap;gap:8px 12px;padding:10px 16px}
-  .top .sub{display:none}
+@media (max-width:760px){
+  .top{padding:8px 12px;gap:8px 12px}
   .top .spacer{display:none}
-  .stage-wrap{height:52dvh;min-height:320px}
-  .panel{border-left:0}
-  .detail{position:static}
-  .section{padding:16px}
-  .float.views{left:8px;right:8px;bottom:8px}
-  .float.views .seg{width:100%}
-  .float.views .seg label{flex:1;justify-content:center;padding:0 6px;min-height:40px}
-  .float.camera{right:8px;top:8px;bottom:auto}
-  .icon-btn{height:40px;min-width:40px}
-  .hint{display:none}
+  .top .ctl-label{display:none}
+  .views{order:5;width:100%}
+  .views .seg{width:100%}
+  .views .seg label{flex:1;padding:0 4px}
+  .menu-body{right:auto;left:0}
+  .hint,.status{display:none}
+  .camera{top:10px;bottom:auto;right:10px}
+  .icon-btn{height:36px;min-width:36px;padding:0 8px}
+  .table-card{left:8px;right:8px;bottom:8px;width:auto}
+  .drawer{left:0;right:0;bottom:0;top:auto;width:auto;max-height:72%;border-radius:12px 12px 0 0}
 }
 </style>
 </head>
@@ -134,15 +131,37 @@ button,input,select{font:inherit;color:inherit}
 <div class="app" id="ss-office-3d">
   <header class="top">
     <h1>東SSビル 6階 レイアウト</h1>
-    <span class="sub">家具配置の3D確認</span>
-    <span class="spacer"></span>
-    <div role="radiogroup" aria-label="配置">
-      <span class="seg-label">配置</span>
+    <div class="ctl" role="radiogroup" aria-label="配置">
+      <span class="ctl-label">配置</span>
       <span class="seg" id="ss-layout">
         <label><input type="radio" name="ss-layout" value="A">A 島型</label>
         <label><input type="radio" name="ss-layout" value="B" checked>B 壁寄せ</label>
       </span>
     </div>
+    <div class="ctl views" role="radiogroup" aria-label="視点">
+      <span class="ctl-label">視点</span>
+      <span class="seg" id="ss-view">
+        <label><input type="radio" name="ss-view" value="overview" checked>全体</label>
+        <label><input type="radio" name="ss-view" value="top">真上</label>
+        <label><input type="radio" name="ss-view" value="inside">室内</label>
+        <label><input type="radio" name="ss-view" value="reverse">入口を見る</label>
+      </span>
+    </div>
+    <span class="spacer"></span>
+    <details class="menu">
+      <summary>表示</summary>
+      <div class="menu-body">
+        <div class="ctl" role="radiogroup" aria-label="床">
+          <span class="ctl-label" style="display:inline">床</span>
+          <span class="seg" id="ss-floor">
+            <label><input type="radio" name="ss-floor" value="linoleum" checked>リノリウム</label>
+            <label><input type="radio" name="ss-floor" value="carpet">カーペット</label>
+          </span>
+        </div>
+        <label class="check"><input id="ss-power" type="checkbox" checked>電源の位置（9箇所・36口）</label>
+        <label class="check"><input id="ss-walls" type="checkbox">外壁を透かす</label>
+      </div>
+    </details>
   </header>
 
   <main class="stage-wrap">
@@ -151,15 +170,37 @@ button,input,select{font:inherit;color:inherit}
       <div class="ss-loading" role="status">3Dを読み込み中…</div>
     </div>
     <p class="hint">ドラッグで回転・ホイールで拡大縮小</p>
-    <div class="float views">
-      <span class="seg" id="ss-view" role="radiogroup" aria-label="視点">
-        <label><input type="radio" name="ss-view" value="overview" checked>全体</label>
-        <label><input type="radio" name="ss-view" value="top">真上</label>
-        <label><input type="radio" name="ss-view" value="inside">室内</label>
-        <label><input type="radio" name="ss-view" value="reverse">入口を見る</label>
-      </span>
+    <p class="status" id="ss-layout-label" aria-live="polite"></p>
+
+    <div class="table-card" id="table-card">
+      <div class="row1">
+        <label class="k" for="table-select">中央テーブル</label>
+        <select id="table-select"></select>
+      </div>
+      <div class="spec">
+        <span class="dims num" id="card-dims"></span>
+        <span class="price num" id="card-price"></span>
+      </div>
+      <div class="row3">
+        <span id="card-basis"></span>
+        <button type="button" class="link-btn" id="open-compare" aria-expanded="false" aria-controls="compare">候補を比べる</button>
+      </div>
     </div>
-    <div class="float camera" role="group" aria-label="カメラ操作">
+
+    <section class="drawer" id="compare" hidden aria-labelledby="compare-h">
+      <div class="drawer-head">
+        <h2 id="compare-h">中央テーブルの候補</h2>
+        <div class="sort" role="group" aria-label="並び順">
+          <button type="button" data-sort="price" aria-pressed="true">価格順</button>
+          <button type="button" data-sort="area" aria-pressed="false">大きさ順</button>
+        </div>
+        <button type="button" class="close" id="close-compare" aria-label="閉じる">×</button>
+      </div>
+      <div class="drawer-body"><ul class="ledger" id="ledger" role="radiogroup" aria-label="中央テーブルの候補"></ul></div>
+      <p class="drawer-foot">価格は2026年10月時点の公開情報。寸法は幅×奥行×高さ（mm）。</p>
+    </section>
+
+    <div class="camera" role="group" aria-label="カメラ操作">
       <span class="btn-group">
         <button type="button" class="icon-btn" id="ss-left" aria-label="左へ回す">↶</button>
         <button type="button" class="icon-btn" id="ss-right" aria-label="右へ回す">↷</button>
@@ -171,54 +212,6 @@ button,input,select{font:inherit;color:inherit}
       <button type="button" class="icon-btn" id="ss-reset">視点を戻す</button>
     </div>
   </main>
-
-  <aside class="panel" aria-label="詳細">
-    <section class="section detail" aria-labelledby="detail-h">
-      <h2 id="detail-h">中央テーブル</h2>
-      <p class="note" id="layout-note" hidden>配置Aでは中央テーブルを置かず、この会議テーブルを北東に置いています。下の一覧から選ぶと配置Bに切り替わります。<button type="button" id="to-b">配置Bにする</button></p>
-      <div class="maker" id="d-maker"></div>
-      <div class="name" id="d-name"></div>
-      <dl class="dims num" id="d-dims"></dl>
-      <dl class="facts" id="d-facts"></dl>
-      <div class="price">
-        <div class="label">価格</div>
-        <div class="amount num" id="d-price"></div>
-        <div class="basis" id="d-basis"></div>
-        <a id="d-link" href="#" target="_blank" rel="noopener">商品ページを開く ↗</a>
-      </div>
-    </section>
-
-    <section class="section" aria-labelledby="ledger-h">
-      <div class="ledger-head">
-        <h2 id="ledger-h">候補を比べる</h2>
-        <div class="sort" role="group" aria-label="並び順">
-          <button type="button" data-sort="price" aria-pressed="true">価格順</button>
-          <button type="button" data-sort="area" aria-pressed="false">大きさ順</button>
-        </div>
-      </div>
-      <ul class="ledger" id="ledger" role="radiogroup" aria-label="中央テーブルの候補"></ul>
-      <p class="ledger-foot">価格は2026年10月時点の公開情報。寸法は幅×奥行×高さ（mm）。</p>
-    </section>
-
-    <section class="section" aria-labelledby="view-h">
-      <h2 id="view-h">表示</h2>
-      <div class="settings">
-        <div role="radiogroup" aria-label="床">
-          <span class="seg-label">床</span>
-          <span class="seg" id="ss-floor">
-            <label><input type="radio" name="ss-floor" value="linoleum" checked>リノリウム</label>
-            <label><input type="radio" name="ss-floor" value="carpet">カーペット</label>
-          </span>
-        </div>
-        <label class="check"><input id="ss-power" type="checkbox" checked>電源の位置を表示（9箇所・36口）</label>
-        <label class="check"><input id="ss-walls" type="checkbox">外壁を透かす</label>
-      </div>
-    </section>
-
-    <section class="section">
-      <p class="facts-small" id="ss-layout-label" aria-live="polite"></p>
-    </section>
-  </aside>
 </div>
 <script>
 (async()=>{
@@ -863,10 +856,20 @@ function dimText(o){const [w,d,h]=o.mm;return o.shape==='round'?`φ${fmt(w)}×${
 const $=s=>root.querySelector(s);
 const viewGroup=$('#ss-view'),layoutGroup=$('#ss-layout'),floorGroup=$('#ss-floor');
 const powerToggle=$('#ss-power'),wallToggle=$('#ss-walls'),layoutLabel=$('#ss-layout-label');
-const ledger=$('#ledger');
+const ledger=$('#ledger'),card=$('#table-card'),select=$('#table-select'),drawer=$('#compare'),openBtn=$('#open-compare');
 let view='overview',lastFit=1,layout='B',floorFinish='linoleum',tableChoice='rughaus',sortKey='price';
 const store={get(){try{return JSON.parse(localStorage.getItem('ss-office-3d')||'null')}catch{return null}},set(v){try{localStorage.setItem('ss-office-3d',JSON.stringify(v))}catch{}}};
 
+select.append(...Object.entries(tableOptions).map(([key,o])=>new Option(`${o.short}（${o.maker}）`,key)));
+
+function renderCard(){
+ const o=tableOptions[tableChoice];
+ card.hidden=layout!=='B';
+ select.value=tableChoice;
+ $('#card-dims').textContent=o.shape==='round'?`φ${fmt(o.mm[0])} × H${o.mm[2]} mm`:`W${fmt(o.mm[0])} × D${fmt(o.mm[1])} × H${o.mm[2]} mm`;
+ $('#card-price').textContent=o.price.text;
+ $('#card-basis').textContent=o.price.basis.split('。')[0];
+}
 function renderLedger(){
  const keys=Object.keys(tableOptions);
  keys.sort((a,b)=>{const A=tableOptions[a],B=tableOptions[b];
@@ -875,31 +878,24 @@ function renderLedger(){
  ledger.replaceChildren(...keys.map(key=>{
   const o=tableOptions[key],li=document.createElement('li'),b=document.createElement('button');
   b.type='button';b.className='row';b.setAttribute('role','radio');b.dataset.key=key;
-  b.setAttribute('aria-checked',String(key===tableChoice&&layout==='B'));
+  b.setAttribute('aria-checked',String(key===tableChoice));
   b.innerHTML=`<span class="dot" aria-hidden="true"></span><span><span class="t"></span><br><span class="s num"></span></span><span class="p num"></span>`;
-  b.querySelector('.t').textContent=`${o.short}`;
+  b.querySelector('.t').textContent=o.short;
   b.querySelector('.s').textContent=`${o.maker}・${dimText(o)}`;
   b.querySelector('.p').innerHTML=`${shortPrice(o.price)}<small>${priceSub(o.price)}</small>`;
-  li.append(b);return li}));
+  li.append(b);
+  if(key===tableChoice){
+   const more=document.createElement('div');more.className='more';
+   const dl=document.createElement('dl');
+   for(const [k,v] of [['商品',o.name],['形',`${o.shapeLabel}・天板 約${topArea(o).toFixed(2)}㎡`],['特徴',o.note],['価格',`${o.price.text}（${o.price.basis}）`]]){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=k;dd.textContent=v;dl.append(dt,dd)}
+   const a=document.createElement('a');a.href=o.url;a.target='_blank';a.rel='noopener';a.textContent='商品ページを開く ↗';
+   const dt=document.createElement('dt'),dd=document.createElement('dd');dd.append(a);dl.append(dt,dd);
+   more.append(dl);li.append(more);
+  }
+  return li}));
  root.querySelectorAll('.sort button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sort===sortKey)));
 }
-function renderDetail(){
- const o=tableOptions[layout==='B'?tableChoice:'rughaus'],[w,d,h]=o.mm;
- $('#layout-note').hidden=layout==='B';
- $('#detail-h').textContent=layout==='B'?'中央テーブル':'会議テーブル（配置A）';
- $('#d-maker').textContent=o.maker;
- $('#d-name').textContent=o.name;
- const cells=o.shape==='round'?[['直径',w],['高さ',h],['天板面積',null]]:[['幅',w],['奥行',d],['高さ',h]];
- $('#d-dims').innerHTML=cells.map(([k,v])=>`<div><dt>${k}</dt><dd>${v==null?topArea(o).toFixed(2)+'<small>㎡</small>':fmt(v)+'<small>mm</small>'}</dd></div>`).join('');
- const facts=[['形',o.shapeLabel]];
- if(o.shape!=='round')facts.push(['天板面積',`約${topArea(o).toFixed(2)}㎡`]);
- facts.push(['特徴',layout==='B'?o.note:'天板ブラック・脚レッド。会議チェア4脚（宮武製作所 PCK-019N）と組み合わせ']);
- $('#d-facts').innerHTML='';
- for(const [k,v] of facts){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=k;dd.textContent=v;$('#d-facts').append(dt,dd)}
- const amount=$('#d-price');amount.textContent=o.price.text;amount.classList.toggle('quote',o.price.kind==='quote');
- $('#d-basis').textContent=o.price.basis;
- const link=$('#d-link');link.href=o.url;
-}
+function openCompare(open){drawer.hidden=!open;openBtn.setAttribute('aria-expanded',String(open));if(open){renderLedger();ledger.querySelector('[aria-checked="true"]')?.focus()}}
 function setTable(next){
  tableChoice=tableOptions[next]?next:'rughaus';const option=tableOptions[tableChoice];
  for(const [key,mesh] of Object.entries(tableMeshes))mesh.visible=key===tableChoice;
@@ -908,21 +904,21 @@ function setTable(next){
  deskPhone.position.z=option.mm[0]/2000-.13;
  const [w,d]=option.mm;tableDimensionPin.el.firstElementChild.textContent=option.shape==='round'?`φ${fmt(w)}`:`${fmt(w)}×${fmt(d)}`;
  tableDimensionPin.pos.z=option.pinZ;
- renderDetail();renderLedger();updateLabel();render();
+ renderCard();if(!drawer.hidden)renderLedger();updateLabel();render();
 }
 function setFloor(next){floorFinish=next==='carpet'?'carpet':'linoleum';officeFloor.material=floorFinish==='carpet'?M.carpet:sheetMaterial;floorGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===floorFinish);render()}
 function interior(){return view==='inside'||view==='reverse'}
 function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&&!powerToggle.checked)||(p.layout&&p.layout!==layout)||interior()||v.z>1||v.z< -1||Math.abs(v.x)>.97||Math.abs(v.y)>.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
 function render(){renderer.render(scene,camera);projectPins();root.dataset.layout=layout;root.dataset.tableModel=layout==='B'?tableChoice:''}
 function updateLabel(){
- const t=tableOptions[tableChoice];
  layoutLabel.textContent=layout==='B'
-  ?`配置B：デスクは西に3台・東に4台。中央に${t.short}（${dimText(t)}）、50インチ画面、MacBook 6台、iPad電話。`
-  :'配置A：デスク7台を1つの島に。会議テーブル（RUGHAUS 1,750×800）と会議チェア4脚。';
- stage.setAttribute('aria-label',`東SSビル6階・配置${layout}の3Dモデル。${layoutLabel.textContent}フォンブース2台、冷蔵庫、食品棚、ゴミ箱3個、電源9箇所。`);
+  ?'配置B：デスク 西3台・東4台／中央テーブルに50インチ画面・MacBook 6台・iPad電話'
+  :'配置A：デスク7台の島／会議テーブル RUGHAUS 1,750×800と会議チェア4脚';
+ stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。フォンブース2台、冷蔵庫、食品棚、ゴミ箱3個、電源9箇所。`);
 }
 function setLayout(next){layout=next==='A'?'A':'B';layoutGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===layout);trashBins.forEach((g,i)=>{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4)});deskObjects.forEach((g,i)=>{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout==='A';roundGroup.visible=layout==='B';layoutShadows.A.visible=layout==='A';layoutShadows.B.visible=layout==='B';
- renderDetail();renderLedger();updateLabel();render()}
+ if(layout!=='B')openCompare(false);
+ renderCard();updateLabel();render()}
 function wallTransparency(){outer.traverse(o=>{if(!o.isMesh)return;if(o.material===glass)return;if(!o.userData.original)o.userData.original=o.material;o.material=wallToggle.checked?o.userData.original.clone():o.userData.original;if(wallToggle.checked){o.material.transparent=true;o.material.opacity=.13;o.material.depthWrite=false;o.castShadow=false}else o.castShadow=true});render()}
 function setView(next){view=['overview','inside','reverse','top'].includes(next)?next:'overview';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
  if(view==='overview'){camera.position.set(.6,9.1,10.4);controls.target.set(0,.55,-.35);controls.maxPolarAngle=Math.PI*.49}
@@ -935,10 +931,14 @@ function save(){store.set({view,layout,tableChoice,floorFinish,sortKey,power:pow
 floorGroup.addEventListener('change',e=>{setFloor(e.target.value);save()});
 layoutGroup.addEventListener('change',e=>{setLayout(e.target.value);save()});
 viewGroup.addEventListener('change',e=>{setView(e.target.value);save()});
-ledger.addEventListener('click',e=>{const b=e.target.closest('.row');if(!b)return;if(layout!=='B')setLayout('B');setTable(b.dataset.key);save()});
-ledger.addEventListener('keydown',e=>{if(!['ArrowDown','ArrowUp'].includes(e.key))return;const rows=[...ledger.querySelectorAll('.row')];const i=rows.indexOf(document.activeElement);if(i<0)return;e.preventDefault();const n=rows[(i+(e.key==='ArrowDown'?1:-1)+rows.length)%rows.length];n.focus();n.click();ledger.querySelector(`[data-key="${n.dataset.key}"]`).focus()});
+select.addEventListener('change',()=>{setTable(select.value);save()});
+openBtn.addEventListener('click',()=>openCompare(drawer.hidden));
+$('#close-compare').addEventListener('click',()=>{openCompare(false);openBtn.focus()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!drawer.hidden){openCompare(false);openBtn.focus()}root.querySelector('.menu[open]')?.removeAttribute('open')}});
+document.addEventListener('click',e=>{const m=root.querySelector('.menu[open]');if(m&&!m.contains(e.target))m.removeAttribute('open')});
+ledger.addEventListener('click',e=>{const b=e.target.closest('.row');if(!b)return;setTable(b.dataset.key);ledger.querySelector(`[data-key="${b.dataset.key}"]`).focus();save()});
+ledger.addEventListener('keydown',e=>{if(!['ArrowDown','ArrowUp'].includes(e.key))return;const rows=[...ledger.querySelectorAll('.row')];const i=rows.indexOf(document.activeElement);if(i<0)return;e.preventDefault();const n=rows[(i+(e.key==='ArrowDown'?1:-1)+rows.length)%rows.length];n.click()});
 root.querySelectorAll('.sort button').forEach(b=>b.addEventListener('click',()=>{sortKey=b.dataset.sort;renderLedger();save()}));
-$('#to-b').addEventListener('click',()=>{setLayout('B');save()});
 powerToggle.addEventListener('change',()=>{render();save()});wallToggle.addEventListener('change',()=>{wallTransparency();save()});
 controls.addEventListener('change',render);
 function turn(angle){camera.position.sub(controls.target).applyAxisAngle(new THREE.Vector3(0,1,0),angle).add(controls.target);controls.update();render()}
