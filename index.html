@@ -411,7 +411,8 @@ const desks=[['D1',1.675,3.05,-Math.PI/2],['D2',2.275,3.05,Math.PI/2],['D3',1.67
 const deskObjects=[];
 const deskLayouts={
  A:desks.map(([name,x,z,r])=>[x+(name==='D7'?.6:.3),z+(name==='D7'?.3:.6),r]),
- B:[[.38,3.95,Math.PI/2],[.38,5.25,Math.PI/2],[.38,6.55,Math.PI/2],[6.28,1.55,-Math.PI/2],[6.28,2.80,-Math.PI/2],[6.28,4.05,-Math.PI/2],[6.28,5.30,-Math.PI/2]]
+ // South-aligned rows, 50 mm between tops; stop before the columns and booths.
+ B:[[.38,4.32,Math.PI/2],[.38,5.57,Math.PI/2],[.38,6.82,Math.PI/2],[6.28,2.45,-Math.PI/2],[6.28,3.70,-Math.PI/2],[6.28,4.95,-Math.PI/2],[6.28,6.20,-Math.PI/2]]
 };
 for(const [name,x,z,rot] of desks){
  const cap=name==='D7';const g=group(name,x+(cap?.6:.3),z+(cap?.3:.6),rot);
@@ -689,9 +690,9 @@ const lid=new THREE.Mesh(new THREE.SphereGeometry(.075,16,8,0,Math.PI*2,0,Math.P
 curve(pantry,[[-.06,1.04,.27],[-.15,1.035,.27],[-.15,.91,.27],[-.065,.90,.27]],.013,M.white);
 rod(pantry,[.06,1.015,.27],[.125,1.065,.27],.023,M.white);
 // CRAFT GT-135: three white cardboard bins, W400 × D410 × H700 mm.
-// B: one column in the corner east of the balcony door, backed onto the kitchenette wall.
+// B: north–south row immediately in front of the microwave/kettle cabinet, labels facing east.
 const binWhite=mat(0xe7e4dd,.95),cardboardEdge=mat(0xbba88c,1);
-const trashBins=[],binLayouts={A:[[1.50,2.20],[1.50,2.63],[1.50,3.06]],B:[[2.36,.805],[2.36,1.235],[2.36,1.665]]};
+const trashBins=[],binLayouts={A:[[1.50,2.20],[1.50,2.63],[1.50,3.06]],B:[[1.18,2.32],[1.18,2.75],[1.18,3.18]]};
 function sticker(parent,text,w,h,x,y,z){
  const c=document.createElement('canvas');c.width=512;c.height=192;const ctx=c.getContext('2d');
  ctx.fillStyle='#efeee9';ctx.fillRect(0,0,512,192);ctx.fillStyle='#3d4649';ctx.font='500 84px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,256,96);
@@ -712,20 +713,36 @@ for(let i=0;i<3;i++){
  for(const x of [-.1975,.1975])box(g,.005,.04,.4,x,.675,0,binWhite);
  sticker(g,String(i+1).padStart(2,'0'),.10,.038,0,.615,.202);
 }
-// Storage at the wall highlighted in the user's annotation, beside the doors.
-// Box dimensions are a visual placeholder: W400 × D300 × H300 mm.
-const storageBoxes=[],boxWhite=mat(0xeae9e3,.96),boxSeam=mat(0xbfc0b9,1),boxTape=mat(0xd2c6ad,.9);
-for(let column=0;column<2;column++)for(let level=0;level<4;level++){
- const number=column*4+level+1,g=group(`白い段ボール ${number}`,5.05+column*.414,.80);
- g.position.y=level*.305;storageBoxes.push(g);
- box(g,.4,.294,.30,0,.147,0,boxWhite);
- box(g,.402,.006,.302,0,.297,0,boxWhite);
- box(g,.402,.004,.001,0,.291,.1515,boxSeam);
- for(const side of [-1,1])box(g,.001,.004,.302,side*.201,.291,0,boxSeam);
- box(g,.0015,.001,.30,0,.3005,0,boxSeam);
- box(g,.045,.001,.30,0,.3011,0,boxTape);
- box(g,.045,.045,.001,0,.273,.151,boxTape);
- sticker(g,String(number).padStart(2,'0'),.068,.026,.12,.19,.151);
+// Sixteen Bankers Box 703s-style boxes, W345 × D410 × H265 mm including lid.
+// Four columns × four levels in the north-east space freed by the wall desks.
+const storageBoxes=[],boxWhite=mat(0xf2f0e9,.96),boxInk=mat(0x272c2d,.94);
+function bankersLabel(number){
+ const c=document.createElement('canvas');c.width=768;c.height=300;const ctx=c.getContext('2d');
+ ctx.fillStyle='#f2f0e9';ctx.fillRect(0,0,768,300);ctx.strokeStyle=ctx.fillStyle='#272c2d';ctx.lineWidth=5;
+ ctx.strokeRect(12,12,744,276);ctx.fillRect(12,12,744,61);
+ ctx.fillStyle='#f2f0e9';ctx.font='bold 43px sans-serif';ctx.textAlign='center';ctx.fillText('BANKERS BOX',384,58);
+ ctx.fillStyle='#272c2d';ctx.font='25px sans-serif';ctx.textAlign='left';ctx.fillText('CONTENTS',35,111);ctx.fillText('DATE',35,254);
+ for(const y of [145,192]){ctx.beginPath();ctx.moveTo(35,y);ctx.lineTo(727,y);ctx.stroke()}
+ ctx.beginPath();ctx.moveTo(140,260);ctx.lineTo(553,260);ctx.stroke();ctx.font='bold 57px sans-serif';ctx.fillText(String(number).padStart(2,'0'),617,260);
+ const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+ return new THREE.MeshStandardMaterial({map:texture,roughness:.96});
+}
+function boxHandhole(g,x,z,rot=0){
+ const shape=new THREE.Shape();shape.moveTo(-.028,-.009);shape.lineTo(.028,-.009);shape.absarc(.028,0,.009,-Math.PI/2,Math.PI/2,false);shape.lineTo(-.028,.009);shape.absarc(-.028,0,.009,Math.PI/2,Math.PI*1.5,false);shape.closePath();
+ const hole=new THREE.Mesh(new THREE.ShapeGeometry(shape,12),boxInk);hole.position.set(x,.212,z);hole.rotation.y=rot;g.add(hole);
+}
+for(let column=0;column<4;column++)for(let level=0;level<4;level++){
+ const number=column*4+level+1,g=group(`バンカーズボックス ${String(number).padStart(2,'0')}`,5.03+column*.355,1.30);
+ g.position.y=level*.265;storageBoxes.push(g);
+ box(g,.337,.243,.402,0,.1215,0,boxWhite,'白い収納ボックス本体');
+ box(g,.345,.022,.410,0,.254,0,boxWhite,'かぶせ蓋');
+ for(const z of [-.2055,.2055])box(g,.345,.002,.001,0,.244,z,boxInk);
+ for(const x of [-.173,.173])box(g,.001,.002,.410,x,.244,0,boxInk);
+ const label=new THREE.Mesh(new THREE.PlaneGeometry(.280,.110),bankersLabel(number));label.position.set(0,.110,.2018);g.add(label);
+ boxHandhole(g,0,.202,0);boxHandhole(g,0,-.202,Math.PI);
+ boxHandhole(g,.169,0,Math.PI/2);boxHandhole(g,-.169,0,-Math.PI/2);
+ for(const x of [-.165,.165])box(g,.002,.243,.001,x,.1215,.202,boxInk);
+ box(g,.345,.001,.003,0,.2655,-.14,boxInk);box(g,.345,.001,.003,0,.2655,.14,boxInk);
 }
 // Representative Dyson cordless profile; exact model is unspecified.
 const vacuum=group('ダイソン コードレス掃除機',5.89,.83);
@@ -816,7 +833,7 @@ for(const p of [[2.275,4.55,2.6,5.8],[5.3,2.525,2.4,3]])contactShadow(layoutShad
 for(const [x,z] of deskLayouts.B)contactShadow(layoutShadows.B,x,z,1.4,1.7);
 contactShadow(layoutShadows.B,3.35,4.0,1.8,2.6);
 for(const k of ['A','B'])for(const [x,z] of binLayouts[k])contactShadow(layoutShadows[k],x,z,.57,.59);
-contactShadow(model,5.26,.80,1.10,.60);contactShadow(model,5.89,.90,.40,.38);
+contactShadow(model,5.5625,1.30,1.65,.65);contactShadow(model,5.89,.90,.40,.38);
 // Low-detail context beyond the glazing; not a surveyed exterior model.
 function streetscape(west){
  const c=document.createElement('canvas');c.width=1024;c.height=512;const ctx=c.getContext('2d');
@@ -942,9 +959,9 @@ function updateLabel(){
  layoutLabel.textContent=layout==='B'
   ?`配置B：デスク 西3台・東4台／北側ワゴンに50インチ画面・電話／ノートPC ${equipment.visible?'表示':'非表示'}`
   :'配置A：デスク7台の島／会議テーブル RUGHAUS 1,750×800と会議チェア4脚';
- stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。フォンブース2台、冷蔵庫、食品棚、ゴミ箱3個、電源9箇所。`);
+ stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。フォンブース2台、冷蔵庫、食品棚、ゴミ箱3個、バンカーズボックス16個、電源9箇所。`);
 }
-function setLayout(next){layout=next==='A'?'A':'B';layoutGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===layout);trashBins.forEach((g,i)=>{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4)});deskObjects.forEach((g,i)=>{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout==='A';roundGroup.visible=layout==='B';layoutShadows.A.visible=layout==='A';layoutShadows.B.visible=layout==='B';
+function setLayout(next){layout=next==='A'?'A':'B';layoutGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===layout);trashBins.forEach((g,i)=>{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=layout==='B'?Math.PI/2:0});deskObjects.forEach((g,i)=>{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout==='A';roundGroup.visible=layout==='B';layoutShadows.A.visible=layout==='A';layoutShadows.B.visible=layout==='B';
  if(layout!=='B')openCompare(false);
  renderCard();updateLabel();if(view==='table')setView('table');else render()}
 function wallTransparency(){outer.traverse(o=>{if(!o.isMesh)return;if(o.material===glass)return;if(!o.userData.original)o.userData.original=o.material;o.material=wallToggle.checked?o.userData.original.clone():o.userData.original;if(wallToggle.checked){o.material.transparent=true;o.material.opacity=.13;o.material.depthWrite=false;o.castShadow=false}else o.castShadow=true});render()}
@@ -991,7 +1008,7 @@ setView(saved.view);
 wallTransparency();
 root.querySelector('.ss-loading').hidden=true;
 root.dataset.ready='true';
-root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables};
+root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes};
 render();
 }catch(err){root.querySelector('.ss-loading').textContent='3Dの読み込みに失敗しました。ページを再読み込みしてください。';console.error(err)}
 })();
