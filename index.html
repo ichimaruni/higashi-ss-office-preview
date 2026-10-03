@@ -361,6 +361,24 @@ for(const [x,z] of [[2.87,.52],[3.94,.52]]){
  W(model,.71,.035,.14,x+.335,2.08,z,M.door);
  const g=group(x===2.87?'湯沸室の扉':'洗面所の扉',x,z,.68);box(g,.67,2.05,.035,.335,1.025,0,M.door);box(g,.07,.03,.03,.57,.96,.04,M.metal)
 }
+// BRAUN black 30 cm wall clock, reference appearance: BC17B; exact owned model unspecified.
+// Between the north doors, above their lintels: centre height 2350 mm.
+const wallClock=group('北壁 BRAUN風時計 直径300mm',3.74,.605);wallClock.position.y=2.35;
+const clockCase=mat(0x121514,.78);
+const clockBody=new THREE.Mesh(new THREE.CylinderGeometry(.15,.15,.045,80),clockCase);clockBody.rotation.x=Math.PI/2;clockBody.castShadow=true;wallClock.add(clockBody);
+const dialCanvas=document.createElement('canvas');dialCanvas.width=dialCanvas.height=1024;
+const dialCtx=dialCanvas.getContext('2d');dialCtx.fillStyle='#171b1a';dialCtx.fillRect(0,0,1024,1024);
+dialCtx.strokeStyle='#323635';dialCtx.lineWidth=2;dialCtx.beginPath();dialCtx.arc(512,512,383,0,Math.PI*2);dialCtx.stroke();
+for(let i=0;i<60;i++){const a=i*Math.PI/30,r=i%5===0?449:462;dialCtx.strokeStyle='#eeeeda';dialCtx.lineWidth=i%5===0?6:4;dialCtx.beginPath();dialCtx.moveTo(512+Math.sin(a)*r,512-Math.cos(a)*r);dialCtx.lineTo(512+Math.sin(a)*484,512-Math.cos(a)*484);dialCtx.stroke()}
+dialCtx.fillStyle='#f0f0e9';dialCtx.font='500 64px Arial, sans-serif';dialCtx.textAlign='center';dialCtx.textBaseline='middle';
+for(let i=1;i<=12;i++){const a=i*Math.PI/6;dialCtx.fillText(String(i),512+Math.sin(a)*414,512-Math.cos(a)*414)}
+dialCtx.font='bold 35px Arial, sans-serif';dialCtx.fillText('BRAUN',512,290);
+const dialTexture=new THREE.CanvasTexture(dialCanvas);dialTexture.colorSpace=THREE.SRGBColorSpace;dialTexture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+const clockFace=new THREE.Mesh(new THREE.CircleGeometry(.144,80),new THREE.MeshStandardMaterial({map:dialTexture,roughness:.85}));clockFace.position.z=.0235;wallClock.add(clockFace);
+function clockHand(angle,length,width,material,z){const a=angle*Math.PI/180;const hand=box(wallClock,width,length,.0015,Math.sin(a)*length*.44,Math.cos(a)*length*.44,z,material);hand.rotation.z=-a;return hand}
+clockHand(305,.074,.009,M.white,.0255);clockHand(60,.109,.006,M.white,.027);
+clockHand(222,.131,.0014,clockCase,.029);const secondTip=box(wallClock,.0028,.030,.0015,Math.sin(222*Math.PI/180)*.115,Math.cos(222*Math.PI/180)*.115,.030,mat(0xf2c522,.7));secondTip.rotation.z=-222*Math.PI/180;
+const clockHub=new THREE.Mesh(new THREE.CircleGeometry(.007,24),clockCase);clockHub.position.z=.031;wallClock.add(clockHub);
 W(model,1.0,.84,.52,2.91,.42,-.73,M.white);W(model,1.05,.04,.57,2.91,.86,-.73,M.metal);W(model,.33,.03,.31,2.62,.89,-.71,M.dark);
 rod(model,[2.63-3.35,.9,-.91-4],[2.63-3.35,1.14,-.91-4],.015,M.metal);
 W(model,.43,.48,.22,3.26,1.76,-.91,M.white);
@@ -757,6 +775,24 @@ const filter=new THREE.Mesh(new THREE.CylinderGeometry(.061,.061,.052,32),vacuum
 for(let i=0;i<7;i++){const a=i*Math.PI*2/7;rod(vacuum,[.044*Math.cos(a),1.095,.008+.044*Math.sin(a)],[.05*Math.cos(a),1.17,.008+.05*Math.sin(a)],.008,vacuumPurple)}
 curve(vacuum,[[.05,1.11,-.08],[.076,1.00,-.09],[.073,.965,-.025],[.045,1.015,.018]],.014,M.dark);
 box(vacuum,.09,.04,.09,.04,.958,-.03,M.dark,'バッテリー');
+// Lightweight open tubular hanger rack, behind the boxes and west of the vacuum.
+// Nominal W900 × D400 × H1600 mm; no shelf or panels.
+const hangerRack=group('簡易シルバーハンガーラック 900×400×1600',5.15,.83);
+const rackMetal=mat(0xbdc4c5,.27,.82),rackCap=mat(0x343a39,.8);
+for(const x of [-.43,.43]){
+ rod(hangerRack,[x,.030,-.186],[x,.030,.186],.014,rackMetal);
+ rod(hangerRack,[x,.045,0],[x,1.572,0],.014,rackMetal);
+ for(const z of [-.19,.19])box(hangerRack,.030,.025,.028,x,.018,z,rackCap,'脚先キャップ');
+ for(const y of [.13,1.48]){const collar=new THREE.Mesh(new THREE.CylinderGeometry(.017,.017,.035,16),rackMetal);collar.position.set(x,y,0);hangerRack.add(collar)}
+}
+rod(hangerRack,[-.436,1.58,0],[.436,1.58,0],.014,rackMetal);
+rod(hangerRack,[-.43,.12,0],[.43,.12,0],.010,rackMetal);
+for(const x of [-.19,.19]){
+ curve(hangerRack,[[x-.018,1.56,0],[x-.025,1.585,0],[x,1.606,0],[x+.025,1.585,0],[x+.012,1.553,0],[x,1.535,0],[x,1.50,0]],.002,rackMetal);
+ rod(hangerRack,[x,1.50,0],[x-.15,1.35,0],.002,rackMetal);
+ rod(hangerRack,[x-.15,1.35,0],[x+.15,1.35,0],.002,rackMetal);
+ rod(hangerRack,[x+.15,1.35,0],[x,1.50,0],.002,rackMetal);
+}
 const wb=group('WB',6.56,3.652);box(wb,.035,.90,1.8,0,1.55,0,M.white);
 for(const y of [1.10,2.0])box(wb,.055,.025,1.84,0,y,0,M.metal);
 for(const z of [-.9,.9])box(wb,.055,.92,.025,0,1.55,z,M.metal);
@@ -833,7 +869,7 @@ for(const p of [[2.275,4.55,2.6,5.8],[5.3,2.525,2.4,3]])contactShadow(layoutShad
 for(const [x,z] of deskLayouts.B)contactShadow(layoutShadows.B,x,z,1.4,1.7);
 contactShadow(layoutShadows.B,3.35,4.0,1.8,2.6);
 for(const k of ['A','B'])for(const [x,z] of binLayouts[k])contactShadow(layoutShadows[k],x,z,.57,.59);
-contactShadow(model,5.5625,1.30,1.65,.65);contactShadow(model,5.89,.90,.40,.38);
+contactShadow(model,5.15,.83,1.1,.50);contactShadow(model,5.5625,1.30,1.65,.65);contactShadow(model,5.89,.90,.40,.38);
 // Low-detail context beyond the glazing; not a surveyed exterior model.
 function streetscape(west){
  const c=document.createElement('canvas');c.width=1024;c.height=512;const ctx=c.getContext('2d');
@@ -959,7 +995,7 @@ function updateLabel(){
  layoutLabel.textContent=layout==='B'
   ?`配置B：デスク 西3台・東4台／北側ワゴンに50インチ画面・電話／ノートPC ${equipment.visible?'表示':'非表示'}`
   :'配置A：デスク7台の島／会議テーブル RUGHAUS 1,750×800と会議チェア4脚';
- stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。フォンブース2台、冷蔵庫、食品棚、ゴミ箱3個、バンカーズボックス16個、電源9箇所。`);
+ stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。フォンブース2台、冷蔵庫、食品棚、ゴミ箱3個、バンカーズボックス16個、北壁の時計、簡易ハンガーラック、電源9箇所。`);
 }
 function setLayout(next){layout=next==='A'?'A':'B';layoutGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===layout);trashBins.forEach((g,i)=>{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=layout==='B'?Math.PI/2:0});deskObjects.forEach((g,i)=>{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout==='A';roundGroup.visible=layout==='B';layoutShadows.A.visible=layout==='A';layoutShadows.B.visible=layout==='B';
  if(layout!=='B')openCompare(false);
@@ -1008,7 +1044,7 @@ setView(saved.view);
 wallTransparency();
 root.querySelector('.ss-loading').hidden=true;
 root.dataset.ready='true';
-root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes};
+root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,hangerRack};
 render();
 }catch(err){root.querySelector('.ss-loading').textContent='3Dの読み込みに失敗しました。ページを再読み込みしてください。';console.error(err)}
 })();
