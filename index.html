@@ -754,10 +754,13 @@ const fargoCable=new THREE.Group();fargoCable.name='ワゴンから卓上Fargo�
 function updateFargoCable(){
  const option=tableOptions[tableChoice],h=option.height,north=-option.mm[0]/2000;
  // Keep the strip in the northern half; leave the paper and six laptops clear.
- fargoTap.position.set(0,h,tableChoice==='rughaus'&&equipment.visible?north+.040:-Math.min(.50,-north*.55));
+ const narrowWithPC=tableChoice==='rughaus'&&equipment.visible;
+ fargoTap.rotation.y=-Math.PI/2;
+ fargoTap.position.set(narrowWithPC?-.30:0,h,narrowWithPC?north+.190:-Math.min(.50,-north*.55));
  while(fargoCable.children.length){const mesh=fargoCable.children[0];fargoCable.remove(mesh);mesh.geometry.dispose()}
- const z=fargoTap.position.z,cartZ=mediaCart.position.z;
- curve(fargoCable,[[-.169,h+.015,z],[-.205,h+.009,z-.025],[-.220,h+.006,north+.065],[-.220,h+.003,north-.012],[-.240,h-.075,north-.080],[-.310,h-.120,cartZ+.12],[-.315,h-.10,cartZ-.16],[-.250,h-.040,cartZ-.24],[-.060,h-.025,cartZ-.18]],.0038,M.black).name='天板の北端からワゴン脇を通る黒いコード';
+ const x=fargoTap.position.x,z=fargoTap.position.z,cartZ=mediaCart.position.z;
+ const tabletopRoute=narrowWithPC?[[x,h+.015,z-.169],[x,h+.003,north-.012],[-.310,h-.075,north-.080]]:[[x,h+.015,z-.169],[-.020,h+.009,z-.199],[-.220,h+.006,north+.065],[-.220,h+.003,north-.012],[-.240,h-.075,north-.080]];
+ curve(fargoCable,[...tabletopRoute,[-.310,h-.120,cartZ+.12],[-.315,h-.10,cartZ-.16],[-.250,h-.040,cartZ-.24],[-.060,h-.025,cartZ-.18]],.0038,M.black).name='天板の北端からワゴン脇を通る黒いコード';
  box(fargoCable,.027,.020,.016,-.060,h-.016,cartZ-.18,M.black,'ワゴン背面の電源に差したプラグ');
 }
 
