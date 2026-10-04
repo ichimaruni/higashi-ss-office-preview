@@ -149,6 +149,7 @@ button,input,select{font:inherit;color:inherit}
         <label><input type="radio" name="ss-view" value="pantry">食器</label>
         <label><input type="radio" name="ss-view" value="printer">プリンタ</label>
         <label><input type="radio" name="ss-view" value="doors">北側ドア</label>
+        <label><input type="radio" name="ss-view" value="calendar">予定表示</label>
         <label><input type="radio" name="ss-view" value="inside">室内</label>
         <label><input type="radio" name="ss-view" value="reverse">入口を見る</label>
       </span>
@@ -413,6 +414,64 @@ function clockHand(angle,length,width,material,z){const a=angle*Math.PI/180;cons
 clockHand(305,.074,.009,M.white,.0255);clockHand(60,.109,.006,M.white,.027);
 clockHand(222,.131,.0014,clockCase,.029);const secondTip=box(wallClock,.0028,.030,.0015,Math.sin(222*Math.PI/180)*.115,Math.cos(222*Math.PI/180)*.115,.030,mat(0xf2c522,.7));secondTip.rotation.z=-222*Math.PI/180;
 const clockHub=new THREE.Mesh(new THREE.CircleGeometry(.007,24),clockCase);clockHub.position.z=.031;wallClock.add(clockHub);
+// Landscape wall tablet beside the balcony: 380 × 250 mm, centre at 1550 mm.
+// Illustrative five-person day view only; no private calendar data or live API.
+const calendarTablet=group('北壁の予定表示タブレット 約16インチ',2.51,.588);
+calendarTablet.position.y=1.55;
+box(calendarTablet,.24,.14,.008,0,0,-.004,M.metal,'壁面固定プレート');
+const tabletBody=new THREE.Mesh(roundedTableGeometry(.38,.25,.014,.015,.001),mat(0x737b80,.36,.72));
+tabletBody.rotation.x=Math.PI/2;tabletBody.castShadow=true;tabletBody.name='薄型シルバー筐体';calendarTablet.add(tabletBody);
+const tabletBezel=new THREE.Mesh(roundedTableGeometry(.376,.246,.012,.001),mat(0x131719,.55));
+tabletBezel.rotation.x=Math.PI/2;tabletBezel.position.z=.015;tabletBezel.name='黒い画面ベゼル';calendarTablet.add(tabletBezel);
+const calendarCanvas=document.createElement('canvas');calendarCanvas.width=1760;calendarCanvas.height=1100;
+const cal=calendarCanvas.getContext('2d');
+cal.fillStyle='#fff';cal.fillRect(0,0,1760,1100);
+cal.fillStyle='#f6f9fd';cal.fillRect(0,0,1760,110);
+cal.fillStyle='#4285f4';cal.beginPath();cal.roundRect(28,25,60,60,10);cal.fill();
+cal.fillStyle='#fff';cal.font='600 35px Arial';cal.textAlign='center';cal.fillText('31',58,69);
+cal.textAlign='left';cal.fillStyle='#343b45';cal.font='500 44px "Noto Sans JP", sans-serif';cal.fillText('カレンダー',110,70);
+const calendarDate=new Intl.DateTimeFormat('ja-JP',{timeZone:'Asia/Tokyo',year:'numeric',month:'long',day:'numeric'}).format(new Date());
+cal.font='500 36px "Noto Sans JP", sans-serif';cal.fillText(calendarDate,480,68);
+cal.strokeStyle='#dce1e8';cal.lineWidth=2;cal.beginPath();cal.roundRect(1320,28,116,54,27);cal.stroke();
+cal.font='500 29px "Noto Sans JP", sans-serif';cal.fillText('今日',1345,64);cal.fillText('日 ▾',1500,64);
+const dayGrid={left:104,top:245,width:1620,row:83};
+const memberWidth=dayGrid.width/5;
+const memberColors=['#487bd2','#a58036','#438e7c','#bf677d','#8172b4'];
+for(let i=0;i<5;i++){
+ const x=dayGrid.left+i*memberWidth;
+ cal.fillStyle=memberColors[i];cal.beginPath();cal.arc(x+memberWidth/2,149,14,0,Math.PI*2);cal.fill();
+ cal.fillStyle='#3c4043';cal.font='500 31px "Noto Sans JP", sans-serif';cal.textAlign='center';cal.fillText('メンバー '+String.fromCharCode(65+i),x+memberWidth/2,204);
+ cal.strokeStyle='#e3e7eb';cal.beginPath();cal.moveTo(x,220);cal.lineTo(x,1020);cal.stroke();
+}
+cal.textAlign='right';cal.font='26px Arial';cal.fillStyle='#69717a';
+for(let h=9;h<=18;h++){
+ const y=dayGrid.top+(h-9)*dayGrid.row;
+ cal.fillText(String(h).padStart(2,'0')+':00',85,y+9);
+ cal.strokeStyle='#e3e7eb';cal.beginPath();cal.moveTo(dayGrid.left,y);cal.lineTo(1724,y);cal.stroke();
+}
+// Sample appointments imitate the supplied layout, not its actual appointments.
+const calendarExamples=[
+ [[9.5,1,'朝の共有','#d77c77'],[11,1,'作業','#588fba'],[14,1.5,'打ち合わせ','#588fba']],
+ [[9.5,1,'朝の共有','#d77c77'],[10.75,1.25,'外出','#dba943'],[15,1,'相談','#dba943']],
+ [[9.5,1,'朝の共有','#d77c77'],[13,1,'打ち合わせ','#5b9a87'],[16,1,'作業','#5b9a87']],
+ [[9.5,1,'朝の共有','#d77c77'],[11,1.5,'作業','#c07993'],[14,1.5,'打ち合わせ','#c07993']],
+ [[9.5,1,'朝の共有','#d77c77'],[13,1,'打ち合わせ','#8b79b6'],[16.5,1,'作業','#8b79b6']]
+];
+cal.textAlign='left';
+calendarExamples.forEach((events,i)=>events.forEach(([hour,duration,title,color])=>{
+ const x=dayGrid.left+i*memberWidth+8,y=dayGrid.top+(hour-9)*dayGrid.row+2;
+ cal.fillStyle=color;cal.beginPath();cal.roundRect(x,y,memberWidth-16,duration*dayGrid.row-5,9);cal.fill();
+ cal.fillStyle='#fff';cal.font='500 30px "Noto Sans JP", sans-serif';cal.fillText(title,x+14,y+34);
+ const time=v=>String(Math.floor(v)).padStart(2,'0')+':'+String(Math.round(v%1*60)).padStart(2,'0');
+ cal.font='25px Arial';cal.fillText(time(hour)+'–'+time(hour+duration),x+14,y+64);
+}));
+cal.fillStyle='#f6f9fd';cal.fillRect(0,1030,1760,70);
+cal.fillStyle='#69717a';cal.font='27px "Noto Sans JP", sans-serif';cal.fillText('表示例 · 実際の予定とは連動していません',32,1075);
+const calendarTexture=new THREE.CanvasTexture(calendarCanvas);calendarTexture.colorSpace=THREE.SRGBColorSpace;calendarTexture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+const calendarScreen=new THREE.Mesh(new THREE.PlaneGeometry(.352,.22),new THREE.MeshBasicMaterial({map:calendarTexture,toneMapped:false}));
+calendarScreen.name='全員の当日予定・日表示のサンプル画面';calendarScreen.position.z=.0168;calendarTablet.add(calendarScreen);
+const tabletCamera=new THREE.Mesh(new THREE.CircleGeometry(.0013,16),M.dark);tabletCamera.position.set(0,.118,.0168);calendarTablet.add(tabletCamera);
+box(calendarTablet,.0015,.013,.004,.1902,.047,.0075,M.dark,'電源ボタン');
 W(model,1.0,.84,.52,2.91,.42,-.73,M.white);W(model,1.05,.04,.57,2.91,.86,-.73,M.metal);W(model,.33,.03,.31,2.62,.89,-.71,M.dark);
 rod(model,[2.63-3.35,.9,-.91-4],[2.63-3.35,1.14,-.91-4],.015,M.metal);
 W(model,.43,.48,.22,3.26,1.76,-.91,M.white);
@@ -1270,13 +1329,13 @@ function updateLabel(){
  layoutLabel.textContent=layout==='B'
   ?`配置B：デスク 西3台・東4台／北側ワゴンに50インチ画面・電話／ノートPC ${equipment.visible?'表示':'非表示'}`
   :'配置A：デスク7台の島／会議テーブル RUGHAUS 1,750×800と会議チェア4脚';
- stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その左手前の家庭用プリンターと用紙・インク収納ワゴン、北側ドアのキッチン・トイレサイン、北壁の時計、簡易ハンガーラック、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
+ stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その左手前の家庭用プリンターと用紙・インク収納ワゴン、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、簡易ハンガーラック、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
 }
 function setLayout(next){layout=next==='A'?'A':'B';layoutGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===layout);trashBins.forEach((g,i)=>{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=Math.PI/2});deskObjects.forEach((g,i)=>{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout==='A';roundGroup.visible=layout==='B';layoutShadows.A.visible=layout==='A';layoutShadows.B.visible=layout==='B';
  if(layout!=='B')openCompare(false);
  renderCard();updateLabel();if(view==='table')setView('table');else render()}
 function wallTransparency(){outer.traverse(o=>{if(!o.isMesh)return;if(o.material===glass)return;if(!o.userData.original)o.userData.original=o.material;o.material=wallToggle.checked?o.userData.original.clone():o.userData.original;if(wallToggle.checked){o.material.transparent=true;o.material.opacity=.13;o.material.depthWrite=false;o.castShadow=false}else o.castShadow=true});render()}
-function setView(next){view=['overview','inside','reverse','top','table','rack','kitchen','doors','pantry','printer'].includes(next)?next:'overview';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
+function setView(next){view=['overview','inside','reverse','top','table','rack','kitchen','doors','pantry','printer','calendar'].includes(next)?next:'overview';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
  if(view==='overview'){camera.position.set(.6,9.1,10.4);controls.target.set(0,.55,-.35);controls.maxPolarAngle=Math.PI*.49}
  if(view==='inside'){camera.position.set(.25,1.6,2.25);controls.target.set(-.25,1.35,-2.5);controls.maxPolarAngle=Math.PI*.72}
  if(view==='reverse'){camera.position.set(-2.25,1.6,-2.15);controls.target.set(.45,1.30,2.60);controls.maxPolarAngle=Math.PI*.72}
@@ -1285,6 +1344,7 @@ function setView(next){view=['overview','inside','reverse','top','table','rack',
  if(view==='rack'){camera.position.set(3.04,2.0,2.35);controls.target.set(3.04,.55,3.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='pantry'){camera.position.set(-1.20,2.95,-1.55);controls.target.set(-2.80,1.74,-1.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='printer'){camera.position.set(.50,1.65,-.35);controls.target.set(1.15,.55,-2.35);controls.maxPolarAngle=Math.PI*.49}
+ if(view==='calendar'){camera.position.set(-.95,1.70,-2.20);controls.target.set(-.84,1.55,-3.38);controls.maxPolarAngle=Math.PI*.49}
  if(view==='doors'){camera.position.set(.30,2.05,-1.00);controls.target.set(.30,1.68,-3.58);controls.maxPolarAngle=Math.PI*.49}
  if(view==='top'){camera.position.set(0,16.8,.02);controls.target.set(0,0,-.32);controls.maxPolarAngle=Math.PI*.49}
  lastFit=1;resize();controls.update();render();
@@ -1311,7 +1371,7 @@ $('#ss-right').addEventListener('click',()=>turn(Math.PI/8));
 $('#ss-near').addEventListener('click',()=>zoom(.8));
 $('#ss-far').addEventListener('click',()=>zoom(1.25));
 $('#ss-reset').addEventListener('click',()=>setView(view));
-function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','rack','kitchen','doors','pantry','printer'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','rack','kitchen','doors','pantry','printer'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','rack','kitchen','doors','pantry','printer','calendar'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','rack','kitchen','doors','pantry','printer','calendar'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
 new ResizeObserver(resize).observe(stage);
 const saved=store.get()||{};
 sortKey=saved.sortKey==='area'?'area':'price';
@@ -1324,7 +1384,7 @@ setView(saved.view);
 wallTransparency();
 root.querySelector('.ss-loading').hidden=true;
 root.dataset.ready='true';
-root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory,printerCart,printer,printerSupplies,printerCables};
+root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory,printerCart,printer,printerSupplies,printerCables,calendarTablet,calendarScreen};
 render();
 }catch(err){root.querySelector('.ss-loading').textContent='3Dの読み込みに失敗しました。ページを再読み込みしてください。';console.error(err)}
 })();
