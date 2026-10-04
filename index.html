@@ -146,6 +146,7 @@ button,input,select{font:inherit;color:inherit}
         <label><input type="radio" name="ss-view" value="table">中央</label>
         <label><input type="radio" name="ss-view" value="rack">機器棚</label>
         <label><input type="radio" name="ss-view" value="kitchen">家電棚</label>
+        <label><input type="radio" name="ss-view" value="pantry">食器</label>
         <label><input type="radio" name="ss-view" value="doors">北側ドア</label>
         <label><input type="radio" name="ss-view" value="inside">室内</label>
         <label><input type="radio" name="ss-view" value="reverse">入口を見る</label>
@@ -835,32 +836,99 @@ cookerCtx.fillStyle='#afc0b3';cookerCtx.font='500 68px sans-serif';cookerCtx.fil
 cookerCtx.font='24px sans-serif';cookerCtx.fillStyle='#8d9792';for(const [label,x] of [['取消',315],['予約',512],['炊飯',709]])cookerCtx.fillText(label,x,677);
 const cookerTexture=new THREE.CanvasTexture(cookerCanvas);cookerTexture.colorSpace=THREE.SRGBColorSpace;cookerTexture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
 const touchPanel=new THREE.Mesh(new THREE.CircleGeometry(.128,80),new THREE.MeshStandardMaterial({map:cookerTexture,roughness:.52,metalness:.12}));touchPanel.rotation.x=-Math.PI/2;touchPanel.scale.y=cookerRatio;touchPanel.position.y=.2582;riceCooker.add(touchPanel);
-// Everyday tableware on the remaining upper shelf: stacked dishes, mugs and glasses.
-const tableware=new THREE.Group();tableware.name='食器 皿・ボウル・マグ・グラス';pantry.add(tableware);
-const dishWhite=mat(0xf3f0e7,.24),dishBlue=mat(0xabc2c5,.31),dishGlass=new THREE.MeshPhysicalMaterial({color:0xdce8e9,metalness:0,roughness:.12,transparent:true,opacity:.42,depthWrite:false,side:THREE.DoubleSide});
-function plates(x,z,h,count,r=.12){
- const g=new THREE.Group();g.name='重ねた皿';g.position.set(x,h+.001,z);tableware.add(g);
- for(let i=0;i<count;i++){
-  const plate=lathe(g,'平皿',[[0,0],[r*.58,0],[r*.77,.004],[r*.96,.011],[r,.014],[r*.99,.018],[r*.91,.016],[r*.72,.008],[0,.008]],dishWhite);plate.position.y=i*.014;
- }
+// Ten-person pantry, organized into baskets and trays on the existing upper shelf.
+const tableware=new THREE.Group();tableware.name='10人分の食器・飲み物・消耗品';pantry.add(tableware);
+const dishWhite=mat(0xf3f0e7,.24),dishBlue=mat(0xabc2c5,.31),basketSand=mat(0xc5b99d,.78),basketGrey=mat(0x8d9c9c,.67),paperWhite=mat(0xf5f1e8,.96),teaGreen=mat(0x657f64,.65),coffeeBrown=mat(0x6e4730,.68);
+const dishGlass=new THREE.MeshPhysicalMaterial({color:0xdce8e9,roughness:.12,transparent:true,opacity:.42,depthWrite:false,side:THREE.DoubleSide});
+const pantryInventory={plates:10,bowls:10,mugs:10,glasses:10,forks:10,knives:10,spoons:10,chopstickPairs:10,paperCups:20};
+function pantryLathe(parent,name,profile,material){const mesh=new THREE.Mesh(new THREE.LatheGeometry(profile.map(([r,y])=>new THREE.Vector2(r,y)),32),material);mesh.name=name;mesh.castShadow=mesh.receiveShadow=true;parent.add(mesh);return mesh}
+function pantryLabel(parent,text,w,x,y,z){
+ const c=document.createElement('canvas');c.width=768;c.height=160;const ctx=c.getContext('2d');ctx.fillStyle='#f1eee5';ctx.fillRect(0,0,768,160);ctx.fillStyle='#394342';ctx.font='500 64px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,384,82);
+ const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;
+ const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,.032),new THREE.MeshStandardMaterial({map:texture,roughness:.9}));mesh.rotation.y=Math.PI/2;mesh.position.set(x,y,z);parent.add(mesh);
 }
-function bowls(x,z,h,count){
- const g=new THREE.Group();g.name='重ねたボウル';g.position.set(x,h+.001,z);tableware.add(g);
- for(let i=0;i<count;i++){
-  const bowl=lathe(g,'ボウル',[[0,0],[.03,0],[.043,.006],[.066,.040],[.075,.057],[.073,.062],[.069,.060],[.062,.038],[.039,.009],[0,.009]],i%2?dishBlue:dishWhite);bowl.position.y=i*.021;
+function pantryTray(name,x,z,w,d,material,wire=false){
+ const g=new THREE.Group();g.name=name;g.position.set(x,1.652,z);tableware.add(g);
+ box(g,w,.010,d,0,.005,0,material,'収納容器の底');
+ if(wire){
+  const h=.085;
+  for(const y of [.019,.047,h]){for(const x of [-w/2,w/2])rod(g,[x,y,-d/2],[x,y,d/2],.003,material);for(const z of [-d/2,d/2])rod(g,[-w/2,y,z],[w/2,y,z],.003,material)}
+  for(let i=0;i<=Math.ceil(d/.035);i++){const z=-d/2+d*i/Math.ceil(d/.035);for(const x of [-w/2,w/2])rod(g,[x,.01,z],[x,h,z],.002,material)}
+  for(let i=0;i<=Math.ceil(w/.035);i++){const x=-w/2+w*i/Math.ceil(w/.035);for(const z of [-d/2,d/2])rod(g,[x,.01,z],[x,h,z],.002,material)}
+  pantryLabel(g,name,Math.min(.23,d*.78),w/2+.004,.041,0);
+ }else{
+  for(const x of [-w/2,w/2])box(g,.006,.038,d,x,.025,0,material);
+  for(const z of [-d/2,d/2])box(g,w,.038,.006,0,.025,z,material);
+  pantryLabel(g,name,Math.min(.23,d*.78),w/2+.004,.026,0);
  }
+ return g;
 }
-function mug(x,z,h,blue=false){
- const g=new THREE.Group();g.name='マグカップ';g.position.set(x,h+.001,z);tableware.add(g);
- lathe(g,'マグカップ本体',[[0,0],[.028,0],[.033,.008],[.038,.090],[.037,.096],[.033,.096],[.032,.090],[.028,.011],[0,.011]],blue?dishBlue:dishWhite);
+function plates(parent,x,z,count,r=.11){
+ const g=new THREE.Group();g.name='平皿 '+count+'枚';g.position.set(x,.011,z);parent.add(g);
+ for(let i=0;i<count;i++){const plate=pantryLathe(g,'平皿',[[0,0],[r*.58,0],[r*.77,.004],[r*.96,.011],[r,.014],[r*.99,.018],[r*.91,.016],[r*.72,.008],[0,.008]],dishWhite);plate.position.y=i*.014}
+}
+function bowls(parent,x,z,count){
+ const g=new THREE.Group();g.name='ボウル '+count+'個';g.position.set(x,.011,z);parent.add(g);
+ for(let i=0;i<count;i++){const bowl=pantryLathe(g,'ボウル',[[0,0],[.03,0],[.043,.006],[.066,.040],[.075,.057],[.073,.062],[.069,.060],[.062,.038],[.039,.009],[0,.009]],i%2?dishBlue:dishWhite);bowl.position.y=i*.021}
+}
+function mug(parent,x,z,blue=false,level=0){
+ const g=new THREE.Group();g.name='マグカップ';g.position.set(x,.011+level*.055,z);parent.add(g);
+ pantryLathe(g,'マグカップ本体',[[0,0],[.028,0],[.033,.008],[.038,.090],[.037,.096],[.033,.096],[.032,.090],[.028,.011],[0,.011]],blue?dishBlue:dishWhite);
  curve(g,[[.034,.078,0],[.062,.081,0],[.066,.047,0],[.035,.030,0]],.005,blue?dishBlue:dishWhite);
 }
-plates(-.12,.16,1.65,7);bowls(.09,.57,1.65,3);
-for(let i=0;i<4;i++)mug(.10,-.57+i*.17,1.65,i%2===1);
-for(let i=0;i<3;i++){
- const g=new THREE.Group();g.name='グラス';g.position.set(-.12,1.651,-.54+i*.18);tableware.add(g);
- lathe(g,'ガラスのコップ',[[0,0],[.027,0],[.030,.006],[.034,.105],[.032,.105],[.029,.007],[0,.007]],dishGlass);
+const dishTray=pantryTray('食器 ×10',0,-.48,.58,.44,basketSand);
+for(const x of [-.14,.14])plates(dishTray,x,-.065,5);
+for(const x of [-.12,.12])bowls(dishTray,x,.145,5);
+const cupBasket=pantryTray('マグ ×10',-.16,-.035,.28,.40,basketSand,true);
+for(const [i,[x,z]] of [[-.07,-.135],[-.07,0],[-.07,.135],[.06,-.135],[.06,0]].entries())for(let j=0;j<2;j++)mug(cupBasket,x,z,i%2===1,j);
+const glassBasket=pantryTray('グラス・紙コップ',.135,-.035,.28,.40,basketGrey,true);
+for(const x of [-.065,.065])for(let i=0;i<5;i++){
+ const g=new THREE.Group();g.name='グラス';g.position.set(x,.011+i*.026,-.10);glassBasket.add(g);
+ pantryLathe(g,'ガラスのコップ',[[0,0],[.027,0],[.030,.006],[.034,.105],[.032,.105],[.029,.007],[0,.007]],dishGlass);
 }
+const paperCups=new THREE.Group();paperCups.name='紙コップ20個';paperCups.position.set(0,.011,.095);glassBasket.add(paperCups);
+for(let i=0;i<20;i++){const cup=pantryLathe(paperCups,'紙コップ',[[0,0],[.026,0],[.039,.083],[.040,.087],[.037,.087],[.025,.004],[0,.004]],paperWhite);cup.position.y=i*.0055}
+const teaTray=pantryTray('お茶・コーヒー',-.15,.43,.28,.49,M.wood);
+const teapot=new THREE.Group();teapot.name='急須 お茶セット';teapot.position.set(0,.011,-.105);teaTray.add(teapot);
+pantryLathe(teapot,'急須本体',[[0,0],[.043,0],[.064,.025],[.070,.057],[.063,.091],[.048,.103],[0,.103]],dishBlue);
+pantryLathe(teapot,'急須のふた',[[0,.103],[.051,.103],[.042,.116],[0,.121]],dishWhite);
+const knob=new THREE.Mesh(new THREE.SphereGeometry(.010,16,10),dishBlue);knob.position.y=.127;teapot.add(knob);
+curve(teapot,[[0,.077,-.055],[0,.09,-.112],[0,.028,-.113],[0,.025,-.057]],.009,dishBlue);
+rod(teapot,[0,.050,.052],[0,.083,.112],.014,dishBlue);
+function pantryJar(parent,name,x,z,r,h,material,label){
+ const g=new THREE.Group();g.name=name;g.position.set(x,.011,z);parent.add(g);
+ pantryLathe(g,name,[[0,0],[r*.88,0],[r,.012],[r,h-.02],[r*.83,h-.008],[0,h-.008]],material);
+ const lid=new THREE.Mesh(new THREE.CylinderGeometry(r*.92,r*.92,.012,32),M.black);lid.position.y=h-.006;g.add(lid);
+ pantryLabel(g,label,r*1.55,r+.001,h*.5,0);return g;
+}
+pantryJar(teaTray,'茶葉の保存缶',-.067,.16,.043,.125,teaGreen,'TEA');
+pantryJar(teaTray,'インスタントコーヒー',.068,.16,.047,.15,coffeeBrown,'COFFEE');
+const teaPackets=new THREE.Group();teaPackets.name='ティーバッグのケース';teaPackets.position.set(.075,.011,-.01);teaTray.add(teaPackets);
+box(teaPackets,.052,.045,.082,0,.0225,0,teaGreen);
+for(let i=0;i<6;i++)box(teaPackets,.042,.052,.002,0,.035,-.031+i*.012,paperWhite,'ティーバッグ');
+const suppliesTray=pantryTray('カトラリー・紙類',.155,.43,.28,.49,M.white);
+const cutleryTray=new THREE.Group();cutleryTray.name='4区画のカトラリートレー';cutleryTray.position.set(0,.011,-.125);suppliesTray.add(cutleryTray);
+box(cutleryTray,.27,.006,.224,0,.003,0,basketGrey);
+for(const x of [-.135,-.0675,0,.0675,.135])box(cutleryTray,.003,.022,.224,x,.015,0,basketGrey,'仕切り');
+for(const z of [-.112,.112])box(cutleryTray,.27,.022,.003,0,.015,z,basketGrey);
+for(let type=0;type<4;type++)for(let i=0;i<10;i++){
+ const g=new THREE.Group();g.name=['フォーク','ナイフ','スプーン','箸 1膳'][type];g.position.set(-.10125+type*.0675+(type===3?0:(i%2-.5)*.023),.008+Math.floor(i/2)*.0028,0);cutleryTray.add(g);
+ if(type===3){for(const dx of [-.004,.004])rod(g,[dx+(i-4.5)*.0055,0,-.103],[dx+(i-4.5)*.0055,0,.103],.0012,mat(0x967554,.65));continue;}
+ box(g,.007,.002,.132,0,0,-.028,M.metal,'持ち手');
+ if(type===0){box(g,.014,.002,.024,0,0,.050,M.metal);for(const x of [-.006,-.002,.002,.006])box(g,.002,.002,.029,x,0,.076,M.metal,'フォークの先');}
+ if(type===1){box(g,.012,.002,.072,.0025,0,.052,M.metal,'ナイフの刃');}
+ if(type===2){const bowl=new THREE.Mesh(new THREE.SphereGeometry(.013,16,10),M.metal);bowl.scale.set(.78,.18,1.50);bowl.position.z=.066;g.add(bowl);}
+}
+const tissue=new THREE.Group();tissue.name='ティッシュボックス';tissue.position.set(-.015,.011,.075);suppliesTray.add(tissue);
+box(tissue,.235,.070,.105,0,.035,0,mat(0xb9c7c0,.86));box(tissue,.13,.003,.017,0,.072,0,M.dark,'取り出し口');
+const tissueShape=new THREE.Shape();tissueShape.moveTo(-.060,0);tissueShape.lineTo(-.052,.028);tissueShape.lineTo(-.029,.039);tissueShape.lineTo(.015,.033);tissueShape.lineTo(.046,.042);tissueShape.lineTo(.061,.020);tissueShape.lineTo(.060,0);tissueShape.closePath();
+const tissueSheet=new THREE.Mesh(new THREE.ShapeGeometry(tissueShape),new THREE.MeshStandardMaterial({color:0xf9f7ef,roughness:1,side:THREE.DoubleSide}));tissueSheet.position.set(0,.073,0);tissueSheet.rotation.y=.25;tissue.add(tissueSheet);
+const paperRoll=new THREE.Group();paperRoll.name='横置きキッチンペーパーホルダー';paperRoll.position.set(0,.011,.19);suppliesTray.add(paperRoll);
+box(paperRoll,.255,.006,.103,0,.003,0,basketGrey);
+for(const x of [-.125,.125])box(paperRoll,.006,.062,.046,x,.034,0,basketGrey);
+rod(paperRoll,[-.127,.060,0],[.127,.060,0],.008,M.metal);
+const roll=pantryLathe(paperRoll,'キッチンペーパー',[[.014,-.112],[.050,-.112],[.050,.112],[.014,.112],[.014,-.112]],paperWhite);roll.rotation.z=Math.PI/2;roll.position.y=.060;
+const core=pantryLathe(paperRoll,'紙芯',[[.010,-.114],[.014,-.114],[.014,.114],[.010,.114],[.010,-.114]],mat(0xb7a286,.94));core.rotation.z=Math.PI/2;core.position.y=.060;
 // CRAFT GT-135: three white cardboard bins, W400 × D410 × H700 mm.
 // A/B: three bins tucked into the open floor bay of the appliance rack, labels east.
 const binWhite=mat(0xe7e4dd,.95),cardboardEdge=mat(0xbba88c,1);
@@ -1149,19 +1217,20 @@ function updateLabel(){
  layoutLabel.textContent=layout==='B'
   ?`配置B：デスク 西3台・東4台／北側ワゴンに50インチ画面・電話／ノートPC ${equipment.visible?'表示':'非表示'}`
   :'配置A：デスク7台の島／会議テーブル RUGHAUS 1,750×800と会議チェア4脚';
- stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・食器）、ラック下のゴミ箱3個、バンカーズボックス16個、北側ドアのキッチン・トイレサイン、北壁の時計、簡易ハンガーラック、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
+ stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、北側ドアのキッチン・トイレサイン、北壁の時計、簡易ハンガーラック、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
 }
 function setLayout(next){layout=next==='A'?'A':'B';layoutGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===layout);trashBins.forEach((g,i)=>{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=Math.PI/2});deskObjects.forEach((g,i)=>{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout==='A';roundGroup.visible=layout==='B';layoutShadows.A.visible=layout==='A';layoutShadows.B.visible=layout==='B';
  if(layout!=='B')openCompare(false);
  renderCard();updateLabel();if(view==='table')setView('table');else render()}
 function wallTransparency(){outer.traverse(o=>{if(!o.isMesh)return;if(o.material===glass)return;if(!o.userData.original)o.userData.original=o.material;o.material=wallToggle.checked?o.userData.original.clone():o.userData.original;if(wallToggle.checked){o.material.transparent=true;o.material.opacity=.13;o.material.depthWrite=false;o.castShadow=false}else o.castShadow=true});render()}
-function setView(next){view=['overview','inside','reverse','top','table','rack','kitchen','doors'].includes(next)?next:'overview';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
+function setView(next){view=['overview','inside','reverse','top','table','rack','kitchen','doors','pantry'].includes(next)?next:'overview';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
  if(view==='overview'){camera.position.set(.6,9.1,10.4);controls.target.set(0,.55,-.35);controls.maxPolarAngle=Math.PI*.49}
  if(view==='inside'){camera.position.set(.25,1.6,2.25);controls.target.set(-.25,1.35,-2.5);controls.maxPolarAngle=Math.PI*.72}
  if(view==='reverse'){camera.position.set(-2.25,1.6,-2.15);controls.target.set(.45,1.30,2.60);controls.maxPolarAngle=Math.PI*.72}
  if(view==='table'){camera.position.set(layout==='B'?1.9:1,1.85,layout==='B'?2.4:1.05);controls.target.set(layout==='B'?0:1.95,.62,layout==='B'?-.30:-1.475);controls.maxPolarAngle=Math.PI*.49}
  if(view==='kitchen'){camera.position.set(-.25,2.55,-2.55);controls.target.set(-2.80,.90,-1.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='rack'){camera.position.set(3.04,2.0,2.35);controls.target.set(3.04,.55,3.18);controls.maxPolarAngle=Math.PI*.49}
+ if(view==='pantry'){camera.position.set(-1.20,2.95,-1.55);controls.target.set(-2.80,1.74,-1.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='doors'){camera.position.set(.30,2.05,-1.00);controls.target.set(.30,1.68,-3.58);controls.maxPolarAngle=Math.PI*.49}
  if(view==='top'){camera.position.set(0,16.8,.02);controls.target.set(0,0,-.32);controls.maxPolarAngle=Math.PI*.49}
  lastFit=1;resize();controls.update();render();
@@ -1188,7 +1257,7 @@ $('#ss-right').addEventListener('click',()=>turn(Math.PI/8));
 $('#ss-near').addEventListener('click',()=>zoom(.8));
 $('#ss-far').addEventListener('click',()=>zoom(1.25));
 $('#ss-reset').addEventListener('click',()=>setView(view));
-function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','rack','kitchen','doors'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','rack','kitchen','doors'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','rack','kitchen','doors','pantry'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','rack','kitchen','doors','pantry'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
 new ResizeObserver(resize).observe(stage);
 const saved=store.get()||{};
 sortKey=saved.sortKey==='area'?'area':'price';
@@ -1201,7 +1270,7 @@ setView(saved.view);
 wallTransparency();
 root.querySelector('.ss-loading').hidden=true;
 root.dataset.ready='true';
-root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware};
+root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory};
 render();
 }catch(err){root.querySelector('.ss-loading').textContent='3Dの読み込みに失敗しました。ページを再読み込みしてください。';console.error(err)}
 })();
