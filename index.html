@@ -146,6 +146,7 @@ button,input,select{font:inherit;color:inherit}
         <label><input type="radio" name="ss-view" value="table">中央</label>
         <label><input type="radio" name="ss-view" value="rack">機器棚</label>
         <label><input type="radio" name="ss-view" value="kitchen">家電棚</label>
+        <label><input type="radio" name="ss-view" value="doors">北側ドア</label>
         <label><input type="radio" name="ss-view" value="inside">室内</label>
         <label><input type="radio" name="ss-view" value="reverse">入口を見る</label>
       </span>
@@ -357,11 +358,40 @@ W(frontHigh,1.4,.055,.09,2.375,2.21,8.12,M.door);
 lineWall(model,2.15,-1.1,6.7,-1.1);lineWall(model,2.15,-1.1,2.15,.55);lineWall(model,6.7,-1.1,6.7,.65);
 for(const x of [3.63,4.84,5.96])lineWall(model,x,-1.1,x,.52);
 for(const [a,b,z] of [[2.15,2.87,.52],[3.53,3.63,.52],[3.63,3.94,.52],[4.61,4.84,.52],[4.84,5.96,.52],[5.96,6.7,.65]])lineWall(model,a,z,b,z);
+// Matte adhesive door signs, 180 × 240 mm, mounted at eye level.
+const doorSigns=[];
+function addDoorSign(door,kitchen){
+ const c=document.createElement('canvas');c.width=600;c.height=800;
+ const ctx=c.getContext('2d');ctx.fillStyle='#f5f4ef';ctx.beginPath();ctx.roundRect(0,0,600,800,38);ctx.fill();
+ ctx.fillStyle=ctx.strokeStyle='#252c2b';ctx.lineWidth=22;ctx.lineCap='round';ctx.lineJoin='round';
+ if(kitchen){
+  // Plate with fork and knife: food preparation / kitchenette.
+  ctx.beginPath();ctx.arc(300,265,101,0,Math.PI*2);ctx.stroke();
+  ctx.lineWidth=8;ctx.beginPath();ctx.arc(300,265,75,0,Math.PI*2);ctx.stroke();ctx.lineWidth=22;
+  ctx.beginPath();ctx.moveTo(137,150);ctx.lineTo(137,231);ctx.lineTo(137,381);
+  ctx.moveTo(109,150);ctx.lineTo(109,217);ctx.quadraticCurveTo(137,251,165,217);ctx.lineTo(165,150);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(467,151);ctx.lineTo(467,380);ctx.moveTo(467,151);ctx.quadraticCurveTo(422,189,429,260);ctx.lineTo(467,260);ctx.stroke();
+ }else{
+  // Two human figures for a shared restroom, without relying on color.
+  for(const x of [218,385]){ctx.beginPath();ctx.arc(x,162,30,0,Math.PI*2);ctx.fill();}
+  ctx.beginPath();ctx.roundRect(188,212,60,105,13);ctx.fill();
+  ctx.beginPath();ctx.moveTo(172,231);ctx.lineTo(163,308);ctx.moveTo(264,231);ctx.lineTo(273,308);
+  ctx.moveTo(204,304);ctx.lineTo(204,382);ctx.moveTo(232,304);ctx.lineTo(232,382);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(385,207);ctx.lineTo(329,318);ctx.lineTo(441,318);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(352,229);ctx.lineTo(327,287);ctx.moveTo(418,229);ctx.lineTo(443,287);
+  ctx.moveTo(370,317);ctx.lineTo(370,382);ctx.moveTo(400,317);ctx.lineTo(400,382);ctx.stroke();
+ }
+ ctx.textAlign='center';ctx.textBaseline='middle';ctx.font='600 82px "Noto Sans JP", sans-serif';ctx.fillText(kitchen?'キッチン':'トイレ',300,541);
+ ctx.font='500 39px Arial, sans-serif';ctx.fillText(kitchen?'KITCHEN':'RESTROOM',300,646);
+ const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+ const sign=new THREE.Mesh(new THREE.PlaneGeometry(.18,.24),new THREE.MeshStandardMaterial({map:texture,roughness:.9,alphaTest:.2,polygonOffset:true,polygonOffsetFactor:-1}));
+ sign.name=kitchen?'キッチン 貼り付けサイン':'トイレ 貼り付けサイン';sign.position.set(.335,1.52,.0195);door.add(sign);doorSigns.push(sign);
+}
 for(const [x,z] of [[2.87,.52],[3.94,.52]]){
  lineWall(model,x,z,x+.67,z,.5,2.1);
  for(const edge of [x-.018,x+.682])W(model,.035,2.08,.14,edge,1.04,z,M.door);
  W(model,.71,.035,.14,x+.335,2.08,z,M.door);
- const g=group(x===2.87?'湯沸室の扉':'洗面所の扉',x,z,.68);box(g,.67,2.05,.035,.335,1.025,0,M.door);box(g,.07,.03,.03,.57,.96,.04,M.metal)
+ const g=group(x===2.87?'湯沸室の扉':'洗面所の扉',x,z,.68);box(g,.67,2.05,.035,.335,1.025,0,M.door);box(g,.07,.03,.03,.57,.96,.04,M.metal);addDoorSign(g,x===2.87);
 }
 // BRAUN black 30 cm wall clock, reference appearance: BC17B; exact owned model unspecified.
 // Between the north doors, above their lintels: centre height 2350 mm.
@@ -1119,19 +1149,20 @@ function updateLabel(){
  layoutLabel.textContent=layout==='B'
   ?`配置B：デスク 西3台・東4台／北側ワゴンに50インチ画面・電話／ノートPC ${equipment.visible?'表示':'非表示'}`
   :'配置A：デスク7台の島／会議テーブル RUGHAUS 1,750×800と会議チェア4脚';
- stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・食器）、ラック下のゴミ箱3個、バンカーズボックス16個、北壁の時計、簡易ハンガーラック、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
+ stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・食器）、ラック下のゴミ箱3個、バンカーズボックス16個、北側ドアのキッチン・トイレサイン、北壁の時計、簡易ハンガーラック、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
 }
 function setLayout(next){layout=next==='A'?'A':'B';layoutGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===layout);trashBins.forEach((g,i)=>{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=Math.PI/2});deskObjects.forEach((g,i)=>{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout==='A';roundGroup.visible=layout==='B';layoutShadows.A.visible=layout==='A';layoutShadows.B.visible=layout==='B';
  if(layout!=='B')openCompare(false);
  renderCard();updateLabel();if(view==='table')setView('table');else render()}
 function wallTransparency(){outer.traverse(o=>{if(!o.isMesh)return;if(o.material===glass)return;if(!o.userData.original)o.userData.original=o.material;o.material=wallToggle.checked?o.userData.original.clone():o.userData.original;if(wallToggle.checked){o.material.transparent=true;o.material.opacity=.13;o.material.depthWrite=false;o.castShadow=false}else o.castShadow=true});render()}
-function setView(next){view=['overview','inside','reverse','top','table','rack','kitchen'].includes(next)?next:'overview';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
+function setView(next){view=['overview','inside','reverse','top','table','rack','kitchen','doors'].includes(next)?next:'overview';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
  if(view==='overview'){camera.position.set(.6,9.1,10.4);controls.target.set(0,.55,-.35);controls.maxPolarAngle=Math.PI*.49}
  if(view==='inside'){camera.position.set(.25,1.6,2.25);controls.target.set(-.25,1.35,-2.5);controls.maxPolarAngle=Math.PI*.72}
  if(view==='reverse'){camera.position.set(-2.25,1.6,-2.15);controls.target.set(.45,1.30,2.60);controls.maxPolarAngle=Math.PI*.72}
  if(view==='table'){camera.position.set(layout==='B'?1.9:1,1.85,layout==='B'?2.4:1.05);controls.target.set(layout==='B'?0:1.95,.62,layout==='B'?-.30:-1.475);controls.maxPolarAngle=Math.PI*.49}
  if(view==='kitchen'){camera.position.set(-.25,2.55,-2.55);controls.target.set(-2.80,.90,-1.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='rack'){camera.position.set(3.04,2.0,2.35);controls.target.set(3.04,.55,3.18);controls.maxPolarAngle=Math.PI*.49}
+ if(view==='doors'){camera.position.set(.30,2.05,-1.00);controls.target.set(.30,1.68,-3.58);controls.maxPolarAngle=Math.PI*.49}
  if(view==='top'){camera.position.set(0,16.8,.02);controls.target.set(0,0,-.32);controls.maxPolarAngle=Math.PI*.49}
  lastFit=1;resize();controls.update();render();
 }
@@ -1157,7 +1188,7 @@ $('#ss-right').addEventListener('click',()=>turn(Math.PI/8));
 $('#ss-near').addEventListener('click',()=>zoom(.8));
 $('#ss-far').addEventListener('click',()=>zoom(1.25));
 $('#ss-reset').addEventListener('click',()=>setView(view));
-function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','rack','kitchen'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','rack','kitchen'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','rack','kitchen','doors'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','rack','kitchen','doors'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
 new ResizeObserver(resize).observe(stage);
 const saved=store.get()||{};
 sortKey=saved.sortKey==='area'?'area':'price';
@@ -1170,7 +1201,7 @@ setView(saved.view);
 wallTransparency();
 root.querySelector('.ss-loading').hidden=true;
 root.dataset.ready='true';
-root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware};
+root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware};
 render();
 }catch(err){root.querySelector('.ss-loading').textContent='3Dの読み込みに失敗しました。ページを再読み込みしてください。';console.error(err)}
 })();
