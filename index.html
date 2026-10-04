@@ -31,7 +31,7 @@ button,input,select{font:inherit;color:inherit}
 .seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden;background:var(--panel)}
 .seg label{position:relative;display:flex;align-items:center;justify-content:center;min-height:32px;padding:0 12px;cursor:pointer;white-space:nowrap;border-left:1px solid var(--line)}
 .seg label:first-child{border-left:0}
-.views .seg label{padding:0 7px}
+.views .seg label{padding:0 5px}
 .seg input{position:absolute;opacity:0;pointer-events:none}
 .seg label:hover{background:var(--hover)}
 .seg label:has(input:checked){background:var(--ink);color:#fff}
@@ -145,6 +145,7 @@ button,input,select{font:inherit;color:inherit}
         <label><input type="radio" name="ss-view" value="overview" checked>全体</label>
         <label><input type="radio" name="ss-view" value="top">真上</label>
         <label><input type="radio" name="ss-view" value="table">中央</label>
+        <label><input type="radio" name="ss-view" value="display">画面</label>
         <label><input type="radio" name="ss-view" value="rack">機器棚</label>
         <label><input type="radio" name="ss-view" value="kitchen">家電棚</label>
         <label><input type="radio" name="ss-view" value="pantry">食器</label>
@@ -767,6 +768,68 @@ function updateFargoCable(){
 const sharedDisplay=new THREE.Group();sharedDisplay.name='ワゴン上の50インチ画面・テーブル向き';sharedDisplay.position.set(0,-.720,0);mediaEquipment.add(sharedDisplay);
 box(sharedDisplay,1.127,.643,.048,0,1.168,0,M.black,'50インチ ディスプレイ');
 box(sharedDisplay,1.107,.623,.005,0,1.171,.027,M.screen);
+// Illustrative macOS desktop; no live accounts or user data are displayed.
+function makeSharedDesktop(){
+ const c=document.createElement('canvas');c.width=2560;c.height=1440;const ctx=c.getContext('2d');
+ const fill=(color,x,y,w,h)=>{ctx.fillStyle=color;ctx.fillRect(x,y,w,h)};
+ const text=(value,x,y,size=24,color='#303946',weight='400')=>{ctx.fillStyle=color;ctx.font=`${weight} ${size}px "Noto Sans JP", Arial, sans-serif`;ctx.fillText(value,x,y)};
+ const rounded=(x,y,w,h,r,color)=>{ctx.fillStyle=color;ctx.beginPath();ctx.roundRect(x,y,w,h,r);ctx.fill()};
+ const line=(x1,y1,x2,y2,color='#e4e8ee',width=1)=>{ctx.strokeStyle=color;ctx.lineWidth=width;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke()};
+ const dot=(x,y,r,color)=>{ctx.fillStyle=color;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()};
+ const background=ctx.createLinearGradient(0,0,2560,1440);background.addColorStop(0,'#758cad');background.addColorStop(.45,'#9eaaca');background.addColorStop(1,'#e3b9a8');ctx.fillStyle=background;ctx.fillRect(0,0,2560,1440);
+ ctx.fillStyle='rgba(247,229,220,.30)';ctx.beginPath();ctx.ellipse(2090,1120,1300,360,-.6,0,Math.PI*2);ctx.fill();
+ fill('rgba(245,247,251,.75)',0,0,2560,42);text('●',22,30,22,'#263242','700');text('Finder',67,30,23,'#263242','700');text('ファイル   編集   表示   移動   ウィンドウ   ヘルプ',163,29,20);text('Wi-Fi   ▰    10月5日(月)  10:24',2210,29,19);
+ function windowFrame(x,y,w,h,title){
+  ctx.save();ctx.shadowColor='rgba(32,40,62,.28)';ctx.shadowBlur=28;ctx.shadowOffsetY=10;rounded(x,y,w,h,14,'#ffffff');ctx.restore();
+  ctx.save();ctx.beginPath();ctx.roundRect(x,y,w,h,14);ctx.clip();fill('#f1f2f5',x,y,w,52);line(x,y+52,x+w,y+52,'#d9dde5');ctx.restore();
+  for(const [i,color] of ['#ff6058','#ffbd2e','#28c840'].entries())dot(x+24+i*26,y+26,8,color);
+  text(title,x+114,y+34,21,'#465363','600');
+ }
+ // Browser: a project dashboard with a large shared Gantt chart.
+ const bx=60,by=84,bw=1450,bh=846;windowFrame(bx,by,bw,bh,'ブラウザ  —  プロジェクトの進行状況');
+ rounded(bx+25,by+66,bw-50,40,8,'#f5f7fa');text('‹  ›     ↻',bx+40,by+95,23);text('プロジェクトボード  /  デモ画面',bx+200,by+93,20,'#657485');
+ fill('#edf1f6',bx,by+120,220,bh-120);text('WORKSPACE',bx+26,by+169,19,'#738496','700');
+ ['概要','プロジェクト','スケジュール','ファイル','メンバー'].forEach((v,i)=>{if(i===2)rounded(bx+15,by+194+i*66,190,46,7,'#d7e5ef');text(v,bx+38,by+224+i*66,22,i===2?'#285777':'#617284','500')});
+ text('プロジェクトスケジュール',bx+258,by+175,33,'#283a4c','700');text('全体の進み方を、同じ画面で確認',bx+260,by+214,21,'#7b8897');
+ for(const [i,[label,value,color]] of [['進行中','4 件','#4a7792'],['今週の確認','3 件','#619985'],['次の節目','レビュー','#c39759']].entries()){
+  const x=bx+260+i*374;rounded(x,by+245,350,110,10,'#f4f7fa');fill(color,x,by+263,4,72);text(label,x+21,by+282,20,'#78899a');text(value,x+21,by+326,29,'#314a60','600');
+ }
+ const gx=bx+260,gy=by+409,gw=1124,labelW=280,cw=(gw-labelW)/20,row=48;
+ text('工程',gx,gy-23,21,'#67798a','600');for(let week=0;week<4;week++)text(`WEEK ${week+1}`,gx+labelW+week*5*cw+18,gy-23,19,'#7d8da1','600');
+ const rows=[['要件整理',0,3],['画面・構成設計',2,4],['試作・レビュー',5,3],['実装',7,7],['連携・調整',11,4],['動作確認',14,3],['修正・仕上げ',16,3],['公開・振り返り',19,1]];
+ rows.forEach(([label,start,duration],i)=>{fill(i%2?'#f5f7fa':'#ffffff',gx,gy+i*row,gw,row);text(label,gx+10,gy+i*row+31,20);for(let day=0;day<=20;day++)line(gx+labelW+day*cw,gy+i*row,gx+labelW+day*cw,gy+(i+1)*row,day%5===0?'#d1dce5':'#e9edf2');rounded(gx+labelW+start*cw+3,gy+i*row+12,duration*cw-6,24,5,['#66869a','#6a9a8c','#c7a16b'][i%3]);});
+ // Calendar: five people in parallel, matching a daily office overview.
+ const cx=1542,cy=84,cww=958,ch=638;windowFrame(cx,cy,cww,ch,'カレンダー  —  チームの今日');
+ text('10月5日 月曜日',cx+28,cy+93,29,'#334760','600');rounded(cx+cww-124,cy+64,94,40,7,'#edf2f8');text('今日',cx+cww-101,cy+93,20);
+ const cgx=cx+87,cgy=cy+170,col=(cww-112)/5,rh=74;fill('#f5f7fb',cgx,cgy-54,col*5,54);
+ ['企画','制作','開発 A','開発 B','営業'].forEach((v,i)=>text(v,cgx+i*col+20,cgy-19,20,'#66768a','600'));
+ for(let hour=0;hour<6;hour++){text(`${9+hour}:00`,cx+19,cgy+hour*rh+8,18,'#8b99a9');line(cgx,cgy+hour*rh,cgx+5*col,cgy+hour*rh,'#e3e9f1')}
+ for(let i=0;i<6;i++)line(cgx+i*col,cgy,cgx+i*col,cgy+rh*6,'#e8edf4');
+ const events=[[0,0,1,'チーム共有','#d8796f'],[1,0,1,'チーム共有','#d8796f'],[2,0,1,'チーム共有','#d8796f'],[3,0,1,'チーム共有','#d8796f'],[4,0,1,'チーム共有','#d8796f'],[0,1.4,1.3,'資料を整理','#749ab9'],[2,1.4,1.3,'実装・確認','#739b8b'],[4,1.4,1.3,'打ち合わせ','#c5a05e'],[0,4,1,'レビュー','#7f82b8'],[1,4,1,'レビュー','#7f82b8'],[2,4,1,'レビュー','#7f82b8'],[3,4,1,'レビュー','#7f82b8']];
+ events.forEach(([person,start,duration,label,color])=>{const x=cgx+person*col+5,y=cgy+start*rh+4;rounded(x,y,col-10,duration*rh-8,6,color);text(label,x+10,y+29,17,'#ffffff','600')});
+ // Team chat with visible channels and a short sample conversation.
+ const sx=1542,sy=750,sw=958,sh=560;windowFrame(sx,sy,sw,sh,'チャット  —  # オフィス');
+ fill('#2e384b',sx,sy+52,220,sh-52);text('チーム',sx+25,sy+103,23,'#ffffff','600');text('チャンネル',sx+25,sy+169,18,'#aab7cb');
+ ['# 全体','# オフィス','# プロジェクト','# 雑談'].forEach((v,i)=>{if(i===1)rounded(sx+12,sy+191+i*56,196,42,6,'#526779');text(v,sx+27,sy+219+i*56,20,'#edf1f8')});
+ text('# オフィス',sx+247,sy+92,25,'#33465a','600');line(sx+220,sy+114,sx+sw,sy+114);
+ const messages=[['企画','10:04','今日の工程表を、中央テーブルに置きました。','#7087a7'],['制作','10:08','画面を一緒に見ながら確認しましょう。','#af8a6b'],['開発','10:12','午後のレビュー用の資料も準備しています。','#71988a']];
+ messages.forEach(([name,time,message,color],i)=>{const y=sy+155+i*105;rounded(sx+247,y,38,38,9,color);text(name,sx+301,y+16,20,'#33475b','700');text(time,sx+365,y+16,16,'#98a4b2');text(message,sx+301,y+51,19,'#56677b')});
+ rounded(sx+242,sy+sh-90,sw-269,65,8,'#f7f9fc');text('チームにメッセージ …',sx+265,sy+sh-48,20,'#98a6b4');
+ // Notes / document window kept open next to the other applications.
+ const nx=60,ny=962,nw=1450,nh=348;windowFrame(nx,ny,nw,nh,'メモ  —  レビューの準備');
+ fill('#f7f6f0',nx,ny+52,245,nh-52);text('メモ',nx+28,ny+106,23,'#7f7660','600');rounded(nx+13,ny+135,218,84,8,'#eee1b7');text('レビューの準備',nx+29,ny+169,22);text('今日の共有事項',nx+29,ny+199,18,'#938973');
+ text('今日、みんなで確認すること',nx+280,ny+105,30,'#364658','700');
+ ['全体のスケジュールと次の節目','画面・資料を並べて、相談したい点を共有','中央テーブルで、短く一緒にレビュー'].forEach((v,i)=>{dot(nx+299,ny+156+i*55,10,'#d9b56a');text('✓',nx+292,ny+164+i*55,19,'#ffffff','600');text(v,nx+323,ny+166+i*55,24,'#69778a')});
+ text('表示例・サンプルデータ',nx+nw-269,ny+nh-22,16,'#a8afb8');
+ // Translucent macOS-style Dock, with simple original application symbols.
+ rounded(1010,1354,540,68,17,'rgba(248,249,252,.64)');
+ const icons=[['F','#689fd0'],['◎','#c86d73'],['5','#d77f70'],['#','#706590'],['N','#d0ae67'],['▥','#65878b'],['⚙','#8c949f']];
+ icons.forEach(([label,color],i)=>{const x=1027+i*73;rounded(x,1364,48,48,10,color);text(label,x+12,1398,29,'#ffffff','600');dot(x+24,1420,2,'#6f7c8c')});
+ return c;
+}
+const sharedDesktopCanvas=makeSharedDesktop(),sharedDesktopTexture=new THREE.CanvasTexture(sharedDesktopCanvas);sharedDesktopTexture.colorSpace=THREE.SRGBColorSpace;sharedDesktopTexture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+const sharedScreen=new THREE.Mesh(new THREE.PlaneGeometry(1.107,.623),new THREE.MeshBasicMaterial({map:sharedDesktopTexture,toneMapped:false}));sharedScreen.position.set(0,1.171,.0297);sharedScreen.name='macOS風の複数ウィンドウ表示（サンプル）';sharedDisplay.add(sharedScreen);
+
 box(sharedDisplay,.085,.13,.052,0,.80,-.009,M.black);
 box(sharedDisplay,.48,.022,.31,0,.731,0,M.black,'卓上スタンド');
 box(sharedDisplay,.23,.31,.036,0,1.087,-.04,M.dark);
@@ -1571,7 +1634,7 @@ function setTable(next){
  laptops.forEach((g,i)=>{const side=i<3?-1:1;g.position.x=side*option.laptopX;g.position.z=option.laptopZ[i%3]});
  const [w,d]=option.mm;tableDimensionPin.el.firstElementChild.textContent=option.shape==='round'?`φ${fmt(w)}`:`${fmt(w)}×${fmt(d)}`;
  tableDimensionPin.pos.z=option.pinZ;
- renderCard();if(!drawer.hidden)renderLedger();updateLabel();render();
+ renderCard();if(!drawer.hidden)renderLedger();updateLabel();if(view==='display')setView('display');else render();
 }
 function updateCartCable(z,h){
  while(cartCables.children.length){const mesh=cartCables.children[0];cartCables.remove(mesh);mesh.geometry.dispose()}
@@ -1587,23 +1650,25 @@ function updateCartCable(z,h){
 function setLaptops(show){laptopToggle.checked=!!show;equipment.visible=!!show;placeSchedule();updateFargoCable();updateLabel();render()}
 function setFloor(next){floorFinish=next==='carpet'?'carpet':'linoleum';officeFloor.material=floorFinish==='carpet'?M.carpet:sheetMaterial;floorGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===floorFinish);render()}
 function interior(){return view==='inside'||view==='reverse'}
-function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&&!powerToggle.checked)||(p.layout&&p.layout!==layout)||interior()||view==='clothes'||view==='shrine'||(view==='table'&&p===tableDimensionPin)||v.z>1||v.z< -1||Math.abs(v.x)>.97||Math.abs(v.y)>.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
+function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&&!powerToggle.checked)||(p.layout&&p.layout!==layout)||interior()||view==='clothes'||view==='shrine'||view==='display'||(view==='table'&&p===tableDimensionPin)||v.z>1||v.z< -1||Math.abs(v.x)>.97||Math.abs(v.y)>.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
 function render(){renderer.render(scene,camera);projectPins();root.dataset.layout=layout;root.dataset.tableModel=layout==='B'?tableChoice:'';root.dataset.laptops=String(equipment.visible)}
 function updateLabel(){
  layoutLabel.textContent=layout==='B'
   ?`配置B：デスク 西3台・東4台／北側ワゴンに50インチ画面・電話／ノートPC ${equipment.visible?'表示':'非表示'}`
   :'配置A：デスク7台の島／会議テーブル RUGHAUS 1,750×800と会議チェア4脚';
- stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。テーブル上のA3ガントチャート印刷紙とモニター側の黄色いFargo電源タップ（ワゴンから給電コード）、フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その左手前の家庭用プリンターと用紙・インク収納ワゴン、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、作業ジャケット5着を掛けた簡易ハンガーラックと、その上の北壁に木製の神棚、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
+ stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。50インチ画面にはmacOS風の複数ウィンドウを表示。テーブル上のA3ガントチャート印刷紙とモニター側の黄色いFargo電源タップ（ワゴンから給電コード）、フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その左手前の家庭用プリンターと用紙・インク収納ワゴン、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、作業ジャケット5着を掛けた簡易ハンガーラックと、その上の北壁に木製の神棚、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
 }
 function setLayout(next){layout=next==='A'?'A':'B';layoutGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===layout);trashBins.forEach((g,i)=>{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=Math.PI/2});deskObjects.forEach((g,i)=>{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout==='A';roundGroup.visible=layout==='B';layoutShadows.A.visible=layout==='A';layoutShadows.B.visible=layout==='B';
- if(layout!=='B')openCompare(false);
- renderCard();updateLabel();if(view==='table')setView('table');else render()}
+ viewGroup.querySelector('input[value="display"]').disabled=layout!=='B';
+ if(layout!=='B'){openCompare(false);if(view==='display')view='table';}
+ renderCard();updateLabel();if(view==='table'||view==='display')setView(view);else render()}
 function wallTransparency(){outer.traverse(o=>{if(!o.isMesh)return;if(o.material===glass)return;if(!o.userData.original)o.userData.original=o.material;o.material=wallToggle.checked?o.userData.original.clone():o.userData.original;if(wallToggle.checked){o.material.transparent=true;o.material.opacity=.13;o.material.depthWrite=false;o.castShadow=false}else o.castShadow=true});render()}
-function setView(next){view=['overview','inside','reverse','top','table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine'].includes(next)?next:'overview';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
+function setView(next){view=['overview','inside','reverse','top','table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display'].includes(next)?next:'overview';if(view==='display'&&layout==='A')view='table';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
  if(view==='overview'){camera.position.set(.6,9.1,10.4);controls.target.set(0,.55,-.35);controls.maxPolarAngle=Math.PI*.49}
  if(view==='inside'){camera.position.set(.25,1.6,2.25);controls.target.set(-.25,1.35,-2.5);controls.maxPolarAngle=Math.PI*.72}
  if(view==='reverse'){camera.position.set(-2.25,1.6,-2.15);controls.target.set(.45,1.30,2.60);controls.maxPolarAngle=Math.PI*.72}
  if(view==='table'){camera.position.set(layout==='B'?1.9:1,1.85,layout==='B'?2.4:1.05);controls.target.set(layout==='B'?0:1.95,.62,layout==='B'?-.30:-1.475);controls.maxPolarAngle=Math.PI*.49}
+ if(view==='display'){const z=mediaCart.position.z,h=tableOptions[tableChoice].height;camera.position.set(.64,h+.91,z+1.82);controls.target.set(0,h+.43,z+.02);controls.maxPolarAngle=Math.PI*.49}
  if(view==='kitchen'){camera.position.set(-.25,2.55,-2.55);controls.target.set(-2.80,.90,-1.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='rack'){camera.position.set(3.04,2.0,2.35);controls.target.set(3.04,.55,3.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='pantry'){camera.position.set(-1.20,2.95,-1.55);controls.target.set(-2.80,1.74,-1.18);controls.maxPolarAngle=Math.PI*.49}
@@ -1637,7 +1702,7 @@ $('#ss-right').addEventListener('click',()=>turn(Math.PI/8));
 $('#ss-near').addEventListener('click',()=>zoom(.8));
 $('#ss-far').addEventListener('click',()=>zoom(1.25));
 $('#ss-reset').addEventListener('click',()=>setView(view));
-function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
 new ResizeObserver(resize).observe(stage);
 const saved=store.get()||{};
 sortKey=saved.sortKey==='area'?'area':'price';
@@ -1650,7 +1715,7 @@ setView(saved.view);
 wallTransparency();
 root.querySelector('.ss-loading').hidden=true;
 root.dataset.ready='true';
-root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory,printerCart,printer,printerSupplies,printerCables,calendarTablet,calendarScreen,workJackets,schedulePrint,ganttSheet,meetingSchedule,kamidana,shrineOfuda,shrineOfferings,shrineSakaki,fargoTap,fargoSockets,fargoCable};
+root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory,printerCart,printer,printerSupplies,printerCables,calendarTablet,calendarScreen,workJackets,schedulePrint,ganttSheet,meetingSchedule,kamidana,shrineOfuda,shrineOfferings,shrineSakaki,fargoTap,fargoSockets,fargoCable,sharedDisplay,sharedScreen};
 render();
 }catch(err){root.querySelector('.ss-loading').textContent='3Dの読み込みに失敗しました。ページを再読み込みしてください。';console.error(err)}
 })();
