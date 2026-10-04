@@ -1034,7 +1034,7 @@ function boxHandhole(g,x,z,rot=0){
  const hole=new THREE.Mesh(new THREE.ShapeGeometry(shape,12),boxInk);hole.position.set(x,.212,z);hole.rotation.y=rot;g.add(hole);
 }
 for(let column=0;column<4;column++)for(let level=0;level<4;level++){
- const number=column*4+level+1,g=group(`バンカーズボックス ${String(number).padStart(2,'0')}`,5.03+column*.355,1.30);
+ const number=column*4+level+1,g=group(`バンカーズボックス ${String(number).padStart(2,'0')}`,5.03+column*.355,1.61);
  g.position.y=level*.265;storageBoxes.push(g);
  box(g,.337,.243,.402,0,.1215,0,boxWhite,'白い収納ボックス本体');
  box(g,.345,.022,.410,0,.254,0,boxWhite,'かぶせ蓋');
@@ -1113,7 +1113,7 @@ curve(vacuum,[[.05,1.11,-.08],[.076,1.00,-.09],[.073,.965,-.025],[.045,1.015,.01
 box(vacuum,.09,.04,.09,.04,.958,-.03,M.dark,'バッテリー');
 // Lightweight open tubular hanger rack, behind the boxes and west of the vacuum.
 // Nominal W900 × D400 × H1600 mm; no shelf or panels.
-const hangerRack=group('簡易シルバーハンガーラック 900×400×1600',5.15,.83);
+const hangerRack=group('簡易シルバーハンガーラック 900×400×1600',5.15,1.055);
 const rackMetal=mat(0xbdc4c5,.27,.82),rackCap=mat(0x343a39,.8);
 for(const x of [-.43,.43]){
  rod(hangerRack,[x,.030,-.186],[x,.030,.186],.014,rackMetal);
@@ -1123,62 +1123,99 @@ for(const x of [-.43,.43]){
 }
 rod(hangerRack,[-.436,1.58,0],[.436,1.58,0],.014,rackMetal);
 rod(hangerRack,[-.43,.12,0],[.43,.12,0],.010,rackMetal);
-// Five charcoal work jackets, based on the supplied photo, hanging towards south.
-// Soft torso / sleeves, stand collars, black front zips and chest-pocket flaps.
+// Five refined work jackets: hanger planes perpendicular to the rack's rail.
+// Smooth fabric profiles, hollow collars, draped sleeves and surface-fitted pockets.
 const workJackets=[];
-const jacketZip=mat(0x242c34,.9),jacketStitch=mat(0x636d75,1),zipMetal=mat(0x889196,.48,.40);
-function fabricLoft(levels,material,phase=0){
- const segments=32,positions=[],indices=[];
- levels.forEach(([x,y,z,w,d],j)=>{
-  for(let i=0;i<segments;i++){
-   const a=i/segments*Math.PI*2,fold=1+.028*Math.sin(a*7+phase+j*.6);
-   positions.push(x+Math.sin(a)*w*fold,y,z+Math.cos(a)*d*fold);
+const clothCanvas=document.createElement('canvas');clothCanvas.width=clothCanvas.height=128;
+const clothCtx=clothCanvas.getContext('2d'),clothPixels=clothCtx.createImageData(128,128);
+for(let y=0;y<128;y++)for(let x=0;x<128;x++){
+ const p=(y*128+x)*4,v=128+12*Math.sin(x*Math.PI)+9*Math.cos(y*Math.PI)+5*Math.sin((x+y)*Math.PI/2);
+ clothPixels.data[p]=clothPixels.data[p+1]=clothPixels.data[p+2]=v;clothPixels.data[p+3]=255;
+}
+clothCtx.putImageData(clothPixels,0,0);
+const clothWeave=new THREE.CanvasTexture(clothCanvas);clothWeave.wrapS=clothWeave.wrapT=THREE.RepeatWrapping;clothWeave.repeat.set(4,4);
+const jacketZip=mat(0x252b31,.94),jacketStitch=mat(0x50585e,1),zipMetal=mat(0x6e767a,.40,.55);
+function fabricSamples(levels){
+ const out=[];
+ for(let j=0;j<levels.length-1;j++)for(let k=0;k<8;k++){
+  const t=k/8,a=levels[Math.max(0,j-1)],b=levels[j],c=levels[j+1],d=levels[Math.min(levels.length-1,j+2)];
+  out.push(b.map((v,n)=>.5*((2*v)+(-a[n]+c[n])*t+(2*a[n]-5*v+4*c[n]-d[n])*t*t+(-a[n]+3*v-3*c[n]+d[n])*t*t*t)));
+ }
+ out.push(levels[levels.length-1]);return out;
+}
+function fabricDrape(x,y,phase){return .0028*Math.sin((y-.86)*42+x*30+phase)*Math.exp(-Math.pow((Math.abs(x)-.17)/.065,2)-Math.pow((y-1.01)/.16,2));}
+function fabricMesh(samples,material,phase=0,flatness=2,openTop=false){
+ const segments=64,positions=[],uv=[],indices=[];
+ samples.forEach(([x,y,z,w,d],j)=>{
+  for(let i=0;i<=segments;i++){
+   const a=i/segments*Math.PI*2,si=Math.sin(a),co=Math.cos(a),fold=.0016*Math.sin(a*6+phase+y*7)*Math.sin(Math.PI*j/(samples.length-1));
+   const px=x+Math.sign(si)*Math.pow(Math.abs(si),2/flatness)*w;
+   positions.push(px,y,z+Math.sign(co)*Math.pow(Math.abs(co),2/flatness)*(d+fold)+(flatness>3&&co>0?fabricDrape(px,y,phase)*co*co:0));uv.push(i/segments,j/(samples.length-1));
   }
  });
- for(let j=0;j<levels.length-1;j++)for(let i=0;i<segments;i++){
-  const n=(i+1)%segments,a=j*segments+i,b=j*segments+n,c=(j+1)*segments+i,d=(j+1)*segments+n;
-  indices.push(a,b,c,b,d,c);
+ const row=segments+1;
+ for(let j=0;j<samples.length-1;j++)for(let i=0;i<segments;i++){const a=j*row+i,b=a+1,c=a+row,d=c+1;indices.push(a,b,c,b,d,c);}
+ for(const j of (openTop?[0]:[0,samples.length-1])){
+  const [x,y,z]=samples[j],centre=positions.length/3;positions.push(x,y,z);uv.push(.5,.5);
+  for(let i=0;i<segments;i++){const a=j*row+i,b=a+1;indices.push(...(j===0?[centre,b,a]:[centre,a,b]));}
  }
- for(const j of [0,levels.length-1]){
-  const [x,y,z]=levels[j],centre=positions.length/3;positions.push(x,y,z);
-  for(let i=0;i<segments;i++){const a=j*segments+i,b=j*segments+(i+1)%segments;indices.push(...(j===0?[centre,b,a]:[centre,a,b]));}
- }
- const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);geometry.computeVertexNormals();
- const mesh=new THREE.Mesh(geometry,material);mesh.castShadow=mesh.receiveShadow=true;return mesh;
-}
-function jacketPanel(parent,points,z,material,name){
- const shape=new THREE.Shape();points.forEach(([x,y],i)=>i?shape.lineTo(x,y):shape.moveTo(x,y));shape.closePath();
- const mesh=new THREE.Mesh(new THREE.ExtrudeGeometry(shape,{depth:.002,bevelEnabled:true,bevelThickness:.001,bevelSize:.001,bevelSegments:2}),material);mesh.position.z=z;mesh.castShadow=true;mesh.name=name;parent.add(mesh);return mesh;
+ const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.setIndex(indices);geo.computeVertexNormals();
+ const mesh=new THREE.Mesh(geo,material);mesh.castShadow=mesh.receiveShadow=true;return mesh;
 }
 for(let i=0;i<5;i++){
- const g=new THREE.Group();g.name='チャコールグレー作業ジャケット '+(i+1);g.position.x=-.30+i*.15;g.rotation.y=-.16-i*.012;hangerRack.add(g);workJackets.push(g);
- curve(g,[[-.018,1.56,0],[-.025,1.585,0],[0,1.606,0],[.025,1.585,0],[.012,1.553,0],[0,1.535,0],[0,1.50,0]],.002,rackMetal).name='ハンガーのフック';
- rod(g,[0,1.50,0],[-.20,1.35,0],.002,rackMetal);rod(g,[-.20,1.35,0],[.20,1.35,0],.002,rackMetal);rod(g,[.20,1.35,0],[0,1.50,0],.002,rackMetal);
- const cloth=mat([0x53595e,0x555b60,0x51575c,0x53595e,0x565c60][i],.98),collarCloth=mat(0x464d52,1);
- const z=.020+i*.009,hem=.80+(i%2)*.013;
- const body=fabricLoft([[0,hem,z,.226,.030],[0,hem+.035,z,.230,.034],[0,1.00,z,.218,.043],[0,1.21,z,.222,.045],[0,1.37,z,.234,.038],[0,1.425,z,.221,.031],[0,1.488,z,.089,.030]],cloth,i);body.name='柔らかい作業服の胴体';g.add(body);
+ const g=new THREE.Group();g.name='チャコールグレー作業ジャケット '+(i+1);g.position.x=-.30+i*.15;g.rotation.y=Math.PI/2;hangerRack.add(g);workJackets.push(g);
+ // The hook surrounds the horizontal rail; shoulders sit inside the garment.
+ curve(g,[[-.013,1.565,0],[-.022,1.588,0],[0,1.603,0],[.022,1.590,0],[.016,1.569,0],[0,1.551,0],[0,1.490,0]],.0022,rackMetal).name='ハンガーのフック';
+ curve(g,[[0,1.49,0],[-.085,1.455,0],[-.208,1.387,0],[-.22,1.367,0],[0,1.358,0],[.22,1.367,0],[.208,1.387,0],[.085,1.455,0],[0,1.49,0]],.003,rackMetal).name='肩を支えるハンガー';
+ const cloth=new THREE.MeshPhysicalMaterial({color:[0x596064,0x586064,0x5a6064,0x586064,0x596165][i],roughness:.94,metalness:0,sheen:.42,sheenColor:new THREE.Color(0x8b9499),sheenRoughness:.85,bumpMap:clothWeave,bumpScale:.00028});
+ const trim=cloth.clone();trim.color.multiplyScalar(.89);
+ const hem=.805+(i%2)*.008;
+ const bodySamples=fabricSamples([[0,hem,0,.224,.022],[0,hem+.025,0,.226,.026],[0,.94,0,.224,.030],[0,1.12,0,.219,.034],[0,1.29,0,.226,.035],[0,1.365,0,.228,.029],[0,1.401,0,.221,.023],[0,1.448,0,.146,.022],[0,1.477,0,.075,.024]]);
+ const body=fabricMesh(bodySamples,cloth,i*.22,3.5,true);body.name='滑らかな肩と胴体';g.add(body);
+ // A front surface sampler keeps the pocket / zip on the cloth instead of floating.
+ function front(x,y,extra=.0015){
+  let j=bodySamples.findIndex(p=>p[1]>=y);j=Math.max(1,j<0?bodySamples.length-1:j);
+  const a=bodySamples[j-1],b=bodySamples[j],t=THREE.MathUtils.clamp((y-a[1])/(b[1]-a[1]),0,1),w=THREE.MathUtils.lerp(a[3],b[3],t),d=THREE.MathUtils.lerp(a[4],b[4],t);
+  return d*Math.pow(Math.max(0,1-Math.pow(Math.abs(x)/w,3.5)),1/3.5)+fabricDrape(x,y,i*.22)+extra;
+ }
+ function fittedPanel(points,offset,material,name){
+  const shape=new THREE.Shape();points.forEach(([x,y],j)=>j?shape.lineTo(x,y):shape.moveTo(x,y));shape.closePath();
+  const geo=new THREE.ShapeGeometry(shape,12),positions=geo.attributes.position;
+  for(let j=0;j<positions.count;j++)positions.setZ(j,front(positions.getX(j),positions.getY(j),offset));geo.computeVertexNormals();
+  const mesh=new THREE.Mesh(geo,material);mesh.name=name;mesh.castShadow=true;g.add(mesh);
+ }
  for(const sign of [-1,1]){
-  const sleeve=fabricLoft([[sign*.302,hem-.018,z+.006,.043,.031],[sign*.299,hem+.035,z+.005,.045,.033],[sign*.286,1.085,z,.058,.038],[sign*.258,1.30,z,.066,.042],[sign*.224,1.392,z,.067,.040]],cloth,i+sign);sleeve.name='長袖';g.add(sleeve);
-  const cuff=fabricLoft([[sign*.302,hem-.021,z+.006,.044,.032],[sign*.301,hem+.016,z+.006,.046,.034]],collarCloth);cuff.name='袖口';g.add(cuff);
-  curve(g,[[sign*.275,hem+.02,z+.031],[sign*.275,1.05,z+.038],[sign*.253,1.28,z+.038],[sign*.23,1.38,z+.032]],.0009,jacketStitch).name='袖の縫い目';
+  // Slightly bent elbows and narrower cuffs, attached under the shoulder seam.
+  const sleeve=fabricMesh(fabricSamples([[sign*.267,hem-.012,.003,.039,.023],[sign*.266,hem+.032,.002,.041,.025],[sign*.256,1.00,-.004,.046,.028],[sign*.250,1.135,-.008,.048,.030],[sign*.238,1.275,-.003,.055,.029],[sign*.220,1.355,0,.059,.026],[sign*.207,1.395,0,.050,.023]]),cloth,sign*.7+i*.2);sleeve.name='自然に垂れる長袖';g.add(sleeve);
+  const cuff=fabricMesh(fabricSamples([[sign*.267,hem-.017,.003,.040,.024],[sign*.267,hem+.015,.003,.041,.025]]),trim);cuff.name='袖口';g.add(cuff);
+  curve(g,[[sign*.260,hem+.024,.030],[sign*.252,1.03,.025],[sign*.237,1.27,.025],[sign*.217,1.365,.024]],.00045,jacketStitch).name='袖の縫い目';
+  const seam=[[sign*.075,1.467],[sign*.119,1.447],[sign*.168,1.416],[sign*.199,1.370],[sign*.218,1.306]].map(([x,y])=>[x,y,front(x,y,.002)]);
+  curve(g,seam,.00065,jacketStitch).name='肩のラグラン切り替え';
  }
- // Open stand collar, so it reads as a jacket rather than a closed cylinder.
- const collarPositions=[],collarIndices=[],collarSegments=40;
- for(let j=0;j<2;j++)for(let k=0;k<=collarSegments;k++){
-  const a=.15+k/collarSegments*(Math.PI*2-.30);collarPositions.push(Math.sin(a)*.090,1.481+j*.061,z+Math.cos(a)*.033);
+ // Hollow, 3 mm thick standing collar with an opening at the front.
+ const cp=[],ci=[],cn=64;
+ for(let ring=0;ring<4;ring++)for(let k=0;k<=cn;k++){
+  const a=.20+k/cn*(Math.PI*2-.40),inner=ring>=2,w=inner?.072:.075,d=inner?.026:.029,top=ring%2===1;
+  cp.push(Math.sin(a)*w,top?1.518+Math.cos(a)*.002:1.476,Math.cos(a)*d);
  }
- for(let k=0;k<collarSegments;k++){const a=k,b=k+1,c=k+collarSegments+1,d=c+1;collarIndices.push(a,b,c,b,d,c);}
- const collarGeo=new THREE.BufferGeometry();collarGeo.setAttribute('position',new THREE.Float32BufferAttribute(collarPositions,3));collarGeo.setIndex(collarIndices);collarGeo.computeVertexNormals();
- const collarMaterial=collarCloth.clone();collarMaterial.side=THREE.DoubleSide;
- const collar=new THREE.Mesh(collarGeo,collarMaterial);collar.name='立ち襟';collar.castShadow=true;g.add(collar);
- curve(g,[[0,hem+.011,z+.033],[0,1.00,z+.046],[0,1.21,z+.048],[0,1.37,z+.041],[0,1.488,z+.033],[0,1.54,z+.034]],.0033,jacketZip).name='黒い前ファスナー';
- box(g,.007,.017,.004,0,1.474,z+.039,zipMetal,'ファスナーの引き手');
- for(const sign of [-1,1])curve(g,[[sign*.008,hem+.02,z+.034],[sign*.008,1.02,z+.047],[sign*.008,1.24,z+.047],[sign*.008,1.41,z+.038]],.00065,jacketStitch).name='ファスナー脇のステッチ';
- jacketPanel(g,[[.066,1.185],[.179,1.185],[.182,1.304],[.066,1.312]],z+.039,cloth,'胸ポケット');
- jacketPanel(g,[[.064,1.316],[.186,1.306],[.184,1.265],[.122,1.250],[.064,1.270]],z+.044,collarCloth,'胸ポケットのフラップ');
- curve(g,[[.067,1.270,z+.047],[.122,1.253,z+.047],[.182,1.267,z+.047]],.0008,jacketStitch).name='ポケットのステッチ';
- for(const sign of [-1,1])curve(g,[[sign*.086,1.482,z+.017],[sign*.155,1.449,z+.028],[sign*.214,1.410,z+.028]],.001,collarCloth).name='肩の切り替え';
- curve(g,[[-.20,hem+.018,z+.019],[-.11,hem+.018,z+.030],[0,hem+.018,z+.034],[.11,hem+.018,z+.030],[.20,hem+.018,z+.019]],.001,jacketStitch).name='裾のステッチ';
+ const cr=cn+1;
+ for(const [r1,r2,reverse] of [[0,1,false],[2,3,true],[1,3,true],[0,2,false]])for(let k=0;k<cn;k++){
+  const a=r1*cr+k,b=a+1,c=r2*cr+k,d=c+1;ci.push(...(reverse?[a,c,b,b,c,d]:[a,b,c,b,d,c]));
+ }
+ for(const k of [0,cn]){const a=k,b=cr+k,c=2*cr+k,d=3*cr+k;ci.push(a,c,b,b,c,d);}
+ const collarGeo=new THREE.BufferGeometry();collarGeo.setAttribute('position',new THREE.Float32BufferAttribute(cp,3));collarGeo.setIndex(ci);collarGeo.computeVertexNormals();
+ const collarMaterial=trim.clone();collarMaterial.side=THREE.DoubleSide;
+ const collar=new THREE.Mesh(collarGeo,collarMaterial);collar.name='厚みのある立ち襟';collar.castShadow=true;g.add(collar);
+ const zipperPoints=[];for(let j=0;j<=24;j++){const y=hem+.014+j/24*(1.477-hem-.014);zipperPoints.push([0,y,front(0,y,.0022)]);}
+ curve(g,zipperPoints,.0023,jacketZip).name='細い前ファスナー';curve(g,[[0,1.477,.027],[0,1.519,.031]],.0023,jacketZip);
+ const teeth=new THREE.InstancedMesh(new THREE.BoxGeometry(.0015,.0015,.0008),zipMetal,110);teeth.name='ファスナーの歯';const toothMatrix=new THREE.Matrix4();
+ for(let n=0;n<55;n++){const y=hem+.023+n*.012;for(let side=0;side<2;side++){toothMatrix.makeTranslation(side?.0024:-.0024,y,front(0,y,.0039));teeth.setMatrixAt(n*2+side,toothMatrix);}}g.add(teeth);
+ const pull=box(g,.0045,.015,.0018,.001,1.454,front(0,1.454,.006),zipMetal,'小さなファスナー引き手');pull.rotation.z=-.16;
+ fittedPanel([[.062,1.203],[.190,1.203],[.190,1.316],[.062,1.322]],.0024,cloth,'布に沿う胸ポケット');
+ fittedPanel([[.060,1.328],[.193,1.320],[.192,1.282],[.128,1.269],[.060,1.288]],.0048,trim,'柔らかい胸ポケットのフラップ');
+ curve(g,[[.064,1.287],[.128,1.273],[.188,1.283]].map(([x,y])=>[x,y,front(x,y,.006)]),.0008,jacketZip).name='フラップ下端の影と縫い目';
+ for(const sign of [-1,1])curve(g,[[sign*.008,hem+.025],[sign*.008,1.00],[sign*.008,1.22],[sign*.008,1.45]].map(([x,y])=>[x,y,front(x,y,.0023)]),.0004,jacketStitch).name='ファスナー脇の縫い目';
+ curve(g,[[-.201,hem+.018],[-.10,hem+.018],[0,hem+.018],[.10,hem+.018],[.201,hem+.018]].map(([x,y])=>[x,y,front(x,y,.002)]),.0005,jacketStitch).name='裾の縫い目';
 }
 const wb=group('WB',6.56,3.652);box(wb,.035,.90,1.8,0,1.55,0,M.white);
 for(const y of [1.10,2.0])box(wb,.055,.025,1.84,0,y,0,M.metal);
@@ -1256,7 +1293,7 @@ for(const p of [[2.275,4.55,2.6,5.8],[5.3,2.525,2.4,3]])contactShadow(layoutShad
 for(const [x,z] of deskLayouts.B)contactShadow(layoutShadows.B,x,z,1.4,1.7);
 contactShadow(layoutShadows.B,3.35,4.0,1.8,2.6);
 for(const k of ['A','B'])for(const [x,z] of binLayouts[k])contactShadow(layoutShadows[k],x,z,.57,.59);
-contactShadow(model,6.39,7.18,.65,.61);contactShadow(model,5.15,.83,1.1,.50);contactShadow(model,5.5625,1.30,1.65,.65);contactShadow(model,5.89,.90,.40,.38);
+contactShadow(model,6.39,7.18,.65,.61);contactShadow(model,5.15,1.055,1.1,.50);contactShadow(model,5.5625,1.61,1.65,.65);contactShadow(model,5.89,.90,.40,.38);
 // Low-detail context beyond the glazing; not a surveyed exterior model.
 function streetscape(west){
  const c=document.createElement('canvas');c.width=1024;c.height=512;const ctx=c.getContext('2d');
@@ -1397,7 +1434,7 @@ function setView(next){view=['overview','inside','reverse','top','table','rack',
  if(view==='rack'){camera.position.set(3.04,2.0,2.35);controls.target.set(3.04,.55,3.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='pantry'){camera.position.set(-1.20,2.95,-1.55);controls.target.set(-2.80,1.74,-1.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='printer'){camera.position.set(.50,1.65,-.35);controls.target.set(1.15,.55,-2.35);controls.maxPolarAngle=Math.PI*.49}
- if(view==='clothes'){camera.position.set(2.65,2.15,-1.58);controls.target.set(1.80,1.15,-3.16);controls.maxPolarAngle=Math.PI*.49}
+ if(view==='clothes'){camera.position.set(3.53,2.10,-2.38);controls.target.set(1.80,1.22,-2.94);controls.maxPolarAngle=Math.PI*.49}
  if(view==='calendar'){camera.position.set(-.95,1.70,-2.20);controls.target.set(-.84,1.55,-3.38);controls.maxPolarAngle=Math.PI*.49}
  if(view==='doors'){camera.position.set(.30,2.05,-1.00);controls.target.set(.30,1.68,-3.58);controls.maxPolarAngle=Math.PI*.49}
  if(view==='top'){camera.position.set(0,16.8,.02);controls.target.set(0,0,-.32);controls.maxPolarAngle=Math.PI*.49}
