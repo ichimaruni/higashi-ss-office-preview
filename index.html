@@ -31,6 +31,7 @@ button,input,select{font:inherit;color:inherit}
 .seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden;background:var(--panel)}
 .seg label{position:relative;display:flex;align-items:center;justify-content:center;min-height:32px;padding:0 12px;cursor:pointer;white-space:nowrap;border-left:1px solid var(--line)}
 .seg label:first-child{border-left:0}
+.views .seg label{padding:0 9px}
 .seg input{position:absolute;opacity:0;pointer-events:none}
 .seg label:hover{background:var(--hover)}
 .seg label:has(input:checked){background:var(--ink);color:#fff}
@@ -150,6 +151,7 @@ button,input,select{font:inherit;color:inherit}
         <label><input type="radio" name="ss-view" value="printer">プリンタ</label>
         <label><input type="radio" name="ss-view" value="doors">北側ドア</label>
         <label><input type="radio" name="ss-view" value="calendar">予定表示</label>
+        <label><input type="radio" name="ss-view" value="clothes">作業服</label>
         <label><input type="radio" name="ss-view" value="inside">室内</label>
         <label><input type="radio" name="ss-view" value="reverse">入口を見る</label>
       </span>
@@ -1121,11 +1123,62 @@ for(const x of [-.43,.43]){
 }
 rod(hangerRack,[-.436,1.58,0],[.436,1.58,0],.014,rackMetal);
 rod(hangerRack,[-.43,.12,0],[.43,.12,0],.010,rackMetal);
-for(const x of [-.19,.19]){
- curve(hangerRack,[[x-.018,1.56,0],[x-.025,1.585,0],[x,1.606,0],[x+.025,1.585,0],[x+.012,1.553,0],[x,1.535,0],[x,1.50,0]],.002,rackMetal);
- rod(hangerRack,[x,1.50,0],[x-.15,1.35,0],.002,rackMetal);
- rod(hangerRack,[x-.15,1.35,0],[x+.15,1.35,0],.002,rackMetal);
- rod(hangerRack,[x+.15,1.35,0],[x,1.50,0],.002,rackMetal);
+// Five charcoal work jackets, based on the supplied photo, hanging towards south.
+// Soft torso / sleeves, stand collars, black front zips and chest-pocket flaps.
+const workJackets=[];
+const jacketZip=mat(0x242c34,.9),jacketStitch=mat(0x636d75,1),zipMetal=mat(0x889196,.48,.40);
+function fabricLoft(levels,material,phase=0){
+ const segments=32,positions=[],indices=[];
+ levels.forEach(([x,y,z,w,d],j)=>{
+  for(let i=0;i<segments;i++){
+   const a=i/segments*Math.PI*2,fold=1+.028*Math.sin(a*7+phase+j*.6);
+   positions.push(x+Math.sin(a)*w*fold,y,z+Math.cos(a)*d*fold);
+  }
+ });
+ for(let j=0;j<levels.length-1;j++)for(let i=0;i<segments;i++){
+  const n=(i+1)%segments,a=j*segments+i,b=j*segments+n,c=(j+1)*segments+i,d=(j+1)*segments+n;
+  indices.push(a,b,c,b,d,c);
+ }
+ for(const j of [0,levels.length-1]){
+  const [x,y,z]=levels[j],centre=positions.length/3;positions.push(x,y,z);
+  for(let i=0;i<segments;i++){const a=j*segments+i,b=j*segments+(i+1)%segments;indices.push(...(j===0?[centre,b,a]:[centre,a,b]));}
+ }
+ const geometry=new THREE.BufferGeometry();geometry.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));geometry.setIndex(indices);geometry.computeVertexNormals();
+ const mesh=new THREE.Mesh(geometry,material);mesh.castShadow=mesh.receiveShadow=true;return mesh;
+}
+function jacketPanel(parent,points,z,material,name){
+ const shape=new THREE.Shape();points.forEach(([x,y],i)=>i?shape.lineTo(x,y):shape.moveTo(x,y));shape.closePath();
+ const mesh=new THREE.Mesh(new THREE.ExtrudeGeometry(shape,{depth:.002,bevelEnabled:true,bevelThickness:.001,bevelSize:.001,bevelSegments:2}),material);mesh.position.z=z;mesh.castShadow=true;mesh.name=name;parent.add(mesh);return mesh;
+}
+for(let i=0;i<5;i++){
+ const g=new THREE.Group();g.name='チャコールグレー作業ジャケット '+(i+1);g.position.x=-.30+i*.15;g.rotation.y=-.16-i*.012;hangerRack.add(g);workJackets.push(g);
+ curve(g,[[-.018,1.56,0],[-.025,1.585,0],[0,1.606,0],[.025,1.585,0],[.012,1.553,0],[0,1.535,0],[0,1.50,0]],.002,rackMetal).name='ハンガーのフック';
+ rod(g,[0,1.50,0],[-.20,1.35,0],.002,rackMetal);rod(g,[-.20,1.35,0],[.20,1.35,0],.002,rackMetal);rod(g,[.20,1.35,0],[0,1.50,0],.002,rackMetal);
+ const cloth=mat([0x53595e,0x555b60,0x51575c,0x53595e,0x565c60][i],.98),collarCloth=mat(0x464d52,1);
+ const z=.020+i*.009,hem=.80+(i%2)*.013;
+ const body=fabricLoft([[0,hem,z,.226,.030],[0,hem+.035,z,.230,.034],[0,1.00,z,.218,.043],[0,1.21,z,.222,.045],[0,1.37,z,.234,.038],[0,1.425,z,.221,.031],[0,1.488,z,.089,.030]],cloth,i);body.name='柔らかい作業服の胴体';g.add(body);
+ for(const sign of [-1,1]){
+  const sleeve=fabricLoft([[sign*.302,hem-.018,z+.006,.043,.031],[sign*.299,hem+.035,z+.005,.045,.033],[sign*.286,1.085,z,.058,.038],[sign*.258,1.30,z,.066,.042],[sign*.224,1.392,z,.067,.040]],cloth,i+sign);sleeve.name='長袖';g.add(sleeve);
+  const cuff=fabricLoft([[sign*.302,hem-.021,z+.006,.044,.032],[sign*.301,hem+.016,z+.006,.046,.034]],collarCloth);cuff.name='袖口';g.add(cuff);
+  curve(g,[[sign*.275,hem+.02,z+.031],[sign*.275,1.05,z+.038],[sign*.253,1.28,z+.038],[sign*.23,1.38,z+.032]],.0009,jacketStitch).name='袖の縫い目';
+ }
+ // Open stand collar, so it reads as a jacket rather than a closed cylinder.
+ const collarPositions=[],collarIndices=[],collarSegments=40;
+ for(let j=0;j<2;j++)for(let k=0;k<=collarSegments;k++){
+  const a=.15+k/collarSegments*(Math.PI*2-.30);collarPositions.push(Math.sin(a)*.090,1.481+j*.061,z+Math.cos(a)*.033);
+ }
+ for(let k=0;k<collarSegments;k++){const a=k,b=k+1,c=k+collarSegments+1,d=c+1;collarIndices.push(a,b,c,b,d,c);}
+ const collarGeo=new THREE.BufferGeometry();collarGeo.setAttribute('position',new THREE.Float32BufferAttribute(collarPositions,3));collarGeo.setIndex(collarIndices);collarGeo.computeVertexNormals();
+ const collarMaterial=collarCloth.clone();collarMaterial.side=THREE.DoubleSide;
+ const collar=new THREE.Mesh(collarGeo,collarMaterial);collar.name='立ち襟';collar.castShadow=true;g.add(collar);
+ curve(g,[[0,hem+.011,z+.033],[0,1.00,z+.046],[0,1.21,z+.048],[0,1.37,z+.041],[0,1.488,z+.033],[0,1.54,z+.034]],.0033,jacketZip).name='黒い前ファスナー';
+ box(g,.007,.017,.004,0,1.474,z+.039,zipMetal,'ファスナーの引き手');
+ for(const sign of [-1,1])curve(g,[[sign*.008,hem+.02,z+.034],[sign*.008,1.02,z+.047],[sign*.008,1.24,z+.047],[sign*.008,1.41,z+.038]],.00065,jacketStitch).name='ファスナー脇のステッチ';
+ jacketPanel(g,[[.066,1.185],[.179,1.185],[.182,1.304],[.066,1.312]],z+.039,cloth,'胸ポケット');
+ jacketPanel(g,[[.064,1.316],[.186,1.306],[.184,1.265],[.122,1.250],[.064,1.270]],z+.044,collarCloth,'胸ポケットのフラップ');
+ curve(g,[[.067,1.270,z+.047],[.122,1.253,z+.047],[.182,1.267,z+.047]],.0008,jacketStitch).name='ポケットのステッチ';
+ for(const sign of [-1,1])curve(g,[[sign*.086,1.482,z+.017],[sign*.155,1.449,z+.028],[sign*.214,1.410,z+.028]],.001,collarCloth).name='肩の切り替え';
+ curve(g,[[-.20,hem+.018,z+.019],[-.11,hem+.018,z+.030],[0,hem+.018,z+.034],[.11,hem+.018,z+.030],[.20,hem+.018,z+.019]],.001,jacketStitch).name='裾のステッチ';
 }
 const wb=group('WB',6.56,3.652);box(wb,.035,.90,1.8,0,1.55,0,M.white);
 for(const y of [1.10,2.0])box(wb,.055,.025,1.84,0,y,0,M.metal);
@@ -1323,19 +1376,19 @@ function updateCartCable(z,h){
 function setLaptops(show){laptopToggle.checked=!!show;equipment.visible=!!show;updateLabel();render()}
 function setFloor(next){floorFinish=next==='carpet'?'carpet':'linoleum';officeFloor.material=floorFinish==='carpet'?M.carpet:sheetMaterial;floorGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===floorFinish);render()}
 function interior(){return view==='inside'||view==='reverse'}
-function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&&!powerToggle.checked)||(p.layout&&p.layout!==layout)||interior()||v.z>1||v.z< -1||Math.abs(v.x)>.97||Math.abs(v.y)>.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
+function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&&!powerToggle.checked)||(p.layout&&p.layout!==layout)||interior()||view==='clothes'||v.z>1||v.z< -1||Math.abs(v.x)>.97||Math.abs(v.y)>.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
 function render(){renderer.render(scene,camera);projectPins();root.dataset.layout=layout;root.dataset.tableModel=layout==='B'?tableChoice:'';root.dataset.laptops=String(equipment.visible)}
 function updateLabel(){
  layoutLabel.textContent=layout==='B'
   ?`配置B：デスク 西3台・東4台／北側ワゴンに50インチ画面・電話／ノートPC ${equipment.visible?'表示':'非表示'}`
   :'配置A：デスク7台の島／会議テーブル RUGHAUS 1,750×800と会議チェア4脚';
- stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その左手前の家庭用プリンターと用紙・インク収納ワゴン、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、簡易ハンガーラック、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
+ stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その左手前の家庭用プリンターと用紙・インク収納ワゴン、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、作業ジャケット5着を掛けた簡易ハンガーラック、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
 }
 function setLayout(next){layout=next==='A'?'A':'B';layoutGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===layout);trashBins.forEach((g,i)=>{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=Math.PI/2});deskObjects.forEach((g,i)=>{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout==='A';roundGroup.visible=layout==='B';layoutShadows.A.visible=layout==='A';layoutShadows.B.visible=layout==='B';
  if(layout!=='B')openCompare(false);
  renderCard();updateLabel();if(view==='table')setView('table');else render()}
 function wallTransparency(){outer.traverse(o=>{if(!o.isMesh)return;if(o.material===glass)return;if(!o.userData.original)o.userData.original=o.material;o.material=wallToggle.checked?o.userData.original.clone():o.userData.original;if(wallToggle.checked){o.material.transparent=true;o.material.opacity=.13;o.material.depthWrite=false;o.castShadow=false}else o.castShadow=true});render()}
-function setView(next){view=['overview','inside','reverse','top','table','rack','kitchen','doors','pantry','printer','calendar'].includes(next)?next:'overview';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
+function setView(next){view=['overview','inside','reverse','top','table','rack','kitchen','doors','pantry','printer','calendar','clothes'].includes(next)?next:'overview';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
  if(view==='overview'){camera.position.set(.6,9.1,10.4);controls.target.set(0,.55,-.35);controls.maxPolarAngle=Math.PI*.49}
  if(view==='inside'){camera.position.set(.25,1.6,2.25);controls.target.set(-.25,1.35,-2.5);controls.maxPolarAngle=Math.PI*.72}
  if(view==='reverse'){camera.position.set(-2.25,1.6,-2.15);controls.target.set(.45,1.30,2.60);controls.maxPolarAngle=Math.PI*.72}
@@ -1344,6 +1397,7 @@ function setView(next){view=['overview','inside','reverse','top','table','rack',
  if(view==='rack'){camera.position.set(3.04,2.0,2.35);controls.target.set(3.04,.55,3.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='pantry'){camera.position.set(-1.20,2.95,-1.55);controls.target.set(-2.80,1.74,-1.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='printer'){camera.position.set(.50,1.65,-.35);controls.target.set(1.15,.55,-2.35);controls.maxPolarAngle=Math.PI*.49}
+ if(view==='clothes'){camera.position.set(2.65,2.15,-1.58);controls.target.set(1.80,1.15,-3.16);controls.maxPolarAngle=Math.PI*.49}
  if(view==='calendar'){camera.position.set(-.95,1.70,-2.20);controls.target.set(-.84,1.55,-3.38);controls.maxPolarAngle=Math.PI*.49}
  if(view==='doors'){camera.position.set(.30,2.05,-1.00);controls.target.set(.30,1.68,-3.58);controls.maxPolarAngle=Math.PI*.49}
  if(view==='top'){camera.position.set(0,16.8,.02);controls.target.set(0,0,-.32);controls.maxPolarAngle=Math.PI*.49}
@@ -1371,7 +1425,7 @@ $('#ss-right').addEventListener('click',()=>turn(Math.PI/8));
 $('#ss-near').addEventListener('click',()=>zoom(.8));
 $('#ss-far').addEventListener('click',()=>zoom(1.25));
 $('#ss-reset').addEventListener('click',()=>setView(view));
-function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','rack','kitchen','doors','pantry','printer','calendar'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','rack','kitchen','doors','pantry','printer','calendar'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','rack','kitchen','doors','pantry','printer','calendar','clothes'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','rack','kitchen','doors','pantry','printer','calendar','clothes'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
 new ResizeObserver(resize).observe(stage);
 const saved=store.get()||{};
 sortKey=saved.sortKey==='area'?'area':'price';
@@ -1384,7 +1438,7 @@ setView(saved.view);
 wallTransparency();
 root.querySelector('.ss-loading').hidden=true;
 root.dataset.ready='true';
-root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory,printerCart,printer,printerSupplies,printerCables,calendarTablet,calendarScreen};
+root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory,printerCart,printer,printerSupplies,printerCables,calendarTablet,calendarScreen,workJackets};
 render();
 }catch(err){root.querySelector('.ss-loading').textContent='3Dの読み込みに失敗しました。ページを再読み込みしてください。';console.error(err)}
 })();
