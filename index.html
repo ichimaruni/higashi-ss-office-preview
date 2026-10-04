@@ -743,8 +743,8 @@ box(fridge,.667,1.775,.835,0,.8875,0,M.fridge);
 for(const z of [-.21,.21])box(fridge,.033,1.70,.407,.346,.89,z,M.fridge);
 for(const z of [-.035,.035])box(fridge,.045,.5,.018,.374,1.02,z,M.black);
 box(fridge,.015,1.67,.007,.366,.90,0,M.black);
-// Large open stainless rack, W1500 × D650 × H1620 mm, facing east.
-// Floor bay: 3 bins; 900 mm: appliances; 1500 mm: dishes.
+// Large open stainless rack, W1500 × D650 × H1770 mm, facing east.
+// Floor bay: 3 bins; 1050 mm: appliances; 1650 mm: dishes.
 const pantry=group('K1',.55,2.82);
 const steelCanvas=document.createElement('canvas');steelCanvas.width=steelCanvas.height=512;
 const steelCtx=steelCanvas.getContext('2d');steelCtx.fillStyle='#c7cdce';steelCtx.fillRect(0,0,512,512);
@@ -753,34 +753,34 @@ const brushedSteel=new THREE.CanvasTexture(steelCanvas);brushedSteel.colorSpace=
 const pantrySteel=new THREE.MeshStandardMaterial({color:0xe0e4e4,map:brushedSteel,metalness:.76,roughness:.32});
 const pantryChrome=mat(0xc3ccce,.20,.86),pantryRubber=mat(0x343a3b,.90);
 for(const x of [-.295,.295])for(const z of [-.720,.720]){
- rod(pantry,[x,.028,z],[x,1.606,z],.016,pantryChrome);
+ rod(pantry,[x,.028,z],[x,1.756,z],.016,pantryChrome);
  const collar=new THREE.Mesh(new THREE.CylinderGeometry(.019,.019,.045,20),pantryChrome);collar.position.set(x,.087,z);pantry.add(collar);
  box(pantry,.038,.027,.038,x,.019,z,pantryRubber,'調整脚');
- for(const y of [.865,1.465]){
+ for(const y of [1.015,1.615]){
   box(pantry,.039,.038,.040,x,y,z,pantrySteel,'棚受け金具');
   const screw=new THREE.Mesh(new THREE.SphereGeometry(.0045,12,8),pantryChrome);screw.position.set(x+.021,y,z);pantry.add(screw);
  }
 }
 // No low shelf or front crossbar: all three 700 mm-high bins fit fully inside.
-for(const h of [.90,1.50]){
- box(pantry,.65,.022,1.50,0,h-.011,0,pantrySteel,h===.90?'家電用天板':'食器用の棚板');
+for(const h of [1.05,1.65]){
+ box(pantry,.65,.022,1.50,0,h-.011,0,pantrySteel,h===1.05?'家電用天板':'食器用の棚板');
  for(const x of [-.322,.322])box(pantry,.006,.033,1.50,x,h-.021,0,pantrySteel,'棚板の折り返し');
  for(const z of [-.747,.747])box(pantry,.64,.033,.006,0,h-.021,z,pantrySteel,'棚板の折り返し');
  for(const x of [-.295,.295])rod(pantry,[x,h-.037,-.720],[x,h-.037,.720],.009,pantryChrome);
  for(const z of [-.720,.720])rod(pantry,[-.295,h-.037,z],[.295,h-.037,z],.009,pantryChrome);
 }
 // Bracing stays behind the bins; the east-facing lower bay remains unobstructed.
-rod(pantry,[-.295,.07,-.720],[-.295,1.46,.720],.005,pantryChrome);rod(pantry,[-.295,.07,.720],[-.295,1.46,-.720],.005,pantryChrome);
-for(const z of [-.72,.72])rod(pantry,[-.295,1.606,z],[.295,1.606,z],.014,pantryChrome);
-// Keep the existing microwave/pot, raising them onto the new 900 mm worktop.
-const microwave=new THREE.Group();microwave.name='電子レンジ';microwave.position.set(-.015,.903,-.45);pantry.add(microwave);
+rod(pantry,[-.295,.07,-.720],[-.295,1.61,.720],.005,pantryChrome);rod(pantry,[-.295,.07,.720],[-.295,1.61,-.720],.005,pantryChrome);
+for(const z of [-.72,.72])rod(pantry,[-.295,1.756,z],[.295,1.756,z],.014,pantryChrome);
+// Keep the existing microwave/pot, raising them onto the new 1050 mm worktop.
+const microwave=new THREE.Group();microwave.name='電子レンジ';microwave.position.set(-.015,1.053,-.45);pantry.add(microwave);
 for(const x of [-.15,.15])for(const z of [-.18,.18])box(microwave,.025,.010,.025,x,.005,z,pantryRubber);
 box(microwave,.41,.29,.48,0,.155,0,M.white);
 box(microwave,.013,.218,.356,.211,.157,-.030,M.black,'レンジ扉');
 box(microwave,.017,.176,.315,.219,.156,-.030,mat(0x394246,.37,.12),'レンジ扉のガラス');
 box(microwave,.023,.13,.017,.228,.16,.19,M.metal,'レンジ取っ手');
 for(const y of [.125,.205]){const dial=new THREE.Mesh(new THREE.CylinderGeometry(.014,.014,.009,24),M.metal);dial.rotation.z=Math.PI/2;dial.position.set(.214,y,.210);microwave.add(dial)}
-const pot=new THREE.Group();pot.name='湯沸かしポット';pot.position.set(.025,.903,.52);pantry.add(pot);
+const pot=new THREE.Group();pot.name='湯沸かしポット';pot.position.set(.025,1.053,.52);pantry.add(pot);
 box(pot,.20,.012,.20,0,.006,0,M.white,'ポット台座');
 const kettle=new THREE.Mesh(new THREE.CylinderGeometry(.073,.095,.20,40),M.white);kettle.position.set(0,.112,0);kettle.castShadow=true;pot.add(kettle);
 const lid=new THREE.Mesh(new THREE.SphereGeometry(.075,24,12,0,Math.PI*2,0,Math.PI/2),M.white);lid.scale.y=.35;lid.position.set(0,.218,0);pot.add(lid);
@@ -788,7 +788,7 @@ curve(pot,[[-.06,.185,0],[-.15,.180,0],[-.15,.055,0],[-.065,.045,0]],.013,M.whit
 rod(pot,[.06,.160,0],[.125,.210,0],.023,M.white);
 // Panasonic SR-X918E-K: catalogue W292 × D327 × H258 mm; front faces east.
 // Photographed rounded body, tapered lid, flat touch panel and front release button.
-const riceCooker=new THREE.Group();riceCooker.name='Panasonic SR-X918E-K ブラック 292×327×258';riceCooker.position.set(.04,.903,.104);riceCooker.rotation.y=Math.PI/2;pantry.add(riceCooker);
+const riceCooker=new THREE.Group();riceCooker.name='Panasonic SR-X918E-K ブラック 292×327×258';riceCooker.position.set(.04,1.053,.104);riceCooker.rotation.y=Math.PI/2;pantry.add(riceCooker);
 const cookerBody=mat(0x252928,.88),cookerLid=mat(0x343837,.49,.14),cookerSeam=mat(0x121716,.86),cookerRatio=.327/.292;
 lathe(riceCooker,'丸みのある炊飯器本体',[[0,.009],[.103,.009],[.117,.014],[.130,.040],[.140,.084],[.145,.130],[.146,.167],[.146,.190],[0,.190]],cookerBody,cookerRatio);
 lathe(riceCooker,'ふたの継ぎ目',[[0,.188],[.146,.188],[.146,.192],[0,.192]],cookerSeam,cookerRatio);
@@ -825,10 +825,10 @@ function mug(x,z,h,blue=false){
  lathe(g,'マグカップ本体',[[0,0],[.028,0],[.033,.008],[.038,.090],[.037,.096],[.033,.096],[.032,.090],[.028,.011],[0,.011]],blue?dishBlue:dishWhite);
  curve(g,[[.034,.078,0],[.062,.081,0],[.066,.047,0],[.035,.030,0]],.005,blue?dishBlue:dishWhite);
 }
-plates(-.12,.16,1.50,7);bowls(.09,.57,1.50,3);
-for(let i=0;i<4;i++)mug(.10,-.57+i*.17,1.50,i%2===1);
+plates(-.12,.16,1.65,7);bowls(.09,.57,1.65,3);
+for(let i=0;i<4;i++)mug(.10,-.57+i*.17,1.65,i%2===1);
 for(let i=0;i<3;i++){
- const g=new THREE.Group();g.name='グラス';g.position.set(-.12,1.501,-.54+i*.18);tableware.add(g);
+ const g=new THREE.Group();g.name='グラス';g.position.set(-.12,1.651,-.54+i*.18);tableware.add(g);
  lathe(g,'ガラスのコップ',[[0,0],[.027,0],[.030,.006],[.034,.105],[.032,.105],[.029,.007],[0,.007]],dishGlass);
 }
 // CRAFT GT-135: three white cardboard bins, W400 × D410 × H700 mm.
@@ -1130,7 +1130,7 @@ function setView(next){view=['overview','inside','reverse','top','table','rack',
  if(view==='inside'){camera.position.set(.25,1.6,2.25);controls.target.set(-.25,1.35,-2.5);controls.maxPolarAngle=Math.PI*.72}
  if(view==='reverse'){camera.position.set(-2.25,1.6,-2.15);controls.target.set(.45,1.30,2.60);controls.maxPolarAngle=Math.PI*.72}
  if(view==='table'){camera.position.set(layout==='B'?1.9:1,1.85,layout==='B'?2.4:1.05);controls.target.set(layout==='B'?0:1.95,.62,layout==='B'?-.30:-1.475);controls.maxPolarAngle=Math.PI*.49}
- if(view==='kitchen'){camera.position.set(-.35,2.40,-2.50);controls.target.set(-2.80,.82,-1.18);controls.maxPolarAngle=Math.PI*.49}
+ if(view==='kitchen'){camera.position.set(-.25,2.55,-2.55);controls.target.set(-2.80,.90,-1.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='rack'){camera.position.set(3.04,2.0,2.35);controls.target.set(3.04,.55,3.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='top'){camera.position.set(0,16.8,.02);controls.target.set(0,0,-.32);controls.maxPolarAngle=Math.PI*.49}
  lastFit=1;resize();controls.update();render();
