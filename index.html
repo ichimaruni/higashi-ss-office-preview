@@ -31,7 +31,7 @@ button,input,select{font:inherit;color:inherit}
 .seg{display:inline-flex;border:1px solid var(--line-strong);border-radius:var(--radius);overflow:hidden;background:var(--panel)}
 .seg label{position:relative;display:flex;align-items:center;justify-content:center;min-height:32px;padding:0 12px;cursor:pointer;white-space:nowrap;border-left:1px solid var(--line)}
 .seg label:first-child{border-left:0}
-.views .seg label{padding:0 9px}
+.views .seg label{padding:0 7px}
 .seg input{position:absolute;opacity:0;pointer-events:none}
 .seg label:hover{background:var(--hover)}
 .seg label:has(input:checked){background:var(--ink);color:#fff}
@@ -152,6 +152,7 @@ button,input,select{font:inherit;color:inherit}
         <label><input type="radio" name="ss-view" value="doors">北側ドア</label>
         <label><input type="radio" name="ss-view" value="calendar">予定表示</label>
         <label><input type="radio" name="ss-view" value="clothes">作業服</label>
+        <label><input type="radio" name="ss-view" value="shrine">神棚</label>
         <label><input type="radio" name="ss-view" value="inside">室内</label>
         <label><input type="radio" name="ss-view" value="reverse">入口を見る</label>
       </span>
@@ -1270,6 +1271,81 @@ for(let i=0;i<5;i++){
  for(const sign of [-1,1])curve(g,[[sign*.008,hem+.025],[sign*.008,1.00],[sign*.008,1.22],[sign*.008,1.45]].map(([x,y])=>[x,y,front(x,y,.0023)]),.0004,jacketStitch).name='ファスナー脇の縫い目';
  curve(g,[[-.201,hem+.018],[-.10,hem+.018],[0,hem+.018],[.10,hem+.018],[.201,hem+.018]].map(([x,y])=>[x,y,front(x,y,.002)]),.0005,jacketStitch).name='裾の縫い目';
 }
+// Modern light-wood kamidana, based on the user's supplied reference image.
+// W640 × D230 mm, shelf surface 2050 mm; three illustrative ofuda and sakaki.
+const kamidana=group('北壁の木製神棚 640×230mm',5.15,.58);kamidana.position.y=2.05;
+const shrineWoodCanvas=document.createElement('canvas');shrineWoodCanvas.width=shrineWoodCanvas.height=256;
+const swc=shrineWoodCanvas.getContext('2d'),swi=swc.createImageData(256,256);
+for(let y=0;y<256;y++)for(let x=0;x<256;x++){
+ const p=(y*256+x)*4,grain=Math.sin(y*.22+Math.sin(x*.023)*1.4)*3+Math.sin(y*.61+x*.012)*1.2;
+ swi.data[p]=229+grain;swi.data[p+1]=214+grain;swi.data[p+2]=184+grain;swi.data[p+3]=255;
+}
+swc.putImageData(swi,0,0);const shrineWoodTexture=new THREE.CanvasTexture(shrineWoodCanvas);shrineWoodTexture.colorSpace=THREE.SRGBColorSpace;shrineWoodTexture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+const shrineWood=new THREE.MeshStandardMaterial({map:shrineWoodTexture,roughness:.82}),shrineRail=mat(0xac925c,.50,.20);
+box(kamidana,.640,.018,.230,0,-.009,.115,shrineWood,'木製棚板');
+box(kamidana,.640,.175,.012,0,.0875,.006,shrineWood,'背板');
+for(const x of [-.308,.320]){
+ const side=new THREE.Shape();side.moveTo(0,0);side.lineTo(0,.175);side.quadraticCurveTo(.026,.176,.050,.147);side.quadraticCurveTo(.158,.077,.230,.075);side.lineTo(.230,0);side.closePath();
+ const geo=new THREE.ExtrudeGeometry(side,{depth:.012,bevelEnabled:true,bevelThickness:.001,bevelSize:.001,bevelSegments:2});geo.rotateY(-Math.PI/2);
+ const mesh=new THREE.Mesh(geo,shrineWood);mesh.position.x=x;mesh.castShadow=mesh.receiveShadow=true;mesh.name='緩やかに傾斜した側板';kamidana.add(mesh);
+}
+box(kamidana,.640,.025,.010,0,.0125,.225,shrineWood,'前縁');
+rod(kamidana,[-.307,.056,.210],[.307,.056,.210],.0035,shrineRail).name='細い前柵';
+for(const x of [-.18,.18])box(kamidana,.048,.070,.008,x,-.045,.004,M.metal,'背面の固定金具');
+const shrineOfuda=[];
+for(const [index,[x,height,label]] of [[-.110,.305,'御神札'],[0,.340,'天照皇大神宮'],[.110,.320,'御神札']].entries()){
+ const plaque=new THREE.Group();plaque.name='お札の配置イメージ '+(index+1);plaque.position.set(x,.009,.028);kamidana.add(plaque);shrineOfuda.push(plaque);
+ box(plaque,.082,height,.005,0,height/2,0,shrineWood,'お札の薄い背面');
+ const c=document.createElement('canvas');c.width=240;c.height=960;const ctx=c.getContext('2d');ctx.fillStyle='#f8f5eb';ctx.fillRect(0,0,240,960);
+ ctx.strokeStyle='#d8b4a4';ctx.lineWidth=2;ctx.strokeRect(23,48,194,860);
+ ctx.strokeStyle='#b96c59';ctx.lineWidth=4;ctx.strokeRect(82,702,76,112);ctx.fillStyle='#bb7865';ctx.textAlign='center';ctx.font='28px serif';ctx.fillText('奉',120,745);ctx.fillText('納',120,786);
+ ctx.fillStyle='#33312d';ctx.font='600 64px serif';ctx.textBaseline='middle';
+ const chars=[...label],space=label.length>4?105:165,start=label.length>4?116:190;
+ chars.forEach((char,i)=>ctx.fillText(char,120,start+i*space));
+ const texture=new THREE.CanvasTexture(c);texture.colorSpace=THREE.SRGBColorSpace;texture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+ const face=new THREE.Mesh(new THREE.PlaneGeometry(.078,height-.004),new THREE.MeshStandardMaterial({map:texture,roughness:.96}));face.position.set(0,height/2,.003);face.name='仮表記のお札';plaque.add(face);
+}
+// Raised small tray and three transparent offering cups, like the reference.
+const shrineOfferings=new THREE.Group();shrineOfferings.name='お供え用の器3個';kamidana.add(shrineOfferings);
+for(const x of [-.116,.116])for(const z of [.121,.199])box(shrineOfferings,.008,.040,.008,x,.020,z,shrineWood,'小さな台の脚');
+box(shrineOfferings,.250,.006,.100,0,.043,.160,shrineWood,'器を載せる木製台');
+const offeringGlass=new THREE.MeshPhysicalMaterial({color:0xe9f1ee,roughness:.13,metalness:0,transparent:true,opacity:.55,transmission:.28,thickness:.003,depthWrite:false});
+for(let i=0;i<3;i++){
+ const cup=new THREE.Group();cup.name=['水を想定した器','米を想定した器','塩を想定した器'][i];cup.position.set((i-1)*.074,.046,.160);shrineOfferings.add(cup);
+ pantryLathe(cup,'透明な脚付きの器',[[0,0],[.017,0],[.017,.006],[.012,.008],[.010,.021],[.015,.028],[.026,.059],[.027,.062],[.024,.064],[.023,.059],[.013,.030],[.008,.023],[0,.021]],offeringGlass);
+ const rim=new THREE.Mesh(new THREE.TorusGeometry(.0255,.001,8,48),offeringGlass);rim.rotation.x=Math.PI/2;rim.position.y=.062;cup.add(rim);
+ if(i===0){const water=pantryLathe(cup,'水の表示イメージ',[[0,.028],[.013,.028],[.021,.048],[0,.048]],new THREE.MeshPhysicalMaterial({color:0xc8ded9,transparent:true,opacity:.38,roughness:.1,depthWrite:false}));water.castShadow=false;}
+ if(i===1){
+  const grains=new THREE.InstancedMesh(new THREE.SphereGeometry(1,8,6),mat(0xbfa67d,.94),48);grains.name='米の粒';const matrix=new THREE.Matrix4(),q=new THREE.Quaternion();
+  for(let n=0;n<48;n++){const a=n*2.39996,r=.019*Math.sqrt((n+.5)/48),y=.050+.007*(1-r/.019);q.setFromEuler(new THREE.Euler(.2*Math.sin(n),a,.4*Math.cos(n)));matrix.compose(new THREE.Vector3(Math.cos(a)*r,y,Math.sin(a)*r),q,new THREE.Vector3(.0016,.0012,.0032));grains.setMatrixAt(n,matrix);}cup.add(grains);
+ }
+ if(i===2)pantryLathe(cup,'白い塩の表示イメージ',[[0,.030],[.012,.030],[.021,.047],[.013,.055],[0,.059]],mat(0xf5f4ed,.97));
+}
+// Two wood-covered holders with slender stems and curved green leaves.
+const shrineSakaki=[];
+function sakakiLeaf(length,width,material){
+ const pos=[],uv=[],idx=[],rows=14,cols=8;
+ for(let j=0;j<=rows;j++)for(let k=0;k<=cols;k++){
+  const v=j/rows,u=k/cols*2-1,w=Math.pow(Math.sin(Math.PI*v),.78)*width;
+  pos.push(u*w,length*v,.007*v*v+.003*(1-u*u)*Math.sin(Math.PI*v));uv.push(k/cols,v);
+ }
+ for(let j=0;j<rows;j++)for(let k=0;k<cols;k++){const a=j*(cols+1)+k,b=a+1,c=a+cols+1,d=c+1;idx.push(a,b,c,b,d,c);}
+ const geo=new THREE.BufferGeometry();geo.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));geo.setAttribute('uv',new THREE.Float32BufferAttribute(uv,2));geo.setIndex(idx);geo.computeVertexNormals();
+ return new THREE.Mesh(geo,material);
+}
+const sakakiMaterials=[0x365b32,0x426d3b,0x507845,0x3a6033].map(color=>new THREE.MeshStandardMaterial({color,roughness:.76,side:THREE.DoubleSide})),sakakiStem=mat(0x746c44,.92);
+for(const sign of [-1,1]){
+ const g=new THREE.Group();g.name=sign<0?'左の榊':'右の榊';g.position.set(sign*.245,0,.087);kamidana.add(g);shrineSakaki.push(g);
+ const holder=new THREE.Mesh(roundedTableGeometry(.060,.061,.003,.094,.001),shrineWood);holder.castShadow=holder.receiveShadow=true;holder.name='木製の榊立て';g.add(holder);
+ const neck=pantryLathe(g,'榊立ての差し口',[[.007,.089],[.010,.089],[.010,.107],[.007,.107],[.007,.089]],offeringGlass);neck.position.z=-.002;
+ for(let stem=0;stem<3;stem++)curve(g,[[0,.094,0],[.004*(stem-1),.168,-.003],[.010*(stem-1),.268,-.008]],.0013,sakakiStem);
+ for(let j=0;j<14;j++){
+  const a=j*2.39996,start=new THREE.Vector3(Math.sin(a)*.008,.119+(j%5)*.022,-.003),tip=start.clone().add(new THREE.Vector3(Math.sin(a)*.053,.080+(j%3)*.014,Math.cos(a)*.024));
+  rod(g,start.toArray(),start.clone().lerp(tip,.36).toArray(),.00075,sakakiStem);
+  const leaf=sakakiLeaf(start.distanceTo(tip),.017+(j%3)*.003,sakakiMaterials[j%4]);leaf.name='榊の葉';leaf.position.copy(start);leaf.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),tip.clone().sub(start).normalize());leaf.rotateY(Math.cos(a)*.32);leaf.castShadow=true;g.add(leaf);
+  const vein=curve(leaf,[[0,.006,.0003],[0,.044,.003],[0,start.distanceTo(tip)*.90,.007]],.0003,mat(0x657c4e,.9));vein.name='葉の中央の筋';
+ }
+}
 const wb=group('WB',6.56,3.652);box(wb,.035,.90,1.8,0,1.55,0,M.white);
 for(const y of [1.10,2.0])box(wb,.055,.025,1.84,0,y,0,M.metal);
 for(const z of [-.9,.9])box(wb,.055,.92,.025,0,1.55,z,M.metal);
@@ -1467,19 +1543,19 @@ function updateCartCable(z,h){
 function setLaptops(show){laptopToggle.checked=!!show;equipment.visible=!!show;placeSchedule();updateLabel();render()}
 function setFloor(next){floorFinish=next==='carpet'?'carpet':'linoleum';officeFloor.material=floorFinish==='carpet'?M.carpet:sheetMaterial;floorGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===floorFinish);render()}
 function interior(){return view==='inside'||view==='reverse'}
-function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&&!powerToggle.checked)||(p.layout&&p.layout!==layout)||interior()||view==='clothes'||(view==='table'&&p===tableDimensionPin)||v.z>1||v.z< -1||Math.abs(v.x)>.97||Math.abs(v.y)>.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
+function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&&!powerToggle.checked)||(p.layout&&p.layout!==layout)||interior()||view==='clothes'||view==='shrine'||(view==='table'&&p===tableDimensionPin)||v.z>1||v.z< -1||Math.abs(v.x)>.97||Math.abs(v.y)>.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
 function render(){renderer.render(scene,camera);projectPins();root.dataset.layout=layout;root.dataset.tableModel=layout==='B'?tableChoice:'';root.dataset.laptops=String(equipment.visible)}
 function updateLabel(){
  layoutLabel.textContent=layout==='B'
   ?`配置B：デスク 西3台・東4台／北側ワゴンに50インチ画面・電話／ノートPC ${equipment.visible?'表示':'非表示'}`
   :'配置A：デスク7台の島／会議テーブル RUGHAUS 1,750×800と会議チェア4脚';
- stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。テーブル上のA3ガントチャート印刷紙、フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その左手前の家庭用プリンターと用紙・インク収納ワゴン、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、作業ジャケット5着を掛けた簡易ハンガーラック、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
+ stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。テーブル上のA3ガントチャート印刷紙、フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その左手前の家庭用プリンターと用紙・インク収納ワゴン、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、作業ジャケット5着を掛けた簡易ハンガーラックと、その上の北壁に木製の神棚、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
 }
 function setLayout(next){layout=next==='A'?'A':'B';layoutGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===layout);trashBins.forEach((g,i)=>{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=Math.PI/2});deskObjects.forEach((g,i)=>{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout==='A';roundGroup.visible=layout==='B';layoutShadows.A.visible=layout==='A';layoutShadows.B.visible=layout==='B';
  if(layout!=='B')openCompare(false);
  renderCard();updateLabel();if(view==='table')setView('table');else render()}
 function wallTransparency(){outer.traverse(o=>{if(!o.isMesh)return;if(o.material===glass)return;if(!o.userData.original)o.userData.original=o.material;o.material=wallToggle.checked?o.userData.original.clone():o.userData.original;if(wallToggle.checked){o.material.transparent=true;o.material.opacity=.13;o.material.depthWrite=false;o.castShadow=false}else o.castShadow=true});render()}
-function setView(next){view=['overview','inside','reverse','top','table','rack','kitchen','doors','pantry','printer','calendar','clothes'].includes(next)?next:'overview';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
+function setView(next){view=['overview','inside','reverse','top','table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine'].includes(next)?next:'overview';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
  if(view==='overview'){camera.position.set(.6,9.1,10.4);controls.target.set(0,.55,-.35);controls.maxPolarAngle=Math.PI*.49}
  if(view==='inside'){camera.position.set(.25,1.6,2.25);controls.target.set(-.25,1.35,-2.5);controls.maxPolarAngle=Math.PI*.72}
  if(view==='reverse'){camera.position.set(-2.25,1.6,-2.15);controls.target.set(.45,1.30,2.60);controls.maxPolarAngle=Math.PI*.72}
@@ -1488,6 +1564,7 @@ function setView(next){view=['overview','inside','reverse','top','table','rack',
  if(view==='rack'){camera.position.set(3.04,2.0,2.35);controls.target.set(3.04,.55,3.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='pantry'){camera.position.set(-1.20,2.95,-1.55);controls.target.set(-2.80,1.74,-1.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='printer'){camera.position.set(.50,1.65,-.35);controls.target.set(1.15,.55,-2.35);controls.maxPolarAngle=Math.PI*.49}
+ if(view==='shrine'){camera.position.set(2.44,2.38,-2.04);controls.target.set(1.80,1.99,-3.27);controls.maxPolarAngle=Math.PI*.49}
  if(view==='clothes'){camera.position.set(3.53,2.10,-2.38);controls.target.set(1.80,1.22,-2.94);controls.maxPolarAngle=Math.PI*.49}
  if(view==='calendar'){camera.position.set(-.95,1.70,-2.20);controls.target.set(-.84,1.55,-3.38);controls.maxPolarAngle=Math.PI*.49}
  if(view==='doors'){camera.position.set(.30,2.05,-1.00);controls.target.set(.30,1.68,-3.58);controls.maxPolarAngle=Math.PI*.49}
@@ -1516,7 +1593,7 @@ $('#ss-right').addEventListener('click',()=>turn(Math.PI/8));
 $('#ss-near').addEventListener('click',()=>zoom(.8));
 $('#ss-far').addEventListener('click',()=>zoom(1.25));
 $('#ss-reset').addEventListener('click',()=>setView(view));
-function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','rack','kitchen','doors','pantry','printer','calendar','clothes'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','rack','kitchen','doors','pantry','printer','calendar','clothes'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
 new ResizeObserver(resize).observe(stage);
 const saved=store.get()||{};
 sortKey=saved.sortKey==='area'?'area':'price';
@@ -1529,7 +1606,7 @@ setView(saved.view);
 wallTransparency();
 root.querySelector('.ss-loading').hidden=true;
 root.dataset.ready='true';
-root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory,printerCart,printer,printerSupplies,printerCables,calendarTablet,calendarScreen,workJackets,schedulePrint,ganttSheet,meetingSchedule};
+root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory,printerCart,printer,printerSupplies,printerCables,calendarTablet,calendarScreen,workJackets,schedulePrint,ganttSheet,meetingSchedule,kamidana,shrineOfuda,shrineOfferings,shrineSakaki};
 render();
 }catch(err){root.querySelector('.ss-loading').textContent='3Dの読み込みに失敗しました。ページを再読み込みしてください。';console.error(err)}
 })();
