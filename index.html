@@ -721,6 +721,46 @@ for(const x of [-.254,.254])for(const z of [-.178,.178]){
 }
 const mediaEquipment=new THREE.Group();mediaEquipment.name='ワゴン上の画面と電話・南向き';mediaCart.add(mediaEquipment);
 const cartCables=new THREE.Group();cartCables.name='ワゴンからT7への延長ケーブル';roundGroup.add(cartCables);
+// Fargo STEEL TAP AC6: catalogue 310 × 50 × 33 mm, yellow reference photo.
+const fargoTap=group('Fargo 黄色のSTEEL TAP・6個口 310×50×33mm',3.35,4,0,roundGroup);
+const fargoYellow=mat(0xf2bd00,.30,.40),fargoSocket=mat(0x353942,.54),fargoHole=mat(0x101215,.85);
+const fargoBody=new THREE.Mesh(roundedTableGeometry(.310,.050,.007,.033,.0015),fargoYellow);fargoBody.castShadow=fargoBody.receiveShadow=true;fargoBody.name='黄色いスチールの本体';fargoTap.add(fargoBody);
+const fargoSockets=[];
+for(let i=0;i<6;i++){
+ const socket=new THREE.Group();socket.name='3ピン対応の差込口 '+(i+1);socket.position.set(-.123+i*.037,0,0);fargoTap.add(socket);fargoSockets.push(socket);
+ const plate=new THREE.Mesh(roundedTableGeometry(.031,.033,.009,.0018,.0003),fargoSocket);plate.position.y=.0324;plate.castShadow=true;socket.add(plate);
+ for(const x of [-.007,.007]){
+  box(socket,.005,.0005,.014,x,.0343,-.004,fargoHole,'差込口のくぼみ');
+  box(socket,.002,.0006,.011,x,.0346,-.004,M.black,'刃の差込穴');
+ }
+ const earth=new THREE.Mesh(new THREE.CircleGeometry(.0036,24),fargoHole);earth.rotation.x=-Math.PI/2;earth.position.set(0,.0346,.009);socket.add(earth);
+ box(socket,.0072,.0005,.003,0,.0343,.007,fargoHole,'アース穴の平らな縁');
+}
+const switchFrame=new THREE.Mesh(roundedTableGeometry(.022,.033,.002,.002,.0003),M.black);switchFrame.position.set(.104,.0324,0);switchFrame.name='スイッチの黒い枠';fargoTap.add(switchFrame);
+const fargoRed=new THREE.MeshPhysicalMaterial({color:0xb72011,roughness:.30,transparent:true,opacity:.92,emissive:0x7b1705,emissiveIntensity:.35});
+const rocker=new THREE.Mesh(roundedTableGeometry(.015,.024,.0015,.002,.0003),fargoRed);rocker.position.set(.104,.0344,0);rocker.rotation.z=.09;rocker.name='赤い一括スイッチ';fargoTap.add(rocker);
+box(fargoTap,.0025,.0003,.0025,.104,.037,0,mat(0xffaa38,.24),'通電ランプ');
+for(const x of [-.065,.009]){
+ const screw=new THREE.Mesh(new THREE.CylinderGeometry(.0027,.0027,.0007,20),cartChrome);screw.position.set(x,.0335,.020);screw.name='銀色の固定ねじ';fargoTap.add(screw);
+ for(const angle of [0,Math.PI/2]){const slot=box(fargoTap,.0037,.0002,.0005,x,.034,.020,M.dark);slot.rotation.y=angle;}
+}
+const fargoLabelCanvas=document.createElement('canvas');fargoLabelCanvas.width=3100;fargoLabelCanvas.height=500;
+const flc=fargoLabelCanvas.getContext('2d');flc.fillStyle='#282c30';flc.textAlign='center';flc.save();flc.translate(2900,250);flc.rotate(Math.PI/2);flc.font='italic 600 105px Arial';flc.fillText('Fargo',0,-35);flc.font='bold 32px Arial';flc.fillText('SURGE GUARD',0,42);flc.restore();
+flc.save();flc.translate(95,250);flc.rotate(Math.PI/2);flc.font='30px Arial';flc.fillText('15A 125V 1500W',0,0);flc.restore();
+const fargoLabelTexture=new THREE.CanvasTexture(fargoLabelCanvas);fargoLabelTexture.colorSpace=THREE.SRGBColorSpace;fargoLabelTexture.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+const fargoLabel=new THREE.Mesh(new THREE.PlaneGeometry(.310,.050),new THREE.MeshStandardMaterial({map:fargoLabelTexture,transparent:true,roughness:.5,depthWrite:false}));fargoLabel.rotation.x=-Math.PI/2;fargoLabel.position.y=.0332;fargoLabel.name='Fargoのロゴと本体印字';fargoTap.add(fargoLabel);
+rod(fargoTap,[-.155,.015,0],[-.169,.015,0],.005,M.black).name='コード出口の黒い保護ブーツ';
+const fargoCable=new THREE.Group();fargoCable.name='ワゴンから卓上Fargoへの給電コード';roundGroup.add(fargoCable);
+function updateFargoCable(){
+ const option=tableOptions[tableChoice],h=option.height,north=-option.mm[0]/2000;
+ // Keep the strip in the northern half; leave the paper and six laptops clear.
+ fargoTap.position.set(0,h,tableChoice==='rughaus'&&equipment.visible?north+.040:-Math.min(.50,-north*.55));
+ while(fargoCable.children.length){const mesh=fargoCable.children[0];fargoCable.remove(mesh);mesh.geometry.dispose()}
+ const z=fargoTap.position.z,cartZ=mediaCart.position.z;
+ curve(fargoCable,[[-.169,h+.015,z],[-.205,h+.009,z-.025],[-.220,h+.006,north+.065],[-.220,h+.003,north-.012],[-.240,h-.075,north-.080],[-.310,h-.120,cartZ+.12],[-.315,h-.10,cartZ-.16],[-.250,h-.040,cartZ-.24],[-.060,h-.025,cartZ-.18]],.0038,M.black).name='天板の北端からワゴン脇を通る黒いコード';
+ box(fargoCable,.027,.020,.016,-.060,h-.016,cartZ-.18,M.black,'ワゴン背面の電源に差したプラグ');
+}
+
 const sharedDisplay=new THREE.Group();sharedDisplay.name='ワゴン上の50インチ画面・テーブル向き';sharedDisplay.position.set(0,-.720,0);mediaEquipment.add(sharedDisplay);
 box(sharedDisplay,1.127,.643,.048,0,1.168,0,M.black,'50インチ ディスプレイ');
 box(sharedDisplay,1.107,.623,.005,0,1.171,.027,M.screen);
@@ -811,7 +851,7 @@ const meetingSchedule=schedulePrint.clone(true);meetingSchedule.name='配置A会
 function placeSchedule(){
  schedulePrint.position.y=tableOptions[tableChoice].height;
  // The narrow RUGHAUS leaves room for the sheet north of the laptops when shown.
- schedulePrint.position.z=tableChoice==='rughaus'&&equipment.visible?-.66:0;
+ schedulePrint.position.z=tableChoice==='rughaus'&&equipment.visible?-.64:0;
  schedulePrint.rotation.y=tableChoice==='rughaus'&&equipment.visible?0:-.08;
 }
 // Phone on the middle shelf, facing south toward the table: an iPad running the
@@ -1524,6 +1564,7 @@ function setTable(next){
  mediaCart.position.z=cartZ;cartFrame.scale.y=(option.height-.08)/.64;mediaEquipment.position.y=option.height;
  deskPhone.position.y=.08+.347*cartFrame.scale.y-option.height;
  updateCartCable(cartZ,option.height);
+ updateFargoCable();
  laptops.forEach((g,i)=>{const side=i<3?-1:1;g.position.x=side*option.laptopX;g.position.z=option.laptopZ[i%3]});
  const [w,d]=option.mm;tableDimensionPin.el.firstElementChild.textContent=option.shape==='round'?`φ${fmt(w)}`:`${fmt(w)}×${fmt(d)}`;
  tableDimensionPin.pos.z=option.pinZ;
@@ -1540,7 +1581,7 @@ function updateCartCable(z,h){
  const phoneY=.08+.347*(h-.08)/.64;
  curve(cartCables,[[.02,phoneY+.01,z+.01],[.13,phoneY+.008,z-.15],[.16,phoneY+.05,z-.21],[.10,h-.026,z-.18]],.003,M.black).name='中段の電話の充電ケーブル';
 }
-function setLaptops(show){laptopToggle.checked=!!show;equipment.visible=!!show;placeSchedule();updateLabel();render()}
+function setLaptops(show){laptopToggle.checked=!!show;equipment.visible=!!show;placeSchedule();updateFargoCable();updateLabel();render()}
 function setFloor(next){floorFinish=next==='carpet'?'carpet':'linoleum';officeFloor.material=floorFinish==='carpet'?M.carpet:sheetMaterial;floorGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===floorFinish);render()}
 function interior(){return view==='inside'||view==='reverse'}
 function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&&!powerToggle.checked)||(p.layout&&p.layout!==layout)||interior()||view==='clothes'||view==='shrine'||(view==='table'&&p===tableDimensionPin)||v.z>1||v.z< -1||Math.abs(v.x)>.97||Math.abs(v.y)>.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
@@ -1549,7 +1590,7 @@ function updateLabel(){
  layoutLabel.textContent=layout==='B'
   ?`配置B：デスク 西3台・東4台／北側ワゴンに50インチ画面・電話／ノートPC ${equipment.visible?'表示':'非表示'}`
   :'配置A：デスク7台の島／会議テーブル RUGHAUS 1,750×800と会議チェア4脚';
- stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。テーブル上のA3ガントチャート印刷紙、フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その左手前の家庭用プリンターと用紙・インク収納ワゴン、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、作業ジャケット5着を掛けた簡易ハンガーラックと、その上の北壁に木製の神棚、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
+ stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。テーブル上のA3ガントチャート印刷紙とモニター側の黄色いFargo電源タップ（ワゴンから給電コード）、フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その左手前の家庭用プリンターと用紙・インク収納ワゴン、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、作業ジャケット5着を掛けた簡易ハンガーラックと、その上の北壁に木製の神棚、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
 }
 function setLayout(next){layout=next==='A'?'A':'B';layoutGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===layout);trashBins.forEach((g,i)=>{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=Math.PI/2});deskObjects.forEach((g,i)=>{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout==='A';roundGroup.visible=layout==='B';layoutShadows.A.visible=layout==='A';layoutShadows.B.visible=layout==='B';
  if(layout!=='B')openCompare(false);
@@ -1606,7 +1647,7 @@ setView(saved.view);
 wallTransparency();
 root.querySelector('.ss-loading').hidden=true;
 root.dataset.ready='true';
-root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory,printerCart,printer,printerSupplies,printerCables,calendarTablet,calendarScreen,workJackets,schedulePrint,ganttSheet,meetingSchedule,kamidana,shrineOfuda,shrineOfferings,shrineSakaki};
+root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory,printerCart,printer,printerSupplies,printerCables,calendarTablet,calendarScreen,workJackets,schedulePrint,ganttSheet,meetingSchedule,kamidana,shrineOfuda,shrineOfferings,shrineSakaki,fargoTap,fargoSockets,fargoCable};
 render();
 }catch(err){root.querySelector('.ss-loading').textContent='3Dの読み込みに失敗しました。ページを再読み込みしてください。';console.error(err)}
 })();
