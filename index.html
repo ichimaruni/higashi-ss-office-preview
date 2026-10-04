@@ -147,6 +147,7 @@ button,input,select{font:inherit;color:inherit}
         <label><input type="radio" name="ss-view" value="rack">機器棚</label>
         <label><input type="radio" name="ss-view" value="kitchen">家電棚</label>
         <label><input type="radio" name="ss-view" value="pantry">食器</label>
+        <label><input type="radio" name="ss-view" value="printer">プリンタ</label>
         <label><input type="radio" name="ss-view" value="doors">北側ドア</label>
         <label><input type="radio" name="ss-view" value="inside">室内</label>
         <label><input type="radio" name="ss-view" value="reverse">入口を見る</label>
@@ -984,6 +985,58 @@ for(let column=0;column<4;column++)for(let level=0;level<4;level++){
  for(const x of [-.165,.165])box(g,.002,.243,.001,x,.1215,.202,boxInk);
  box(g,.345,.001,.003,0,.2655,-.14,boxInk);box(g,.345,.001,.003,0,.2655,.14,boxInk);
 }
+// Compact shared printer station beside the north-east archive boxes, facing south.
+// Illustrative home inkjet MFP, 410 × 350 × H180 mm; cart 600 × 450 × H750 mm.
+const printerCart=group('北側プリンターワゴン 600×450×750',4.50,1.65);
+const printerSteel=mat(0xc0c7c7,.31,.72),printerPlastic=mat(0xe4e7e4,.62),printerDark=mat(0x424b4a,.64);
+for(const x of [-.28,.28])for(const z of [-.19,.19]){
+ rod(printerCart,[x,.068,z],[x,.738,z],.012,printerSteel);
+ const wheel=new THREE.Mesh(new THREE.CylinderGeometry(.032,.032,.018,24),M.black);wheel.rotation.z=Math.PI/2;wheel.position.set(x,.032,z);printerCart.add(wheel);
+ box(printerCart,.024,.025,.030,x,.064,z,printerSteel,'キャスター金具');
+}
+for(const y of [.15,.42,.738]){
+ box(printerCart,.60,.024,.45,0,y,0,printerSteel,y===.738?'プリンター天板':'収納棚板');
+ for(const z of [-.19,.19])rod(printerCart,[-.28,y-.02,z],[.28,y-.02,z],.006,printerSteel);
+}
+rod(printerCart,[-.28,.18,-.19],[.28,.72,-.19],.004,printerSteel);
+rod(printerCart,[.28,.18,-.19],[-.28,.72,-.19],.004,printerSteel);
+const printer=new THREE.Group();printer.name='家庭用インクジェット複合機（仮モデル）';printer.position.set(0,.751,0);printerCart.add(printer);
+for(const x of [-.14,.14])for(const z of [-.11,.11])box(printer,.023,.008,.024,x,.004,z,M.dark);
+const printerBody=new THREE.Mesh(roundedTableGeometry(.41,.35,.025,.152,.003),printerPlastic);printerBody.position.y=.008;printerBody.castShadow=printerBody.receiveShadow=true;printerBody.name='丸みのあるプリンター本体';printer.add(printerBody);
+box(printer,.385,.004,.32,0,.162,0,printerDark,'スキャナーふたの継ぎ目');
+const scannerLid=new THREE.Mesh(roundedTableGeometry(.398,.335,.021,.016,.002),M.white);scannerLid.position.y=.164;scannerLid.castShadow=true;scannerLid.name='スキャナーのふた';printer.add(scannerLid);
+box(printer,.065,.003,.010,0,.182,.142,printerDark,'ふたの指掛け');
+box(printer,.16,.044,.008,0,.128,.177,printerDark,'操作パネル');
+box(printer,.057,.030,.001,-.035,.129,.182,new THREE.MeshStandardMaterial({color:0x9fbfbb,emissive:0x6f9992,emissiveIntensity:.15}),'小型ディスプレイ');
+for(const x of [.015,.040,.065]){const button=new THREE.Mesh(new THREE.CylinderGeometry(.005,.005,.002,16),M.white);button.rotation.x=Math.PI/2;button.position.set(x,.130,.1825);printer.add(button);}
+box(printer,.31,.023,.004,0,.074,.177,M.black,'排紙口');
+box(printer,.32,.030,.005,0,.029,.178,M.white,'前面給紙カセット');
+box(printer,.078,.004,.002,0,.037,.181,printerDark,'カセット取っ手');
+box(printer,.28,.007,.176,0,.056,.232,printerDark,'引き出した排紙トレー');
+box(printer,.210,.002,.145,0,.061,.241,paperWhite,'印刷したA4用紙');
+for(let i=0;i<6;i++)box(printer,.105,.0006,.002,-.025,.0622,.206+i*.010,printerDark,'用紙の印字');
+const rearFeed=new THREE.Group();rearFeed.name='後ろ給紙トレー';rearFeed.position.set(0,.17,-.168);rearFeed.rotation.x=-.22;printer.add(rearFeed);
+box(rearFeed,.285,.135,.008,0,.066,0,printerDark);
+box(rearFeed,.210,.130,.002,0,.083,.006,paperWhite,'給紙用A4用紙');
+for(const x of [-.111,.111])box(rearFeed,.010,.048,.013,x,.025,.008,printerPlastic,'用紙ガイド');
+// Wrapped paper reams and spare ink on the two lower shelves.
+const printerSupplies=new THREE.Group();printerSupplies.name='コピー用紙・予備インク';printerCart.add(printerSupplies);
+const paperReamWrap=mat(0xd1dbd2,.87),inkColors=[0x3b959e,0xb75f80,0xdfc764,0x383f3f];
+for(let i=0;i<3;i++){
+ const g=new THREE.Group();g.name='A4コピー用紙 500枚包み';g.position.set(-.12,.433+i*.045,-.02);printerSupplies.add(g);
+ box(g,.215,.042,.30,0,.021,0,paperReamWrap);box(g,.205,.028,.003,0,.021,.152,paperWhite,'紙の束の断面');
+ sticker(g,'A4',.085,.024,0,.021,.154);
+}
+const inkBasket=new THREE.Group();inkBasket.name='予備インクの収納ケース';inkBasket.position.set(.175,.433,.02);printerSupplies.add(inkBasket);
+box(inkBasket,.165,.006,.205,0,.003,0,printerPlastic);
+for(const x of [-.0825,.0825])box(inkBasket,.004,.072,.205,x,.039,0,printerPlastic);
+for(const z of [-.1025,.1025])box(inkBasket,.165,.072,.004,0,.039,z,printerPlastic);
+for(let i=0;i<4;i++){box(inkBasket,.032,.095,.068,-.057+i*.038,.053,0,M.white,'予備インクの箱');box(inkBasket,.032,.020,.001,-.057+i*.038,.085,.0345,mat(inkColors[i],.78));}
+box(printerSupplies,.39,.17,.30,0,.247,0,paperReamWrap,'コピー用紙のストック箱');sticker(printerSupplies,'A4 PAPER',.22,.054,0,.247,.151);
+// Cable follows the archive-box side, then the north-east wall outlet; no door crossing.
+const printerCables=new THREE.Group();printerCables.name='プリンターから北東壁コンセントへの配線';model.add(printerCables);
+curve(printerCables,[[4.68,.83,1.49],[4.77,.70,1.46],[4.78,.06,1.46],[4.80,.013,1.08],[6.49,.013,1.06],[6.54,.03,.94],[6.55,.29,.92]].map(([x,y,z])=>[x-3.35,y,z-4]),.004,M.white);
+W(printerCables,.022,.031,.040,6.55,.29,.92,M.white,'壁コンセントに差したプラグ');
 // Representative Dyson cordless profile; exact model is unspecified.
 const vacuum=group('ダイソン コードレス掃除機',5.89,.83);
 const vacuumPurple=mat(0x624180,.42,.32),vacuumTube=mat(0xba713a,.36,.62);
@@ -1086,7 +1139,7 @@ shadowGradient.addColorStop(0,'rgba(17,22,28,.20)');shadowGradient.addColorStop(
 shadowCtx.fillStyle=shadowGradient;shadowCtx.fillRect(0,0,128,128);
 const shadowMaterial=new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(shadowCanvas),transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1});
 function contactShadow(parent,x,z,w,d){const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,d),shadowMaterial);mesh.rotation.x=-Math.PI/2;mesh.position.set(x-3.35,.004,z-4);parent.add(mesh)}
-for(const p of [[4.2,7.5,1.7,1.7],[5.5,7.5,1.7,1.7],[.64,1.57,1.2,1.5],[.55,2.82,1.1,1.85]])contactShadow(model,...p);
+for(const p of [[4.2,7.5,1.7,1.7],[5.5,7.5,1.7,1.7],[.64,1.57,1.2,1.5],[.55,2.82,1.1,1.85],[4.50,1.65,.90,.80]])contactShadow(model,...p);
 for(const p of [[2.275,4.55,2.6,5.8],[5.3,2.525,2.4,3]])contactShadow(layoutShadows.A,...p);
 for(const [x,z] of deskLayouts.B)contactShadow(layoutShadows.B,x,z,1.4,1.7);
 contactShadow(layoutShadows.B,3.35,4.0,1.8,2.6);
@@ -1217,13 +1270,13 @@ function updateLabel(){
  layoutLabel.textContent=layout==='B'
   ?`配置B：デスク 西3台・東4台／北側ワゴンに50インチ画面・電話／ノートPC ${equipment.visible?'表示':'非表示'}`
   :'配置A：デスク7台の島／会議テーブル RUGHAUS 1,750×800と会議チェア4脚';
- stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、北側ドアのキッチン・トイレサイン、北壁の時計、簡易ハンガーラック、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
+ stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その左手前の家庭用プリンターと用紙・インク収納ワゴン、北側ドアのキッチン・トイレサイン、北壁の時計、簡易ハンガーラック、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
 }
 function setLayout(next){layout=next==='A'?'A':'B';layoutGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===layout);trashBins.forEach((g,i)=>{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=Math.PI/2});deskObjects.forEach((g,i)=>{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout==='A';roundGroup.visible=layout==='B';layoutShadows.A.visible=layout==='A';layoutShadows.B.visible=layout==='B';
  if(layout!=='B')openCompare(false);
  renderCard();updateLabel();if(view==='table')setView('table');else render()}
 function wallTransparency(){outer.traverse(o=>{if(!o.isMesh)return;if(o.material===glass)return;if(!o.userData.original)o.userData.original=o.material;o.material=wallToggle.checked?o.userData.original.clone():o.userData.original;if(wallToggle.checked){o.material.transparent=true;o.material.opacity=.13;o.material.depthWrite=false;o.castShadow=false}else o.castShadow=true});render()}
-function setView(next){view=['overview','inside','reverse','top','table','rack','kitchen','doors','pantry'].includes(next)?next:'overview';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
+function setView(next){view=['overview','inside','reverse','top','table','rack','kitchen','doors','pantry','printer'].includes(next)?next:'overview';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
  if(view==='overview'){camera.position.set(.6,9.1,10.4);controls.target.set(0,.55,-.35);controls.maxPolarAngle=Math.PI*.49}
  if(view==='inside'){camera.position.set(.25,1.6,2.25);controls.target.set(-.25,1.35,-2.5);controls.maxPolarAngle=Math.PI*.72}
  if(view==='reverse'){camera.position.set(-2.25,1.6,-2.15);controls.target.set(.45,1.30,2.60);controls.maxPolarAngle=Math.PI*.72}
@@ -1231,6 +1284,7 @@ function setView(next){view=['overview','inside','reverse','top','table','rack',
  if(view==='kitchen'){camera.position.set(-.25,2.55,-2.55);controls.target.set(-2.80,.90,-1.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='rack'){camera.position.set(3.04,2.0,2.35);controls.target.set(3.04,.55,3.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='pantry'){camera.position.set(-1.20,2.95,-1.55);controls.target.set(-2.80,1.74,-1.18);controls.maxPolarAngle=Math.PI*.49}
+ if(view==='printer'){camera.position.set(.50,1.65,-.35);controls.target.set(1.15,.55,-2.35);controls.maxPolarAngle=Math.PI*.49}
  if(view==='doors'){camera.position.set(.30,2.05,-1.00);controls.target.set(.30,1.68,-3.58);controls.maxPolarAngle=Math.PI*.49}
  if(view==='top'){camera.position.set(0,16.8,.02);controls.target.set(0,0,-.32);controls.maxPolarAngle=Math.PI*.49}
  lastFit=1;resize();controls.update();render();
@@ -1257,7 +1311,7 @@ $('#ss-right').addEventListener('click',()=>turn(Math.PI/8));
 $('#ss-near').addEventListener('click',()=>zoom(.8));
 $('#ss-far').addEventListener('click',()=>zoom(1.25));
 $('#ss-reset').addEventListener('click',()=>setView(view));
-function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','rack','kitchen','doors','pantry'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','rack','kitchen','doors','pantry'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','rack','kitchen','doors','pantry','printer'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','rack','kitchen','doors','pantry','printer'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
 new ResizeObserver(resize).observe(stage);
 const saved=store.get()||{};
 sortKey=saved.sortKey==='area'?'area':'price';
@@ -1270,7 +1324,7 @@ setView(saved.view);
 wallTransparency();
 root.querySelector('.ss-loading').hidden=true;
 root.dataset.ready='true';
-root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory};
+root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory,printerCart,printer,printerSupplies,printerCables};
 render();
 }catch(err){root.querySelector('.ss-loading').textContent='3Dの読み込みに失敗しました。ページを再読み込みしてください。';console.error(err)}
 })();
