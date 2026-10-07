@@ -172,6 +172,9 @@ button,input,select{font:inherit;color:inherit}
         <label class="check"><input id="ss-power" type="checkbox" checked>電源の位置（9箇所・36口）</label>
         <label class="check"><input id="ss-laptops" type="checkbox">中央テーブルのノートPC（6台）</label>
         <label class="check"><input id="ss-walls" type="checkbox">外壁を透かす</label>
+        <button id="ss-balcony" type="button">ベランダの吸い殻容器を見る</button>
+        <button id="ss-fragrance" type="button">ヒノキのディフューザーを見る</button>
+        <a href="purchase-list.html" target="_blank" rel="noopener">購入リストを見る ↗</a>
       </div>
     </details>
   </header>
@@ -1452,6 +1455,31 @@ for(const sign of [-1,1]){
   const vein=curve(leaf,[[0,.006,.0003],[0,.044,.003],[0,start.distanceTo(tip)*.90,.007]],.0003,mat(0x657c4e,.9));vein.name='葉の中央の筋';
  }
 }
+
+// Outdoor-only cigarette waste station, placed away from the balcony door leaf.
+const cigaretteBin=group('ベランダの吸い殻専用容器',.43,.40);
+const ashSteel=mat(0x9ca7ac,.30,.78),ashDark=mat(0x303a3d,.6);
+const ashBody=pantryLathe(cigaretteBin,'吸い殻を収納する金属容器',[[0,.025],[.115,.025],[.123,.050],[.123,.585],[.117,.608],[0,.608]],ashSteel);
+const ashBase=pantryLathe(cigaretteBin,'重みのある底部',[[0,0],[.133,0],[.133,.023],[.115,.028],[0,.028]],ashDark);
+// A lid with a small drop opening hides the waste inside; not a general rubbish bin.
+pantryLathe(cigaretteBin,'上部のふた',[[.023,.609],[.123,.609],[.130,.619],[.123,.635],[.027,.642],[.023,.634],[.023,.609]],ashSteel);
+const ashOpening=new THREE.Mesh(new THREE.CircleGeometry(.023,40),M.black);ashOpening.rotation.x=-Math.PI/2;ashOpening.position.y=.610;cigaretteBin.add(ashOpening);
+for(const x of [-.048,.048])rod(cigaretteBin,[x,.645,-.035],[x,.645,.035],.0028,ashDark).name='火消し用の金属バー';
+const ashLabelCanvas=document.createElement('canvas');ashLabelCanvas.width=640;ashLabelCanvas.height=520;const ac=ashLabelCanvas.getContext('2d');ac.fillStyle='#f4f2e8';ac.fillRect(0,0,640,520);ac.fillStyle='#374443';ac.textAlign='center';ac.font='bold 76px sans-serif';ac.fillText('吸い殻専用',320,160);ac.font='36px sans-serif';ac.fillText('CIGARETTE WASTE',320,222);ac.fillStyle='#9b4a3c';ac.fillRect(25,287,590,130);ac.fillStyle='#ffffff';ac.font='bold 52px sans-serif';ac.fillText('室内持込禁止',320,370);ac.fillStyle='#596661';ac.font='32px sans-serif';ac.fillText('吸い殻はここで処分',320,475);
+const ashLabelTexture=new THREE.CanvasTexture(ashLabelCanvas);ashLabelTexture.colorSpace=THREE.SRGBColorSpace;
+const ashLabel=new THREE.Mesh(new THREE.PlaneGeometry(.174,.141),new THREE.MeshStandardMaterial({map:ashLabelTexture,roughness:.85}));ashLabel.position.set(0,.40,-.124);ashLabel.rotation.y=Math.PI;cigaretteBin.add(ashLabel);
+// Hinoki reed diffuser on a small shelf beside the entrance, separate from electronics.
+const fragranceShelf=group('入口脇の香り用小棚',.95,7.99);
+box(fragranceShelf,.34,.020,.18,0,1.140,0,M.wood,'小さな木製棚板');
+for(const x of [-.105,.105]){box(fragranceShelf,.020,.10,.012,x,1.085,.084,M.metal);rod(fragranceShelf,[x,1.045,.076],[x,1.130,-.057],.004,M.metal)}
+const hinokiDiffuser=new THREE.Group();hinokiDiffuser.name='ヒノキのリードディフューザー';hinokiDiffuser.position.set(0,1.151,-.027);fragranceShelf.add(hinokiDiffuser);
+const scentGlass=new THREE.MeshPhysicalMaterial({color:0x96784a,roughness:.18,transparent:true,opacity:.72,metalness:0,depthWrite:false});
+pantryLathe(hinokiDiffuser,'琥珀色のガラス瓶',[[0,0],[.036,0],[.040,.006],[.040,.100],[.033,.112],[.014,.125],[.014,.138],[.010,.138],[.010,.123],[.029,.108],[.035,.098],[.035,.007],[0,.007]],scentGlass);
+pantryLathe(hinokiDiffuser,'淡い色の香り液',[[0,.008],[.034,.008],[.034,.078],[0,.078]],mat(0xc9ad78,.6));
+pantryLathe(hinokiDiffuser,'木製のボトル口',[[.010,.127],[.017,.127],[.017,.146],[.010,.146],[.010,.127]],M.wood);
+const reeds=[];for(let i=0;i<7;i++){const angle=i*2.39996,x=Math.sin(angle)*.008,z=Math.cos(angle)*.008;reeds.push(rod(hinokiDiffuser,[x,.025,z],[Math.sin(angle)*.060,.310+(i%3)*.009,Math.cos(angle)*.046],.0016,mat(0xb49b6e,.95)))}
+const scentCanvas=document.createElement('canvas');scentCanvas.width=480;scentCanvas.height=360;const sc=scentCanvas.getContext('2d');sc.fillStyle='#f5f0e3';sc.fillRect(0,0,480,360);sc.fillStyle='#405247';sc.textAlign='center';sc.font='bold 56px serif';sc.fillText('HINOKI',240,110);sc.font='49px sans-serif';sc.fillText('ヒノキ',240,194);sc.font='25px sans-serif';sc.fillText('REED DIFFUSER',240,280);const scentTex=new THREE.CanvasTexture(scentCanvas);scentTex.colorSpace=THREE.SRGBColorSpace;
+const scentLabel=new THREE.Mesh(new THREE.PlaneGeometry(.054,.041),new THREE.MeshStandardMaterial({map:scentTex,roughness:.9}));scentLabel.position.set(0,.067,-.0405);scentLabel.rotation.y=Math.PI;hinokiDiffuser.add(scentLabel);
 const wb=group('WB',6.56,3.652);box(wb,.035,.90,1.8,0,1.55,0,M.white);
 for(const y of [1.10,2.0])box(wb,.055,.025,1.84,0,y,0,M.metal);
 for(const z of [-.9,.9])box(wb,.055,.92,.025,0,1.55,z,M.metal);
@@ -1650,25 +1678,27 @@ function updateCartCable(z,h){
 function setLaptops(show){laptopToggle.checked=!!show;equipment.visible=!!show;placeSchedule();updateFargoCable();updateLabel();render()}
 function setFloor(next){floorFinish=next==='carpet'?'carpet':'linoleum';officeFloor.material=floorFinish==='carpet'?M.carpet:sheetMaterial;floorGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===floorFinish);render()}
 function interior(){return view==='inside'||view==='reverse'}
-function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&&!powerToggle.checked)||(p.layout&&p.layout!==layout)||interior()||view==='clothes'||view==='shrine'||view==='display'||(view==='table'&&p===tableDimensionPin)||v.z>1||v.z< -1||Math.abs(v.x)>.97||Math.abs(v.y)>.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
+function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&&!powerToggle.checked)||(p.layout&&p.layout!==layout)||interior()||view==='clothes'||view==='shrine'||view==='display'||view==='balcony'||view==='fragrance'||(view==='table'&&p===tableDimensionPin)||v.z>1||v.z< -1||Math.abs(v.x)>.97||Math.abs(v.y)>.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
 function render(){renderer.render(scene,camera);projectPins();root.dataset.layout=layout;root.dataset.tableModel=layout==='B'?tableChoice:'';root.dataset.laptops=String(equipment.visible)}
 function updateLabel(){
  layoutLabel.textContent=layout==='B'
   ?`配置B：デスク 西3台・東4台／北側ワゴンに50インチ画面・電話／ノートPC ${equipment.visible?'表示':'非表示'}`
   :'配置A：デスク7台の島／会議テーブル RUGHAUS 1,750×800と会議チェア4脚';
- stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。50インチ画面にはmacOS風の複数ウィンドウを表示。テーブル上のA3ガントチャート印刷紙とモニター側の黄色いFargo電源タップ（ワゴンから給電コード）、フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その左手前の家庭用プリンターと用紙・インク収納ワゴン、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、作業ジャケット5着を掛けた簡易ハンガーラックと、その上の北壁に木製の神棚、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
+ stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。50インチ画面にはmacOS風の複数ウィンドウを表示。テーブル上のA3ガントチャート印刷紙とモニター側の黄色いFargo電源タップ（ワゴンから給電コード）、フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その左手前の家庭用プリンターと用紙・インク収納ワゴン、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、作業ジャケット5着を掛けた簡易ハンガーラックと、その上の北壁に木製の神棚、ベランダの吸い殻専用容器（室内持込禁止）、入口脇のヒノキのリードディフューザー、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
 }
 function setLayout(next){layout=next==='A'?'A':'B';layoutGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===layout);trashBins.forEach((g,i)=>{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=Math.PI/2});deskObjects.forEach((g,i)=>{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout==='A';roundGroup.visible=layout==='B';layoutShadows.A.visible=layout==='A';layoutShadows.B.visible=layout==='B';
  viewGroup.querySelector('input[value="display"]').disabled=layout!=='B';
  if(layout!=='B'){openCompare(false);if(view==='display')view='table';}
  renderCard();updateLabel();if(view==='table'||view==='display')setView(view);else render()}
 function wallTransparency(){outer.traverse(o=>{if(!o.isMesh)return;if(o.material===glass)return;if(!o.userData.original)o.userData.original=o.material;o.material=wallToggle.checked?o.userData.original.clone():o.userData.original;if(wallToggle.checked){o.material.transparent=true;o.material.opacity=.13;o.material.depthWrite=false;o.castShadow=false}else o.castShadow=true});render()}
-function setView(next){view=['overview','inside','reverse','top','table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display'].includes(next)?next:'overview';if(view==='display'&&layout==='A')view='table';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
+function setView(next){view=['overview','inside','reverse','top','table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display','balcony','fragrance'].includes(next)?next:'overview';if(view==='display'&&layout==='A')view='table';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
  if(view==='overview'){camera.position.set(.6,9.1,10.4);controls.target.set(0,.55,-.35);controls.maxPolarAngle=Math.PI*.49}
  if(view==='inside'){camera.position.set(.25,1.6,2.25);controls.target.set(-.25,1.35,-2.5);controls.maxPolarAngle=Math.PI*.72}
  if(view==='reverse'){camera.position.set(-2.25,1.6,-2.15);controls.target.set(.45,1.30,2.60);controls.maxPolarAngle=Math.PI*.72}
  if(view==='table'){camera.position.set(layout==='B'?1.9:1,1.85,layout==='B'?2.4:1.05);controls.target.set(layout==='B'?0:1.95,.62,layout==='B'?-.30:-1.475);controls.maxPolarAngle=Math.PI*.49}
  if(view==='display'){const z=mediaCart.position.z,h=tableOptions[tableChoice].height;camera.position.set(.64,h+.91,z+1.82);controls.target.set(0,h+.43,z+.02);controls.maxPolarAngle=Math.PI*.49}
+ if(view==='balcony'){camera.position.set(-2.16,1.25,-4.65);controls.target.set(-2.92,.36,-3.60);controls.maxPolarAngle=Math.PI*.49}
+ if(view==='fragrance'){camera.position.set(-1.94,1.55,2.85);controls.target.set(-2.40,1.32,3.955);controls.maxPolarAngle=Math.PI*.49}
  if(view==='kitchen'){camera.position.set(-.25,2.55,-2.55);controls.target.set(-2.80,.90,-1.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='rack'){camera.position.set(3.04,2.0,2.35);controls.target.set(3.04,.55,3.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='pantry'){camera.position.set(-1.20,2.95,-1.55);controls.target.set(-2.80,1.74,-1.18);controls.maxPolarAngle=Math.PI*.49}
@@ -1701,8 +1731,10 @@ $('#ss-left').addEventListener('click',()=>turn(-Math.PI/8));
 $('#ss-right').addEventListener('click',()=>turn(Math.PI/8));
 $('#ss-near').addEventListener('click',()=>zoom(.8));
 $('#ss-far').addEventListener('click',()=>zoom(1.25));
+$('#ss-balcony').addEventListener('click',()=>{setView('balcony');root.querySelector('.menu').open=false;save()});
+$('#ss-fragrance').addEventListener('click',()=>{setView('fragrance');root.querySelector('.menu').open=false;save()});
 $('#ss-reset').addEventListener('click',()=>setView(view));
-function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display','balcony','fragrance'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display','balcony','fragrance'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
 new ResizeObserver(resize).observe(stage);
 const saved=store.get()||{};
 sortKey=saved.sortKey==='area'?'area':'price';
@@ -1715,7 +1747,7 @@ setView(saved.view);
 wallTransparency();
 root.querySelector('.ss-loading').hidden=true;
 root.dataset.ready='true';
-root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory,printerCart,printer,printerSupplies,printerCables,calendarTablet,calendarScreen,workJackets,schedulePrint,ganttSheet,meetingSchedule,kamidana,shrineOfuda,shrineOfferings,shrineSakaki,fargoTap,fargoSockets,fargoCable,sharedDisplay,sharedScreen};
+root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory,printerCart,printer,printerSupplies,printerCables,calendarTablet,calendarScreen,workJackets,schedulePrint,ganttSheet,meetingSchedule,kamidana,shrineOfuda,shrineOfferings,shrineSakaki,fargoTap,fargoSockets,fargoCable,sharedDisplay,sharedScreen,cigaretteBin,fragranceShelf,hinokiDiffuser};
 render();
 }catch(err){root.querySelector('.ss-loading').textContent='3Dの読み込みに失敗しました。ページを再読み込みしてください。';console.error(err)}
 })();
