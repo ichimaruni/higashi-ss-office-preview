@@ -172,6 +172,7 @@ button,input,select{font:inherit;color:inherit}
         <label class="check"><input id="ss-power" type="checkbox" checked>電源の位置（9箇所・36口）</label>
         <label class="check"><input id="ss-laptops" type="checkbox">中央テーブルのノートPC（6台）</label>
         <label class="check"><input id="ss-walls" type="checkbox">外壁を透かす</label>
+        <button id="ss-meeting" type="button">4人のオンライン会議セットを見る</button>
         <button id="ss-balcony" type="button">ベランダの吸い殻容器を見る</button>
         <button id="ss-fragrance" type="button">ヒノキのディフューザーを見る</button>
         <a href="purchase-list.html" target="_blank" rel="noopener">購入リストを見る ↗</a>
@@ -837,6 +838,58 @@ box(sharedDisplay,.085,.13,.052,0,.80,-.009,M.black);
 box(sharedDisplay,.48,.022,.31,0,.731,0,M.black,'卓上スタンド');
 box(sharedDisplay,.23,.31,.036,0,1.087,-.04,M.dark);
 curve(sharedDisplay,[[.08,.95,-.06],[.08,.83,-.08],[.15,.736,-.11],[.25,.735,-.12]],.004,M.black);
+// Shared meeting setup: one computer / one meeting connection for about four people.
+// Generic placement models; field of view and audio pickup require product selection.
+const meetingCamera=new THREE.Group();meetingCamera.name='4人用の広角USBカメラ・モニター上';meetingCamera.position.set(0,1.520,.014);sharedDisplay.add(meetingCamera);
+const meetingFinish=mat(0x30363b,.48,.28),lensGlass=new THREE.MeshPhysicalMaterial({color:0x172e44,metalness:.45,roughness:.10,clearcoat:1});
+function meetingRound(parent,w,h,d,x,y,z,m,name){const mesh=new THREE.Mesh(roundedTableGeometry(w,h,Math.min(.018,h/3),d,.001),m);mesh.rotation.x=Math.PI/2;mesh.position.set(x,y,z-d/2);mesh.name=name;mesh.castShadow=true;parent.add(mesh);return mesh}
+meetingRound(meetingCamera,.180,.055,.045,0,0,0,meetingFinish,'丸みのあるカメラ本体 180×55mm');
+box(meetingCamera,.057,.012,.065,0,-.030,-.010,M.black,'画面上端のクリップ');box(meetingCamera,.012,.026,.018,0,-.015,-.026,M.black);
+function frontDisc(parent,r,depth,x,y,z,m,name){const mesh=new THREE.Mesh(new THREE.CylinderGeometry(r,r,depth,48),m);mesh.rotation.x=Math.PI/2;mesh.position.set(x,y,z);mesh.name=name;parent.add(mesh);return mesh}
+frontDisc(meetingCamera,.022,.006,0,0,.025,M.black,'レンズ周囲');frontDisc(meetingCamera,.017,.004,0,0,.030,lensGlass,'広角レンズ');frontDisc(meetingCamera,.008,.001,-.003,.003,.033,mat(0x294c65,.13,.50),'レンズの反射');
+frontDisc(meetingCamera,.002,.002,.064,0,.025,mat(0x66bdad,.3),'カメラ状態ランプ');
+for(const x of [-.060,-.052,-.044])frontDisc(meetingCamera,.0015,.001,x,0,.024,M.black,'本体の小孔');
+curve(sharedDisplay,[[.065,1.520,-.025],[.09,1.49,-.052],[.10,1.18,-.071],[.14,.80,-.080],[.18,.735,-.16]],.002,M.black).name='カメラのUSB配線・モニター背面';
+
+const meetingLights=new THREE.Group();meetingLights.name='ワゴン固定の拡散LEDライト 2灯';mediaEquipment.add(meetingLights);
+const diffuserMat=new THREE.MeshStandardMaterial({color:0xfff5df,roughness:.85,emissive:0xffe9c6,emissiveIntensity:.45});
+for(const side of [-1,1]){
+ const x=side*.252,outerX=side*.72;
+ box(meetingLights,.045,.055,.042,x,-.018,-.15,meetingFinish,'ワゴン天板のクランプ');
+ rod(meetingLights,[x,-.035,-.15],[x,.12,-.15],.009,cartChrome);
+ rod(meetingLights,[x,.12,-.15],[outerX,.46,-.12],.009,meetingFinish);
+ rod(meetingLights,[outerX,.46,-.12],[outerX,.80,-.12],.008,cartChrome);
+ frontDisc(meetingLights,.020,.025,outerX,.46,-.12,M.black,'アーム角度調整ノブ');
+ const panel=new THREE.Group();panel.name='顔を照らす拡散パネル 200×140mm';panel.position.set(outerX,.83,-.11);panel.rotation.y=-side*.24;panel.rotation.x=-.12;meetingLights.add(panel);
+ meetingRound(panel,.21,.15,.028,0,0,0,meetingFinish,'LEDライトの薄い筐体');
+ meetingRound(panel,.195,.135,.003,0,0,.017,diffuserMat,'やわらかい白色の拡散面');
+ for(const dx of [-.111,.111])rod(panel,[dx,-.05,0],[dx,.035,0],.004,M.black);
+ curve(meetingLights,[[outerX,.81,-.14],[outerX,.46,-.15],[x,.12,-.18],[x,-.02,-.18],[.10,-.025,-.19]],.002,M.black).name='ライト電源・アーム沿い';
+}
+const meetingPC=new THREE.Group();meetingPC.name='会議用PC 1台・1アカウントで参加';mediaCart.add(meetingPC);
+box(meetingPC,.18,.04,.18,0,.020,0,cartSilver,'会議用ミニPC・仮モデル');box(meetingPC,.17,.003,.17,0,.042,0,M.metal);
+for(const x of [-.055,-.035])box(meetingPC,.014,.005,.001,x,.024,.091,M.black,'USB端子');
+frontDisc(meetingPC,.002,.001,.06,.025,.091,mat(0x8ce6ce,.3),'PC電源ランプ');
+const meetingMic=new THREE.Group();meetingMic.name='卓上USBスピーカーマイク・直径160mm';roundGroup.add(meetingMic);
+lathe(meetingMic,'丸いスピーカーマイク本体',[[0,0],[.067,0],[.077,.006],[.08,.018],[.078,.034],[.073,.040],[0,.040]],meetingFinish);
+const micCanvas=document.createElement('canvas');micCanvas.width=micCanvas.height=512;const mc=micCanvas.getContext('2d');mc.fillStyle='#343b40';mc.fillRect(0,0,512,512);
+for(let row=0;row<44;row++)for(let col=0;col<44;col++){const x=col*12+(row%2)*6,y=row*12;if(Math.hypot(x-256,y-256)<244){mc.fillStyle='#131b20';mc.beginPath();mc.arc(x,y,2.2,0,Math.PI*2);mc.fill()}}
+mc.fillStyle='#444e54';mc.beginPath();mc.arc(256,256,67,0,Math.PI*2);mc.fill();mc.strokeStyle='#d4e6e5';mc.lineWidth=6;mc.beginPath();mc.roundRect(248,226,16,33,8);mc.stroke();mc.beginPath();mc.arc(256,250,20,0,Math.PI);mc.moveTo(256,270);mc.lineTo(256,282);mc.moveTo(244,282);mc.lineTo(268,282);mc.stroke();
+mc.fillStyle='#c1cccf';mc.font='32px Arial';mc.textAlign='center';mc.fillText('−',140,266);mc.fillText('+',372,266);
+const micTex=new THREE.CanvasTexture(micCanvas);micTex.colorSpace=THREE.SRGBColorSpace;const micGrille=new THREE.Mesh(new THREE.CircleGeometry(.072,64),new THREE.MeshStandardMaterial({map:micTex,roughness:.85}));micGrille.rotation.x=-Math.PI/2;micGrille.position.y=.0405;meetingMic.add(micGrille);
+const micRing=new THREE.Mesh(new THREE.TorusGeometry(.074,.0015,6,80),mat(0x63c7b5,.35));micRing.rotation.x=Math.PI/2;micRing.position.y=.037;meetingMic.add(micRing);
+const meetingCables=new THREE.Group();meetingCables.name='会議機器を1台のPCへ接続';roundGroup.add(meetingCables);
+function updateMeetingSetup(){
+ const h=tableOptions[tableChoice].height,z=mediaCart.position.z,north=-tableOptions[tableChoice].mm[0]/2000;
+ meetingMic.position.set(0,h+.001,.32);
+ const pcY=.08+.106*cartFrame.scale.y+.001;meetingPC.position.set(0,pcY,0);
+ while(meetingCables.children.length){const m=meetingCables.children[0];meetingCables.remove(m);m.geometry.dispose()}
+ const edge=tableOptions[tableChoice].mm[1]/2000+.015,gap=(tableOptions[tableChoice].laptopZ[1]+tableOptions[tableChoice].laptopZ[2])/2;
+ const micRoute=equipment.visible?[[.079,h+.016,.32],[.10,h+.007,gap],[edge-.02,h+.005,gap],[edge,h-.03,gap],[edge-.02,h-.075,-.30],[.22,h-.075,north-.04]]:[[0,h+.016,.24],[.12,h+.007,.22],[.25,h+.005,.17],[.25,h+.004,-.18],[.20,h+.003,north+.025],[.20,h-.06,north-.03]];
+ curve(meetingCables,[...micRoute,[.23,h-.11,z+.16],[.23,pcY+.06,z+.10],[.06,pcY+.025,z+.092]],.0023,M.black).name='スピーカーマイクUSB・天板端からワゴンへ';
+ curve(meetingCables,[[.18,h+.015,z-.16],[.20,h-.06,z-.21],[.20,pcY+.025,z-.21],[.02,pcY+.024,z-.092]],.003,M.black).name='PCから画面・カメラへ接続';
+}
+
 // 14-inch MacBook Pro footprint: 312.6 × 221.2 mm. Six open laptops
 // sit three on each long side, leaving the north end for the shared display.
 const laptopSilver=mat(0xaeb2b5,.36,.7),trackpadMat=mat(0x979da0,.44,.5);
@@ -1659,10 +1712,11 @@ function setTable(next){
  deskPhone.position.y=.08+.347*cartFrame.scale.y-option.height;
  updateCartCable(cartZ,option.height);
  updateFargoCable();
+ updateMeetingSetup();
  laptops.forEach((g,i)=>{const side=i<3?-1:1;g.position.x=side*option.laptopX;g.position.z=option.laptopZ[i%3]});
  const [w,d]=option.mm;tableDimensionPin.el.firstElementChild.textContent=option.shape==='round'?`φ${fmt(w)}`:`${fmt(w)}×${fmt(d)}`;
  tableDimensionPin.pos.z=option.pinZ;
- renderCard();if(!drawer.hidden)renderLedger();updateLabel();if(view==='display')setView('display');else render();
+ renderCard();if(!drawer.hidden)renderLedger();updateLabel();if(view==='display'||view==='meeting')setView(view);else render();
 }
 function updateCartCable(z,h){
  while(cartCables.children.length){const mesh=cartCables.children[0];cartCables.remove(mesh);mesh.geometry.dispose()}
@@ -1675,28 +1729,29 @@ function updateCartCable(z,h){
  const phoneY=.08+.347*(h-.08)/.64;
  curve(cartCables,[[.02,phoneY+.01,z+.01],[.13,phoneY+.008,z-.15],[.16,phoneY+.05,z-.21],[.10,h-.026,z-.18]],.003,M.black).name='中段の電話の充電ケーブル';
 }
-function setLaptops(show){laptopToggle.checked=!!show;equipment.visible=!!show;placeSchedule();updateFargoCable();updateLabel();render()}
+function setLaptops(show){laptopToggle.checked=!!show;equipment.visible=!!show;placeSchedule();updateFargoCable();updateMeetingSetup();updateLabel();render()}
 function setFloor(next){floorFinish=next==='carpet'?'carpet':'linoleum';officeFloor.material=floorFinish==='carpet'?M.carpet:sheetMaterial;floorGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===floorFinish);render()}
 function interior(){return view==='inside'||view==='reverse'}
-function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&&!powerToggle.checked)||(p.layout&&p.layout!==layout)||interior()||view==='clothes'||view==='shrine'||view==='display'||view==='balcony'||view==='fragrance'||(view==='table'&&p===tableDimensionPin)||v.z>1||v.z< -1||Math.abs(v.x)>.97||Math.abs(v.y)>.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
+function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&&!powerToggle.checked)||(p.layout&&p.layout!==layout)||interior()||view==='clothes'||view==='shrine'||view==='display'||view==='balcony'||view==='fragrance'||view==='meeting'||(view==='table'&&p===tableDimensionPin)||v.z>1||v.z< -1||Math.abs(v.x)>.97||Math.abs(v.y)>.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
 function render(){renderer.render(scene,camera);projectPins();root.dataset.layout=layout;root.dataset.tableModel=layout==='B'?tableChoice:'';root.dataset.laptops=String(equipment.visible)}
 function updateLabel(){
  layoutLabel.textContent=layout==='B'
   ?`配置B：デスク 西3台・東4台／北側ワゴンに50インチ画面・電話／ノートPC ${equipment.visible?'表示':'非表示'}`
   :'配置A：デスク7台の島／会議テーブル RUGHAUS 1,750×800と会議チェア4脚';
- stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。50インチ画面にはmacOS風の複数ウィンドウを表示。テーブル上のA3ガントチャート印刷紙とモニター側の黄色いFargo電源タップ（ワゴンから給電コード）、フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その左手前の家庭用プリンターと用紙・インク収納ワゴン、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、作業ジャケット5着を掛けた簡易ハンガーラックと、その上の北壁に木製の神棚、ベランダの吸い殻専用容器（室内持込禁止）、入口脇のヒノキのリードディフューザー、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
+ stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。50インチ画面にはmacOS風の複数ウィンドウを表示。4人程度の会議用に、モニター上の広角カメラ、卓上スピーカーマイク、左右の拡散LEDライト2灯、ワゴン下段の共用PC1台を配置。テーブル上のA3ガントチャート印刷紙とモニター側の黄色いFargo電源タップ（ワゴンから給電コード）、フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その左手前の家庭用プリンターと用紙・インク収納ワゴン、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、作業ジャケット5着を掛けた簡易ハンガーラックと、その上の北壁に木製の神棚、ベランダの吸い殻専用容器（室内持込禁止）、入口脇のヒノキのリードディフューザー、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
 }
 function setLayout(next){layout=next==='A'?'A':'B';layoutGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===layout);trashBins.forEach((g,i)=>{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=Math.PI/2});deskObjects.forEach((g,i)=>{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout==='A';roundGroup.visible=layout==='B';layoutShadows.A.visible=layout==='A';layoutShadows.B.visible=layout==='B';
  viewGroup.querySelector('input[value="display"]').disabled=layout!=='B';
- if(layout!=='B'){openCompare(false);if(view==='display')view='table';}
- renderCard();updateLabel();if(view==='table'||view==='display')setView(view);else render()}
+ if(layout!=='B'){openCompare(false);if(view==='display'||view==='meeting')view='table';}
+ renderCard();updateLabel();if(view==='table'||view==='display'||view==='meeting')setView(view);else render()}
 function wallTransparency(){outer.traverse(o=>{if(!o.isMesh)return;if(o.material===glass)return;if(!o.userData.original)o.userData.original=o.material;o.material=wallToggle.checked?o.userData.original.clone():o.userData.original;if(wallToggle.checked){o.material.transparent=true;o.material.opacity=.13;o.material.depthWrite=false;o.castShadow=false}else o.castShadow=true});render()}
-function setView(next){view=['overview','inside','reverse','top','table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display','balcony','fragrance'].includes(next)?next:'overview';if(view==='display'&&layout==='A')view='table';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
+function setView(next){view=['overview','inside','reverse','top','table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display','balcony','fragrance','meeting'].includes(next)?next:'overview';if((view==='display'||view==='meeting')&&layout==='A')view='table';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
  if(view==='overview'){camera.position.set(.6,9.1,10.4);controls.target.set(0,.55,-.35);controls.maxPolarAngle=Math.PI*.49}
  if(view==='inside'){camera.position.set(.25,1.6,2.25);controls.target.set(-.25,1.35,-2.5);controls.maxPolarAngle=Math.PI*.72}
  if(view==='reverse'){camera.position.set(-2.25,1.6,-2.15);controls.target.set(.45,1.30,2.60);controls.maxPolarAngle=Math.PI*.72}
  if(view==='table'){camera.position.set(layout==='B'?1.9:1,1.85,layout==='B'?2.4:1.05);controls.target.set(layout==='B'?0:1.95,.62,layout==='B'?-.30:-1.475);controls.maxPolarAngle=Math.PI*.49}
  if(view==='display'){const z=mediaCart.position.z,h=tableOptions[tableChoice].height;camera.position.set(.64,h+.91,z+1.82);controls.target.set(0,h+.43,z+.02);controls.maxPolarAngle=Math.PI*.49}
+ if(view==='meeting'){camera.position.set(2.15,2.45,2.55);controls.target.set(0,.96,-.57);controls.maxPolarAngle=Math.PI*.49}
  if(view==='balcony'){camera.position.set(-2.16,1.25,-4.65);controls.target.set(-2.92,.36,-3.60);controls.maxPolarAngle=Math.PI*.49}
  if(view==='fragrance'){camera.position.set(-1.94,1.55,2.85);controls.target.set(-2.40,1.32,3.955);controls.maxPolarAngle=Math.PI*.49}
  if(view==='kitchen'){camera.position.set(-.25,2.55,-2.55);controls.target.set(-2.80,.90,-1.18);controls.maxPolarAngle=Math.PI*.49}
@@ -1731,10 +1786,11 @@ $('#ss-left').addEventListener('click',()=>turn(-Math.PI/8));
 $('#ss-right').addEventListener('click',()=>turn(Math.PI/8));
 $('#ss-near').addEventListener('click',()=>zoom(.8));
 $('#ss-far').addEventListener('click',()=>zoom(1.25));
+$('#ss-meeting').addEventListener('click',()=>{if(layout!=='B')setLayout('B');setView('meeting');root.querySelector('.menu').open=false;save()});
 $('#ss-balcony').addEventListener('click',()=>{setView('balcony');root.querySelector('.menu').open=false;save()});
 $('#ss-fragrance').addEventListener('click',()=>{setView('fragrance');root.querySelector('.menu').open=false;save()});
 $('#ss-reset').addEventListener('click',()=>setView(view));
-function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display','balcony','fragrance'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display','balcony','fragrance'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display','balcony','fragrance','meeting'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display','balcony','fragrance','meeting'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
 new ResizeObserver(resize).observe(stage);
 const saved=store.get()||{};
 sortKey=saved.sortKey==='area'?'area':'price';
@@ -1747,7 +1803,7 @@ setView(saved.view);
 wallTransparency();
 root.querySelector('.ss-loading').hidden=true;
 root.dataset.ready='true';
-root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory,printerCart,printer,printerSupplies,printerCables,calendarTablet,calendarScreen,workJackets,schedulePrint,ganttSheet,meetingSchedule,kamidana,shrineOfuda,shrineOfferings,shrineSakaki,fargoTap,fargoSockets,fargoCable,sharedDisplay,sharedScreen,cigaretteBin,fragranceShelf,hinokiDiffuser};
+root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory,printerCart,printer,printerSupplies,printerCables,calendarTablet,calendarScreen,workJackets,schedulePrint,ganttSheet,meetingSchedule,kamidana,shrineOfuda,shrineOfferings,shrineSakaki,fargoTap,fargoSockets,fargoCable,sharedDisplay,sharedScreen,meetingCamera,meetingMic,meetingLights,meetingPC,meetingCables,cigaretteBin,fragranceShelf,hinokiDiffuser};
 render();
 }catch(err){root.querySelector('.ss-loading').textContent='3Dの読み込みに失敗しました。ページを再読み込みしてください。';console.error(err)}
 })();
