@@ -165,8 +165,8 @@ button,input,select{font:inherit;color:inherit}
         <div class="ctl" role="radiogroup" aria-label="床">
           <span class="ctl-label" style="display:inline">床</span>
           <span class="seg" id="ss-floor">
-            <label><input type="radio" name="ss-floor" value="linoleum" checked>リノリウム</label>
-            <label><input type="radio" name="ss-floor" value="carpet">カーペット</label>
+            <label><input type="radio" name="ss-floor" value="linoleum">リノリウム</label>
+            <label><input type="radio" name="ss-floor" value="carpet" checked>カーペット</label>
           </span>
         </div>
         <label class="check"><input id="ss-power" type="checkbox" checked>電源の位置（9箇所・36口）</label>
@@ -1662,7 +1662,8 @@ const viewGroup=$('#ss-view'),layoutGroup=$('#ss-layout'),floorGroup=$('#ss-floo
 const laptopToggle=$('#ss-laptops');
 const powerToggle=$('#ss-power'),wallToggle=$('#ss-walls'),layoutLabel=$('#ss-layout-label');
 const ledger=$('#ledger'),card=$('#table-card'),select=$('#table-select'),drawer=$('#compare'),openBtn=$('#open-compare');
-let view='overview',lastFit=1,layout='B',floorFinish='linoleum',tableChoice='rughaus',sortKey='price';
+let view='overview',lastFit=1,layout='B',floorFinish='carpet',tableChoice='rughaus',sortKey='price';
+const defaultsVersion='2026-10-20';
 const store={get(){try{return JSON.parse(localStorage.getItem('ss-office-3d')||'null')}catch{return null}},set(v){try{localStorage.setItem('ss-office-3d',JSON.stringify(v))}catch{}}};
 
 select.append(...Object.entries(tableOptions).map(([key,o])=>new Option(`${o.short}　${shortPrice(o.price)}`,key)));
@@ -1730,7 +1731,7 @@ function updateCartCable(z,h){
  curve(cartCables,[[.02,phoneY+.01,z+.01],[.13,phoneY+.008,z-.15],[.16,phoneY+.05,z-.21],[.10,h-.026,z-.18]],.003,M.black).name='中段の電話の充電ケーブル';
 }
 function setLaptops(show){laptopToggle.checked=!!show;equipment.visible=!!show;placeSchedule();updateFargoCable();updateMeetingSetup();updateLabel();render()}
-function setFloor(next){floorFinish=next==='carpet'?'carpet':'linoleum';officeFloor.material=floorFinish==='carpet'?M.carpet:sheetMaterial;floorGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===floorFinish);render()}
+function setFloor(next){floorFinish=next==='linoleum'?'linoleum':'carpet';officeFloor.material=floorFinish==='carpet'?M.carpet:sheetMaterial;floorGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===floorFinish);render()}
 function interior(){return view==='inside'||view==='reverse'}
 function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&&!powerToggle.checked)||(p.layout&&p.layout!==layout)||interior()||view==='clothes'||view==='shrine'||view==='display'||view==='balcony'||view==='fragrance'||view==='meeting'||(view==='table'&&p===tableDimensionPin)||v.z>1||v.z< -1||Math.abs(v.x)>.97||Math.abs(v.y)>.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
 function render(){renderer.render(scene,camera);projectPins();root.dataset.layout=layout;root.dataset.tableModel=layout==='B'?tableChoice:'';root.dataset.laptops=String(equipment.visible)}
@@ -1765,7 +1766,7 @@ function setView(next){view=['overview','inside','reverse','top','table','rack',
  if(view==='top'){camera.position.set(0,16.8,.02);controls.target.set(0,0,-.32);controls.maxPolarAngle=Math.PI*.49}
  lastFit=1;resize();controls.update();render();
 }
-function save(){store.set({view,layout,tableChoice,floorFinish,sortKey,power:powerToggle.checked,walls:wallToggle.checked,laptops:laptopToggle.checked})}
+function save(){store.set({defaultsVersion,view,layout,tableChoice,floorFinish,sortKey,power:powerToggle.checked,walls:wallToggle.checked,laptops:laptopToggle.checked})}
 floorGroup.addEventListener('change',e=>{setFloor(e.target.value);save()});
 layoutGroup.addEventListener('change',e=>{setLayout(e.target.value);save()});
 viewGroup.addEventListener('change',e=>{setView(e.target.value);save()});
@@ -1793,6 +1794,8 @@ $('#ss-reset').addEventListener('click',()=>setView(view));
 function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display','balcony','fragrance','meeting'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display','balcony','fragrance','meeting'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
 new ResizeObserver(resize).observe(stage);
 const saved=store.get()||{};
+// Apply the agreed defaults once to older saved preferences, then remember later choices.
+if(saved.defaultsVersion!==defaultsVersion){Object.assign(saved,{floorFinish:'carpet',layout:'B',tableChoice:'rughaus'})}
 sortKey=saved.sortKey==='area'?'area':'price';
 powerToggle.checked=saved.power!==false;wallToggle.checked=!!saved.walls;
 setFloor(saved.floorFinish);
@@ -1801,6 +1804,7 @@ setLaptops(saved.laptops===true);
 setLayout(saved.layout==='A'?'A':'B');
 setView(saved.view);
 wallTransparency();
+save();
 root.querySelector('.ss-loading').hidden=true;
 root.dataset.ready='true';
 root.__scene={scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory,printerCart,printer,printerSupplies,printerCables,calendarTablet,calendarScreen,workJackets,schedulePrint,ganttSheet,meetingSchedule,kamidana,shrineOfuda,shrineOfferings,shrineSakaki,fargoTap,fargoSockets,fargoCable,sharedDisplay,sharedScreen,meetingCamera,meetingMic,meetingLights,meetingPC,meetingCables,cigaretteBin,fragranceShelf,hinokiDiffuser};
