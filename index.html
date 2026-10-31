@@ -1260,7 +1260,8 @@ for(let column=0;column<4;column++)for(let level=0;level<4;level++){
  for(const x of [-.165,.165])box(g,.002,.243,.001,x,.1215,.202,boxInk);
  box(g,.345,.001,.003,0,.2655,-.14,boxInk);box(g,.345,.001,.003,0,.2655,.14,boxInk);
 }
-// Compact shared printer station beside the north-east archive boxes, facing south.
+// Shared printer on the north-east archive boxes, facing south.
+// The old cart is retained as a detached definition for future layout changes.
 // Illustrative home inkjet MFP, 410 × 350 × H180 mm; cart 600 × 450 × H750 mm.
 const printerCart=group('北側プリンターワゴン 600×450×750',4.50,1.65);
 const printerSteel=mat(0xc0c7c7,.31,.72),printerPlastic=mat(0xe4e7e4,.62),printerDark=mat(0x424b4a,.64);
@@ -1275,7 +1276,7 @@ for(const y of [.15,.42,.738]){
 }
 rod(printerCart,[-.28,.18,-.19],[.28,.72,-.19],.004,printerSteel);
 rod(printerCart,[.28,.18,-.19],[-.28,.72,-.19],.004,printerSteel);
-const printer=new THREE.Group();printer.name='家庭用インクジェット複合機（仮モデル）';printer.position.set(0,.751,0);printerCart.add(printer);
+const printer=new THREE.Group();printer.name='家庭用インクジェット複合機（仮モデル）';printer.position.set(5.2075-3.35,1.061,.91-4);model.add(printer);
 for(const x of [-.14,.14])for(const z of [-.11,.11])box(printer,.023,.008,.024,x,.004,z,M.dark);
 const printerBody=new THREE.Mesh(roundedTableGeometry(.41,.35,.025,.152,.003),printerPlastic);printerBody.position.y=.008;printerBody.castShadow=printerBody.receiveShadow=true;printerBody.name='丸みのあるプリンター本体';printer.add(printerBody);
 box(printer,.385,.004,.32,0,.162,0,printerDark,'スキャナーふたの継ぎ目');
@@ -1310,7 +1311,7 @@ for(let i=0;i<4;i++){box(inkBasket,.032,.095,.068,-.057+i*.038,.053,0,M.white,'�
 box(printerSupplies,.39,.17,.30,0,.247,0,paperReamWrap,'コピー用紙のストック箱');sticker(printerSupplies,'A4 PAPER',.22,.054,0,.247,.151);
 // Cable follows the archive-box side, then the north-east wall outlet; no door crossing.
 const printerCables=new THREE.Group();printerCables.name='プリンターから北東壁コンセントへの配線';model.add(printerCables);
-curve(printerCables,[[4.68,.83,1.49],[4.77,.70,1.46],[4.78,.06,1.46],[4.80,.013,1.08],[6.49,.013,1.06],[6.54,.03,.94],[6.55,.29,.92]].map(([x,y,z])=>[x-3.35,y,z-4]),.004,M.white);
+curve(printerCables,[[5.38,1.14,.75],[5.40,1.08,.67],[5.40,.06,.66],[6.49,.013,.66],[6.54,.03,.78],[6.55,.29,.92]].map(([x,y,z])=>[x-3.35,y,z-4]),.004,M.white);
 W(printerCables,.022,.031,.040,6.55,.29,.92,M.white,'壁コンセントに差したプラグ');
 // Representative Dyson cordless profile; exact model is unspecified.
 const vacuum=group('ダイソン コードレス掃除機',6.45,.90);
@@ -1602,7 +1603,7 @@ shadowGradient.addColorStop(0,'rgba(17,22,28,.20)');shadowGradient.addColorStop(
 shadowCtx.fillStyle=shadowGradient;shadowCtx.fillRect(0,0,128,128);
 const shadowMaterial=new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(shadowCanvas),transparent:true,depthWrite:false,polygonOffset:true,polygonOffsetFactor:-1});
 function contactShadow(parent,x,z,w,d){const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,d),shadowMaterial);mesh.rotation.x=-Math.PI/2;mesh.position.set(x-3.35,.004,z-4);parent.add(mesh)}
-for(const p of [[4.2,7.5,1.7,1.7],[5.5,7.5,1.7,1.7],[.64,1.57,1.2,1.5],[.55,2.82,1.1,1.85],[4.50,1.65,.90,.80]])contactShadow(model,...p);
+for(const p of [[4.2,7.5,1.7,1.7],[5.5,7.5,1.7,1.7],[.64,1.57,1.2,1.5],[.55,2.82,1.1,1.85]])contactShadow(model,...p);
 for(const p of [[2.275,4.55,2.6,5.8],[5.3,2.525,2.4,3]])contactShadow(layoutShadows.A,...p);
 for(const [x,z] of deskLayouts.B)contactShadow(layoutShadows.B,x,z,1.4,1.7);
 contactShadow(layoutShadows.B,3.35,4.0,1.8,2.6);
@@ -1737,7 +1738,7 @@ function updateLabel(){
  layoutLabel.textContent=layout==='B'
   ?`配置B：デスク 西3台・東4台／北壁沿いに収納ボックス16個／ノートPC ${equipment.visible?'表示':'非表示'}`
   :'配置A：デスク7台の島／会議テーブル RUGHAUS 1,750×800と会議チェア4脚';
- stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。卓上スピーカーマイクを配置。テーブル上のA3ガントチャート印刷紙と北寄りの黄色いFargo電源タップ（北側の床電源から給電コード）、フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その左手前の家庭用プリンターと用紙・インク収納ワゴン、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、北壁に木製の神棚、ベランダの吸い殻専用容器（室内持込禁止）、入口脇のヒノキのリードディフューザー、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
+ stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。卓上スピーカーマイクを配置。テーブル上のA3ガントチャート印刷紙と北寄りの黄色いFargo電源タップ（北側の床電源から給電コード）、フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その上の家庭用プリンター、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、北壁に木製の神棚、ベランダの吸い殻専用容器（室内持込禁止）、入口脇のヒノキのリードディフューザー、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
 }
 function setLayout(next){layout=next==='A'?'A':'B';layoutGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===layout);trashBins.forEach((g,i)=>{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=Math.PI/2});deskObjects.forEach((g,i)=>{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout==='A';roundGroup.visible=layout==='B';layoutShadows.A.visible=layout==='A';layoutShadows.B.visible=layout==='B';
 
@@ -1756,7 +1757,7 @@ function setView(next){if(['display','clothes','meeting'].includes(next))next='o
  if(view==='kitchen'){camera.position.set(-.25,2.55,-2.55);controls.target.set(-2.80,.90,-1.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='rack'){camera.position.set(3.04,2.0,2.35);controls.target.set(3.04,.55,3.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='pantry'){camera.position.set(-1.20,2.95,-1.55);controls.target.set(-2.80,1.74,-1.18);controls.maxPolarAngle=Math.PI*.49}
- if(view==='printer'){camera.position.set(.50,1.65,-.35);controls.target.set(1.15,.55,-2.35);controls.maxPolarAngle=Math.PI*.49}
+ if(view==='printer'){camera.position.set(1.10,2.00,-1.25);controls.target.set(1.8575,1.15,-3.09);controls.maxPolarAngle=Math.PI*.49}
  if(view==='shrine'){camera.position.set(2.44,2.38,-2.04);controls.target.set(1.80,1.99,-3.27);controls.maxPolarAngle=Math.PI*.49}
  if(view==='clothes'){camera.position.set(3.53,2.10,-2.38);controls.target.set(1.80,1.22,-2.94);controls.maxPolarAngle=Math.PI*.49}
  if(view==='calendar'){camera.position.set(-.95,1.70,-2.20);controls.target.set(-.84,1.55,-3.38);controls.maxPolarAngle=Math.PI*.49}
@@ -1793,7 +1794,7 @@ function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)retur
 new ResizeObserver(resize).observe(stage);
 // Temporarily remove the rack and the complete shared monitor station.
 // Keep their model definitions so the layout can be reconsidered later.
-for(const object of [hangerRack,mediaCart,cartCables,meetingCables])object.removeFromParent();
+for(const object of [hangerRack,mediaCart,cartCables,meetingCables,printerCart])object.removeFromParent();
 const saved=store.get()||{};
 // Apply the agreed defaults once to older saved preferences, then remember later choices.
 if(saved.defaultsVersion!==defaultsVersion){Object.assign(saved,{floorFinish:'carpet',layout:'B',tableChoice:'rughaus'})}
