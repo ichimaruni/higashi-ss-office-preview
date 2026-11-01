@@ -936,34 +936,7 @@ for(const [index,[x,z,angle]] of laptopPlaces.entries()){
  box(lid,.295,.186,.001,0,.108,.005,laptopScreenMat);
  box(lid,.041,.011,.0015,0,.195,.006,M.black,'ノッチ');
 }
-// Bakery breakfast at real-world scale: a 32 × 36 cm basket, 12 pastries,
-// and one 8 cm diameter / 9 cm tall coffee mug per occupied central seat.
-const breakfast=new THREE.Group();breakfast.name='山盛りのベーカリーパン・実寸';roundGroup.add(breakfast);
-const crust=mat(0xb96b28,.88),goldCrust=mat(0xd99a49,.87),breadCut=mat(0xf2cf88,.95),basketMat=mat(0xaa7d4d,.94);
-const bakeryBasket=new THREE.Group();breakfast.add(bakeryBasket);
-box(bakeryBasket,.30,.012,.34,0,.006,0,basketMat,'パンかご 32×36cm');
-for(let level=0;level<5;level++){
- const y=.015+level*.008;
- curve(bakeryBasket,[[-.15,y,-.17],[-.16,y,0],[-.15,y,.17],[0,y,.18],[.15,y,.17],[.16,y,0],[.15,y,-.17],[0,y,-.18],[-.15,y,-.17]],.004,basketMat);
-}
-for(let i=0;i<15;i++)for(const side of [-1,1])rod(bakeryBasket,[-.14+i*.02,.008,side*.17],[-.14+i*.02,.05,side*.175],.002,breadCut);
-box(bakeryBasket,.285,.002,.325,0,.014,0,mat(0xe8d7b7,1),'かごのベーキングペーパー');
-function breadBlob(parent,x,y,z,sx,sy,sz,material){
- const m=new THREE.Mesh(new THREE.SphereGeometry(1,24,16),material);m.position.set(x,y,z);m.scale.set(sx,sy,sz);m.castShadow=true;m.receiveShadow=true;parent.add(m);return m;
-}
-for(let i=0;i<12;i++){
- const pastry=new THREE.Group();pastry.name=i%3===0?'クロワッサン 約13cm':i%3===1?'クープ入りプチパン 約12cm':'チョコ入りロール 約10cm';
- const layer=Math.floor(i/4),slot=i%4;
- pastry.position.set((slot%2-.5)*(.14-layer*.017),.026+layer*.055,(Math.floor(slot/2)-.5)*(.15-layer*.012));
- pastry.rotation.y=i*1.79;bakeryBasket.add(pastry);
- if(i%3===0){
-  for(let k=0;k<9;k++){const a=(k-4)*.28,t=1-Math.abs(k-4)/6;const part=breadBlob(pastry,Math.sin(a)*.067,.025,Math.cos(a)*.046-.025,.012*t,.026*t,.031*t,k%2?crust:goldCrust);part.rotation.y=a;}
- }else{
-  breadBlob(pastry,0,.027,0,i%3===1?.061:.050,.033,.038,goldCrust);
-  for(let k=-1;k<=1;k++)curve(pastry,[[k*.025-.008,.050,-.025],[k*.025,.060,0],[k*.025+.008,.050,.025]],.003,i%3===1?breadCut:crust);
-  if(i%3===2)for(let k=0;k<5;k++)breadBlob(pastry,(k-2)*.017,.052,Math.sin(k*2)*.020,.004,.003,.004,mat(0x4a2c20,.9));
- }
-}
+// Real-scale coffee mugs, one per occupied central seat.
 const coffeeCups=[];
 const mugCeramic=mat(0xf1eee6,.24),coffeeLiquid=mat(0x352014,.22);
 for(let i=0;i<5;i++){
@@ -972,8 +945,8 @@ for(let i=0;i<5;i++){
  const coffee=new THREE.Mesh(new THREE.CylinderGeometry(.0345,.0345,.001,40),coffeeLiquid);coffee.position.y=.077;cup.add(coffee);
  curve(cup,[[.035,.071,0],[.061,.075,0],[.067,.048,0],[.055,.023,0],[.034,.026,0]],.005,mugCeramic);
 }
-function updateBreakfast(){
- const o=tableOptions[tableChoice];breakfast.position.set(0,o.height,-.32);
+function updateCoffeeCups(){
+ const o=tableOptions[tableChoice];
  laptops.forEach((pc,i)=>{
   // Beside each laptop, tangential to the table edge; do not shrink the props.
   const offset=new THREE.Vector3(.22,0,.015).applyAxisAngle(new THREE.Vector3(0,1,0),pc.rotation.y);
@@ -1720,7 +1693,7 @@ function setTable(next){
  updateCartCable(cartZ,option.height);
  updateFargoCable();
  updateCentralSeats();
- updateBreakfast();
+ updateCoffeeCups();
  updateMeetingSetup();
  const [w,d]=option.mm;tableDimensionPin.el.firstElementChild.textContent=option.shape==='round'?`φ${fmt(w)}`:`${fmt(w)}×${fmt(d)}`;
  tableDimensionPin.pos.z=option.pinZ;
@@ -1757,7 +1730,7 @@ function updateLabel(){
  layoutLabel.textContent=layout==='B'
   ?`配置B：デスク 西3台・東4台／中央にオフィスチェア5脚／北壁沿いに収納ボックス16個／ノートPC ${equipment.visible?'表示':'非表示'}`
   :'配置A：デスク7台の島／会議テーブル RUGHAUS 1,750×800と会議チェア4脚';
- stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。卓上スピーカーマイクを配置。テーブル中央の山盛りのパンと各席のコーヒーカップ、テーブル上の北寄りの黄色いFargo電源タップ（北側の床電源から給電コード）、フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その上の家庭用プリンター、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、北壁に木製の神棚、ベランダの吸い殻専用容器（室内持込禁止）、入口脇のヒノキのリードディフューザー、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
+ stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。卓上スピーカーマイクを配置。各席のコーヒーカップ、テーブル上の北寄りの黄色いFargo電源タップ（北側の床電源から給電コード）、フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その上の家庭用プリンター、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、北壁に木製の神棚、ベランダの吸い殻専用容器（室内持込禁止）、入口脇のヒノキのリードディフューザー、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
 }
 function setLayout(next){layout=next==='A'?'A':'B';layoutGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===layout);trashBins.forEach((g,i)=>{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=Math.PI/2});deskObjects.forEach((g,i)=>{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout==='A';roundGroup.visible=layout==='B';layoutShadows.A.visible=layout==='A';layoutShadows.B.visible=layout==='B';
 
@@ -1828,7 +1801,7 @@ wallTransparency();
 save();
 root.querySelector('.ss-loading').hidden=true;
 root.dataset.ready='true';
-root.__scene={breakfast,coffeeCups,scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,officeChairs,laptops,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory,printerCart,printer,printerSupplies,printerCables,calendarTablet,calendarScreen,workJackets,kamidana,shrineOfuda,shrineOfferings,shrineSakaki,fargoTap,fargoSockets,fargoCable,sharedDisplay,sharedScreen,meetingCamera,tableCamera,meetingMic,meetingLights,meetingPC,meetingCables,cigaretteBin,fragranceShelf,hinokiDiffuser};
+root.__scene={coffeeCups,scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,officeChairs,laptops,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory,printerCart,printer,printerSupplies,printerCables,calendarTablet,calendarScreen,workJackets,kamidana,shrineOfuda,shrineOfferings,shrineSakaki,fargoTap,fargoSockets,fargoCable,sharedDisplay,sharedScreen,meetingCamera,tableCamera,meetingMic,meetingLights,meetingPC,meetingCables,cigaretteBin,fragranceShelf,hinokiDiffuser};
 render();
 }catch(err){root.querySelector('.ss-loading').textContent='3Dの読み込みに失敗しました。ページを再読み込みしてください。';console.error(err)}
 })();
