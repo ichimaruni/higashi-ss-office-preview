@@ -664,6 +664,28 @@ for(const g of [oneLux,oneLuxOval])for(let i=0;i<12;i++){
  const a=i*Math.PI/6,sz=g===oneLux?1:1.15;
  curve(g,[[.289*Math.sin(a),.08,.289*sz*Math.cos(a)],[.303*Math.sin(a),.36,.303*sz*Math.cos(a)],[.327*Math.sin(a),.662,.327*sz*Math.cos(a)]],.00055,g===oneLux?seamWood:mat(0x706b65,.8));
 }
+// Cashew 182: catalogue envelope; sculpted crossed oak panels approximate product photos.
+const cashew=group('カシュー182 楕円 1820 × 1100 × H720',3.35,4,0,roundGroup);
+const cashewOak=tableWood(0xffedcf);
+const cashewShape=new THREE.Shape();cashewShape.absellipse(0,0,.547,.907,0,Math.PI*2,false,0);
+const cashewTop=new THREE.ExtrudeGeometry(cashewShape,{depth:.024,bevelEnabled:true,bevelSize:.003,bevelThickness:.003,bevelSegments:4,curveSegments:96});
+cashewTop.rotateX(-Math.PI/2);cashewTop.translate(0,.003,0);planarTopUV(cashewTop,1.1,1.82);
+tabletop(cashew,cashewTop,.720,cashewOak,.030).name='オーク突板・楕円天板 1820×1100';
+for(const angle of [0,Math.PI/2]){
+ const assembly=new THREE.Group();assembly.rotation.y=angle;
+ if(angle===0)assembly.scale.x=.74;
+ for(const sign of [-1,1]){
+  const profile=new THREE.Shape();profile.moveTo(-.56,.012);profile.lineTo(-.43,.012);
+  profile.lineTo(.09,.345);profile.quadraticCurveTo(.15,.39,.07,.435);
+  profile.lineTo(-.57,.682);profile.lineTo(-.37,.682);
+  profile.lineTo(.18,.46);profile.quadraticCurveTo(.29,.38,.16,.29);profile.closePath();
+  const panel=new THREE.Mesh(new THREE.ExtrudeGeometry(profile,{depth:.036,bevelEnabled:true,bevelSize:.002,bevelThickness:.002,bevelSegments:3,curveSegments:24}),cashewOak);
+  panel.position.z=-.018;panel.scale.x=sign;panel.castShadow=true;panel.receiveShadow=true;
+  panel.name='中央で交差する曲線木製脚（写真近似）';assembly.add(panel);
+ }
+ cashew.add(assembly);
+}
+box(cashew,.16,.12,.16,0,.49,0,cashewOak,'脚の中央接合部');
 // VIENA MT-VD211B (the original VIENA, not Viena2): two T feet, small
 // end casters and two rectangular cable-box lids flush with the oak top.
 const viena2=group('コクヨ ビエナ MT-VD211B 2100 × 1050 × H720',3.35,4,0,roundGroup);
@@ -1610,6 +1632,9 @@ streetscape(true);streetscape(false);
 // published range for the model (size and wood vary), from = starting price,
 // quote = no public price.
 const tableOptions={
+ cashew:{name:'カシュー182 楕円テーブル',short:'カシュー182',maker:'KAGUWORLD',shape:'ellipse',shapeLabel:'楕円形',mm:[1820,1100,720],note:'オーク突板。中央で交差する木製脚。脚の細部は商品写真を基にした近似',
+  price:{kind:'fixed',min:71900,text:'¥71,900',basis:'税込・公式サイト通常掲載価格。購入時の価格・送料は要確認'},url:'https://kagu-world.com/view/item/000000004914',
+  height:.720,laptopX:.34,laptopZ:[-.36,.06,.48],pinZ:.15},
  rughaus:{name:'ポップモダン スタンダードテーブル 6人掛け',short:'RUGHAUS',maker:'RUGHAUS（RHSTUDIO）',shape:'rectangle',shapeLabel:'長方形',mm:[1750,800,720],note:'天板ブラック・脚レッド。配置Aの会議テーブルと同じもの',
   price:{kind:'fixed',min:99000,text:'¥99,000',basis:'税込・公式通販の175×80の価格'},url:'https://rughaus.jp/products/6-seater-steel-leg-table',
   height:.720,laptopX:.23,laptopZ:[-.31,.05,.41],pinZ:.3},
@@ -1629,9 +1654,9 @@ const tableOptions={
   price:{kind:'street',min:151000,text:'約¥151,000',basis:'税込・販売店の実売価格（定価は¥237,600）'},url:'https://www.office-com.jp/products/detail.php?product_id=458005',
   height:.720,laptopX:.35,laptopZ:[-.46,.07,.59],pinZ:.09}
 };
-const tableMeshes={rughaus,modern:roundTable,oneLux,oneLuxOval,gfield,viena2};
+const tableMeshes={cashew,rughaus,modern:roundTable,oneLux,oneLuxOval,gfield,viena2};
 const fmt=n=>n.toLocaleString('ja-JP');
-function topArea(o){const [w,d]=o.mm,m2=w*d/1e6;if(o.shape==='round')return Math.PI/4*m2;if(o.shape==='capsule')return m2-(1-Math.PI/4)*(d/1000)**2;return m2}
+function topArea(o){const [w,d]=o.mm,m2=w*d/1e6;if(o.shape==='round'||o.shape==='ellipse')return Math.PI/4*m2;if(o.shape==='capsule')return m2-(1-Math.PI/4)*(d/1000)**2;return m2}
 function shortPrice(p){if(p.kind==='quote')return '要見積';if(p.kind==='fixed')return p.text;if(p.kind==='street')return p.text;const man=(p.min/10000).toFixed(1).replace(/\.0$/,'');return `¥${man}万〜`}
 function priceSub(p){return {fixed:'税込',street:'実売',range:'価格帯の下限',from:'税抜・下限',quote:'公開価格なし'}[p.kind]}
 function dimText(o){const [w,d,h]=o.mm;return o.shape==='round'?`φ${fmt(w)}×${h}`:`${fmt(w)}×${fmt(d)}×${h}`}
