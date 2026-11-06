@@ -686,6 +686,51 @@ for(const angle of [0,Math.PI/2]){
  cashew.add(assembly);
 }
 box(cashew,.16,.12,.16,0,.49,0,cashewOak,'脚の中央接合部');
+// 2026-11-06: listed external dimensions; unlisted leg details are photo approximations.
+const graph=group('Wilkhahn Graph 3200 × 1500 × H720',3.35,4,0,roundGroup);
+const graphOak=tableWood(0xd9b98b),graphMetal=mat(0xbfc5c9,.23,.85);
+const boat=new THREE.Shape();boat.moveTo(-.50,-1.60);boat.quadraticCurveTo(-.75,-1.60,-.75,0);boat.quadraticCurveTo(-.75,1.60,-.50,1.60);boat.lineTo(.50,1.60);boat.quadraticCurveTo(.75,1.60,.75,0);boat.quadraticCurveTo(.75,-1.60,.50,-1.60);boat.closePath();
+const boatGeo=new THREE.ExtrudeGeometry(boat,{depth:.03,bevelEnabled:false,curveSegments:80});boatGeo.rotateX(-Math.PI/2);planarTopUV(boatGeo,1.5,3.2);
+tabletop(graph,boatGeo,.720,graphOak).name='掲載外寸3200×1500・ボート形天板';
+box(graph,.07,.07,2.72,0,.64,0,graphMetal,'天板下の連結梁');
+for(const z of [-1.12,0,1.12]){
+ box(graph,.87,.045,.045,0,.666,z,graphMetal,'横梁');
+ for(const side of [-1,1]){
+  rod(graph,[side*.37,.677,z],[side*.61,.12,z+(z===0?0:Math.sign(z)*.10)],.021,graphMetal);
+  rod(graph,[side*.61,.12,z+(z===0?0:Math.sign(z)*.10)],[side*.61,.018,z+(z===0?0:Math.sign(z)*.10)],.016,graphMetal);
+  box(graph,.065,.014,.065,side*.61,.007,z+(z===0?0:Math.sign(z)*.10),graphMetal,'アジャスター');
+ }
+}
+for(const z of [-.72,.72]){box(graph,.09,.002,.23,0,.719,z,M.dark,'配線口');box(graph,.075,.003,.215,0,.7185,z,graphOak,'配線口の蓋');}
+function kanademonoTable(name,diameter,middle,linoleum=false){
+ const g=group(name,3.35,4,0,roundGroup),r=diameter/2,h=.710;
+ const topMat=linoleum?mat(0xb2b0a6,.85):tableWood(0xf0d7b2),legMat=linoleum?mat(0xeeeeea,.5):mat(0x252627,.55);
+ // Independent half-round tops, each with its own three splayed legs.
+ for(const side of [-1,1]){
+  const part=new THREE.Group();part.position.z=side*middle/2;part.rotation.y=side===1?0:Math.PI;g.add(part);
+  const sh=new THREE.Shape();sh.moveTo(-r,0);sh.lineTo(r,0);sh.absarc(0,0,r,0,Math.PI,false);sh.closePath();
+  const geo=new THREE.ExtrudeGeometry(sh,{depth:.03,bevelEnabled:false,curveSegments:64});geo.rotateX(Math.PI/2);geo.translate(0,.03,0);planarTopUV(geo,diameter,r);
+  tabletop(part,geo,h,topMat).name='半円テーブル・独立天板';
+  for(const [x,z] of [[-r*.70,.13],[r*.70,.13],[0,r*.73]]){
+   rod(part,[x*.83,.68,z*.85],[x,.025,z],.018,legMat);
+   box(part,.035,.02,.035,x,.01,z,M.dark,'アジャスター');
+  }
+  box(g,diameter,.0005,.002,0,h-.00025,side*middle/2,mat(0x665b4f,.9),'半円と中央天板の継ぎ目');
+ }
+ if(middle>0){
+  tabletop(g,roundedTableGeometry(diameter,middle,.001,.03),h,topMat).name='中央の長方形テーブル';
+  for(const x of [-diameter/2+.12,diameter/2-.12])for(const z of [-middle/2+.12,middle/2-.12]){
+   box(g,.04,.68,.04,x,.35,z,legMat,'中央テーブルの角柱脚');box(g,.04,.02,.04,x,.01,z,M.dark,'アジャスター');
+  }
+ }
+ return g;
+}
+const kana220=kanademonoTable('KANADEMONO ラバーウッド 2200×1400',1.4,.8);
+const kana240=kanademonoTable('KANADEMONO ラバーウッド 2400×1600',1.6,.8);
+const kana160=kanademonoTable('KANADEMONO 半円2台 φ1600',1.6,0);
+const kanaLino220=kanademonoTable('KANADEMONO リノリウム 2200×1400',1.4,.8,true);
+const kanaLino240=kanademonoTable('KANADEMONO リノリウム 2400×1600',1.6,.8,true);
+
 // VIENA MT-VD211B (the original VIENA, not Viena2): two T feet, small
 // end casters and two rectangular cable-box lids flush with the oak top.
 const viena2=group('コクヨ ビエナ MT-VD211B 2100 × 1050 × H720',3.35,4,0,roundGroup);
@@ -1632,6 +1677,12 @@ streetscape(true);streetscape(false);
 // published range for the model (size and wood vary), from = starting price,
 // quote = no public price.
 const tableOptions={
+graph:{"name": "Wilkhahn Graph 中古・商品625729", "short": "Graph 3200", "maker": "Wilkhahn", "shape": "boat", "shapeLabel": "ボート形", "mm": [3200, 1500, 720], "note": "掲載実寸。ボート形天板・銀色6本脚・配線口。脚位置と天板曲線は商品写真から近似。送料別", "price": {"kind": "fixed", "min": 198000, "text": "¥198,000", "basis": "2026-11-06確認・税込本体。KANADEMONOは標準脚の合算、追加加工・配線収納別"}, "url": "https://www.officebusters.com/items/625729", "height": 0.72, "laptopX": 0.4, "laptopZ": [-0.5, 0.1, 0.6], "pinZ": 0.1},
+kana220:{"name": "ラバーウッド 半円2台＋長方形140×80", "short": "KANADEMONO 木製220×140", "maker": "KANADEMONO", "shape": "capsule", "shapeLabel": "半円＋長方形", "mm": [2200, 1400, 710], "note": "半円140×70を2台＋中央140×80。黒脚。固定方法は未確認・脚位置は近似", "price": {"kind": "fixed", "min": 181700, "text": "¥181,700", "basis": "2026-11-06確認・税込本体。KANADEMONOは標準脚の合算、追加加工・配線収納別"}, "url": "https://kanademono.design/products/htb-k03-bk", "height": 0.71, "laptopX": 0.4, "laptopZ": [-0.5, 0.1, 0.6], "pinZ": 0.1},
+kana240:{"name": "ラバーウッド 半円2台＋長方形160×80", "short": "KANADEMONO 木製240×160", "maker": "KANADEMONO", "shape": "capsule", "shapeLabel": "半円＋長方形", "mm": [2400, 1600, 710], "note": "半円160×80を2台＋中央160×80。黒脚。固定方法は未確認・脚位置は近似", "price": {"kind": "fixed", "min": 191700, "text": "¥191,700", "basis": "2026-11-06確認・税込本体。KANADEMONOは標準脚の合算、追加加工・配線収納別"}, "url": "https://kanademono.design/products/htb-k03-bk", "height": 0.71, "laptopX": 0.4, "laptopZ": [-0.5, 0.1, 0.6], "pinZ": 0.1},
+kana160:{"name": "ラバーウッド 半円160×80を2台", "short": "KANADEMONO 木製φ160", "maker": "KANADEMONO", "shape": "round", "shapeLabel": "半円2台の円形", "mm": [1600, 1600, 710], "note": "独立した半円2台・合計6本脚。固定方法は未確認・脚位置は近似", "price": {"kind": "fixed", "min": 131800, "text": "¥131,800", "basis": "2026-11-06確認・税込本体。KANADEMONOは標準脚の合算、追加加工・配線収納別"}, "url": "https://kanademono.design/products/htb-k03-bk", "height": 0.71, "laptopX": 0.4, "laptopZ": [-0.5, 0.1, 0.6], "pinZ": 0.1},
+kanaLino220:{"name": "リノリウム 半円2台＋長方形140×80", "short": "KANADEMONO リノ220×140", "maker": "KANADEMONO", "shape": "capsule", "shapeLabel": "半円＋長方形", "mm": [2200, 1400, 710], "note": "グレー天板・白脚。半円140×70を2台＋中央140×80。高さはアジャスター含む約71cm。脚位置は近似・固定方法未確認", "price": {"kind": "fixed", "min": 276000, "text": "¥276,000", "basis": "2026-11-06確認・税込本体。KANADEMONOは標準脚の合算、追加加工・配線収納別"}, "url": "https://kanademono.design/products/htb-k20-wh", "height": 0.71, "laptopX": 0.4, "laptopZ": [-0.5, 0.1, 0.6], "pinZ": 0.1},
+kanaLino240:{"name": "リノリウム 半円2台＋長方形160×80", "short": "KANADEMONO リノ240×160", "maker": "KANADEMONO", "shape": "capsule", "shapeLabel": "半円＋長方形", "mm": [2400, 1600, 710], "note": "グレー天板・白脚。半円160×80を2台＋中央160×80。高さはアジャスター含む約71cm。脚位置は近似・固定方法未確認", "price": {"kind": "fixed", "min": 291000, "text": "¥291,000", "basis": "2026-11-06確認・税込本体。KANADEMONOは標準脚の合算、追加加工・配線収納別"}, "url": "https://kanademono.design/products/htb-k20-wh", "height": 0.71, "laptopX": 0.4, "laptopZ": [-0.5, 0.1, 0.6], "pinZ": 0.1},
  cashew:{name:'カシュー182 楕円テーブル',short:'カシュー182',maker:'KAGUWORLD',shape:'ellipse',shapeLabel:'楕円形',mm:[1820,1100,720],note:'オーク突板。中央で交差する木製脚。脚の細部は商品写真を基にした近似',
   price:{kind:'fixed',min:71900,text:'¥71,900',basis:'税込・公式サイト通常掲載価格。購入時の価格・送料は要確認'},url:'https://kagu-world.com/view/item/000000004914',
   height:.720,laptopX:.34,laptopZ:[-.36,.06,.48],pinZ:.15},
@@ -1654,9 +1705,9 @@ const tableOptions={
   price:{kind:'street',min:151000,text:'約¥151,000',basis:'税込・販売店の実売価格（定価は¥237,600）'},url:'https://www.office-com.jp/products/detail.php?product_id=458005',
   height:.720,laptopX:.35,laptopZ:[-.46,.07,.59],pinZ:.09}
 };
-const tableMeshes={cashew,rughaus,modern:roundTable,oneLux,oneLuxOval,gfield,viena2};
+const tableMeshes={graph,kana220,kana240,kana160,kanaLino220,kanaLino240,cashew,rughaus,modern:roundTable,oneLux,oneLuxOval,gfield,viena2};
 const fmt=n=>n.toLocaleString('ja-JP');
-function topArea(o){const [w,d]=o.mm,m2=w*d/1e6;if(o.shape==='round'||o.shape==='ellipse')return Math.PI/4*m2;if(o.shape==='capsule')return m2-(1-Math.PI/4)*(d/1000)**2;return m2}
+function topArea(o){const [w,d]=o.mm,m2=w*d/1e6;if(o.shape==='boat')return m2*17/18;if(o.shape==='round'||o.shape==='ellipse')return Math.PI/4*m2;if(o.shape==='capsule')return m2-(1-Math.PI/4)*(d/1000)**2;return m2}
 function shortPrice(p){if(p.kind==='quote')return '要見積';if(p.kind==='fixed')return p.text;if(p.kind==='street')return p.text;const man=(p.min/10000).toFixed(1).replace(/\.0$/,'');return `¥${man}万〜`}
 function priceSub(p){return {fixed:'税込',street:'実売',range:'価格帯の下限',from:'税抜・下限',quote:'公開価格なし'}[p.kind]}
 function dimText(o){const [w,d,h]=o.mm;return o.shape==='round'?`φ${fmt(w)}×${h}`:`${fmt(w)}×${fmt(d)}×${h}`}
