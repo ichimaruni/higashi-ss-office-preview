@@ -1714,7 +1714,61 @@ function pairedOption(maker,model,total,url,finish){
   note:finish+'。南北に10cm間隔。脚部の寸法は写真から近似。',url,
   price:{kind:'fixed',min:total,text:'¥'+total.toLocaleString('ja-JP'),basis:'140cm仕様2台分の本体価格'}};
 }
+// Maximum-open dimensions, in the same north–south orientation as the catalogue.
+const extensionModels={
+ mutuki150:{maker:'MUTUKI',model:'hagst-5513',mm:[1500,1500,750],price:147880,url:'https://mutukishop.com/products/hagst-5513',note:'大理石柄・ステンレス製の広がる脚'},
+ gen160:{maker:'タンスのゲン',model:'円形伸長テーブル 85400006',mm:[1600,1200,720],price:79999,url:'https://www.tansu-gen.jp/products/85400006',note:'ストーングレー×ナチュラル。中央に40cmの伸長板'},
+ best160:{maker:'BestKagu',model:'fnl-269',mm:[1600,1600,770],price:215800,url:'https://www.bestkagu.com/products/fnl-269',note:'艶消しの石目天板・ナチュラル色の柱状脚'}
+};
+const extensionOptions={},extensionMeshes={};
+const stonePattern=document.createElement('canvas');
+stonePattern.width=stonePattern.height=512;
+const stoneBrush=stonePattern.getContext('2d');
+stoneBrush.drawImage(ceramicCanvas,0,0);
+for(let i=0;i<14;i++){
+ const y=rand()*800-250;
+ stoneBrush.beginPath();stoneBrush.moveTo(-10,y);
+ stoneBrush.bezierCurveTo(150,y-25,270,y+160,530,y+210);
+ stoneBrush.strokeStyle='rgba(123,118,110,0.19)';stoneBrush.lineWidth=.5+rand()*2;stoneBrush.stroke();
+}
+const veinMap=new THREE.CanvasTexture(stonePattern);veinMap.colorSpace=THREE.SRGBColorSpace;
+for(const [key,item] of Object.entries(extensionModels)){
+ const [w,d,h]=item.mm, radius=d/2000,height=h/1000;
+ const halfStraight=(w-d)/2000,oval=halfStraight>0,mutuki=key==='mutuki150';
+ const thickness=oval?.024:mutuki?.052:.038;
+ const stone=new THREE.MeshStandardMaterial({color:oval?0x92918a:0xfcfaf6,map:oval?ceramicTex:veinMap,roughness:mutuki?.35:.55});
+ const mesh=group(item.maker+' '+item.model+'（全開）',3.35,4,0,roundGroup);
+ tabletop(mesh,capsuleGeometry(radius-.002,halfStraight,thickness,.002),height,stone,thickness);
+ const seam=mat(oval?0x65645f:0xb2afa8);
+ for(const sign of [-1,1]){
+  if(oval)box(mesh,d/1000-.004,.0003,.0015,0,height,sign*halfStraight,seam,'中央伸長板の継ぎ目');
+  else{
+   const x=radius*.60;
+   box(mesh,.0015,.0003,2*Math.sqrt(radius**2-x**2)-.005,sign*x,height,0,seam,'拡張天板の継ぎ目');
+  }
+ }
+ if(mutuki){
+  const steel=mat(0x7a746e,.31,.70);
+  for(let i=0;i<4;i++){
+   const profile=new THREE.Shape();
+   profile.moveTo(.035,.004);profile.lineTo(.40,.004);
+   profile.bezierCurveTo(.20,.14,.095,.35,.11,.43);
+   profile.quadraticCurveTo(.13,.57,.29,height-thickness);profile.lineTo(.035,height-thickness);profile.closePath();
+   const blade=new THREE.Mesh(new THREE.ExtrudeGeometry(profile,{depth:.13,bevelEnabled:false,curveSegments:32}),steel);
+   blade.geometry.translate(0,0,-.065);blade.rotation.y=i*Math.PI/2;blade.castShadow=true;mesh.add(blade);
+  }
+ }else{
+  const foot=oval?.285:.315,neck=oval?.185:.225;
+  lathe(mesh,'木目の中央脚',[[0,.004],[foot-.013,.004],[foot,.018],[neck,height-.085],[neck+.026,height-thickness],[0,height-thickness]],diningOak);
+ }
+ extensionMeshes[key]=mesh;
+ extensionOptions[key]={maker:item.maker,name:item.model+'（全開）',short:item.maker+' '+(oval?'160×120':'φ'+d/10)+' 全開',mm:item.mm,height,
+  shape:oval?'capsule':'round',shapeLabel:oval?'長円形・全開':'円形・全開',pinZ:.15,
+  note:item.note+'。脚部の細部は商品写真から近似。',url:item.url,
+  price:{kind:'fixed',min:item.price,text:'¥'+item.price.toLocaleString('ja-JP'),basis:'対象サイズのテーブル単品・2026年11月確認'}};
+}
 const tableOptions={
+ ...extensionOptions,
  tomoPair:pairedOption('TOMOKAGU','CZ-T013',309288,'https://tomokagu.com/products/ダイニングテーブル-パイン材-丸みを帯びたデザイン-厚みのある天板-木目調-広々とした天板-円形-cz-t013?variant=49541358223650','パイン材の天板と縦溝の円柱脚'),
  httPair:pairedOption('BEST KAGU','HTT-3844',213798,'https://www.bestkagu.com/products/htt-3844','ブラックのセラミック天板とくびれた金属脚'),
 graph:{"name": "Wilkhahn Graph 中古・商品625729", "short": "Graph 3200", "maker": "Wilkhahn", "shape": "boat", "shapeLabel": "ボート形", "mm": [3200, 1500, 720], "note": "掲載実寸。ボート形天板・銀色6本脚・配線口。脚位置と天板曲線は商品写真から近似。送料別", "price": {"kind": "fixed", "min": 198000, "text": "¥198,000", "basis": "2026-11-06確認・税込本体。KANADEMONOは標準脚の合算、追加加工・配線収納別"}, "url": "https://www.officebusters.com/items/625729", "height": 0.72, "laptopX": 0.4, "laptopZ": [-0.5, 0.1, 0.6], "pinZ": 0.1},
@@ -1745,7 +1799,7 @@ kanaLino240:{"name": "リノリウム 半円2台＋長方形160×80", "short": "
   price:{kind:'street',min:151000,text:'約¥151,000',basis:'税込・販売店の実売価格（定価は¥237,600）'},url:'https://www.office-com.jp/products/detail.php?product_id=458005',
   height:.720,laptopX:.35,laptopZ:[-.46,.07,.59],pinZ:.09}
 };
-const tableMeshes={tomoPair,httPair,graph,kana220,kana240,kana160,kanaLino220,kanaLino240,cashew,rughaus,modern:roundTable,oneLux,oneLuxOval,gfield,viena2};
+const tableMeshes={...extensionMeshes,tomoPair,httPair,graph,kana220,kana240,kana160,kanaLino220,kanaLino240,cashew,rughaus,modern:roundTable,oneLux,oneLuxOval,gfield,viena2};
 const fmt=n=>n.toLocaleString('ja-JP');
 function topArea(o){const [w,d]=o.mm,m2=w*d/1e6;if(o.shape==='paired')return 2*Math.PI*(d/2000)**2;if(o.shape==='boat')return m2*17/18;if(o.shape==='round'||o.shape==='ellipse')return Math.PI/4*m2;if(o.shape==='capsule')return m2-(1-Math.PI/4)*(d/1000)**2;return m2}
 function shortPrice(p){if(p.kind==='quote')return '要見積';if(p.kind==='fixed')return p.text;if(p.kind==='street')return p.text;const man=(p.min/10000).toFixed(1).replace(/\.0$/,'');return `¥${man}万〜`}
