@@ -543,13 +543,6 @@ for(const [name,x,z,rot] of desks){
  box(g,.17,.028,.055,.405,.710,.255,M.black,'昇降コントローラー');
  box(g,.049,.005,.026,.365,.693,.257,M.screen);
  for(let i=0;i<4;i++)box(g,.01,.005,.01,.411+i*.018,.693,.257,M.trim);
- // Xiaomi A27Ui: overall 613 × 185 × 511 mm, 27-inch 16:9 active area.
- box(g,.613,.364,.033,0,1.079,-.165,M.black,'Xiaomi A27Ui 27インチ');
- box(g,.598,.336,.004,0,1.086,-.146,M.screen);
- box(g,.275,.012,.185,0,.756,-.115,M.black);
- box(g,.047,.24,.032,0,.919,-.18,M.dark);
- for(const x of [-.019,.019])box(g,.009,.07,.032,x,.81,-.18,M.dark);
- box(g,.047,.019,.032,0,.774,-.18,M.dark);
  box(g,.3,.012,.11,-.035,.759,.11,M.trim);box(g,.05,.022,.08,.2,.765,.105,M.black);
  // Retain one west-side chair and all four east-side chairs, gathered centrally.
  if(deskObjects.length>=3){const chair=officeChair(roundGroup,0,0);chair.name=`中央テーブルのオフィスチェア ${officeChairs.length+1}`;officeChairs.push(chair);}
@@ -1580,10 +1573,13 @@ pantryLathe(hinokiDiffuser,'木製のボトル口',[[.010,.127],[.017,.127],[.01
 const reeds=[];for(let i=0;i<7;i++){const angle=i*2.39996,x=Math.sin(angle)*.008,z=Math.cos(angle)*.008;reeds.push(rod(hinokiDiffuser,[x,.025,z],[Math.sin(angle)*.060,.310+(i%3)*.009,Math.cos(angle)*.046],.0016,mat(0xb49b6e,.95)))}
 const scentCanvas=document.createElement('canvas');scentCanvas.width=480;scentCanvas.height=360;const sc=scentCanvas.getContext('2d');sc.fillStyle='#f5f0e3';sc.fillRect(0,0,480,360);sc.fillStyle='#405247';sc.textAlign='center';sc.font='bold 56px serif';sc.fillText('HINOKI',240,110);sc.font='49px sans-serif';sc.fillText('ヒノキ',240,194);sc.font='25px sans-serif';sc.fillText('REED DIFFUSER',240,280);const scentTex=new THREE.CanvasTexture(scentCanvas);scentTex.colorSpace=THREE.SRGBColorSpace;
 const scentLabel=new THREE.Mesh(new THREE.PlaneGeometry(.054,.041),new THREE.MeshStandardMaterial({map:scentTex,roughness:.9}));scentLabel.position.set(0,.067,-.0405);scentLabel.rotation.y=Math.PI;hinokiDiffuser.add(scentLabel);
-const wb=group('WB',6.56,3.652);box(wb,.035,.90,1.8,0,1.55,0,M.white);
-for(const y of [1.10,2.0])box(wb,.055,.025,1.84,0,y,0,M.metal);
-for(const z of [-.9,.9])box(wb,.055,.92,.025,0,1.55,z,M.metal);
-box(wb,.10,.018,1.8,-.04,1.10,0,M.metal);
+// The wall display faces west into the room, centered at the former board position.
+const wallDisplay=group('東壁の壁掛けモニター',6.56,3.652,-Math.PI/2);
+box(wallDisplay,.52,.29,.055,0,1.55,-.035,M.dark,'壁掛け金具');
+box(wallDisplay,1.80,1.02,.042,0,1.55,.012,M.black,'薄型ディスプレイ本体');
+const wallScreen=new THREE.Mesh(new THREE.PlaneGeometry(1.776,.999),sharedScreen.material);
+wallScreen.position.set(0,1.55,.034);
+wallDisplay.add(wallScreen);
 const powerData=[['T1',.06,3],['T2',.06,4.5],['T3',.06,6],['T4',6.57,3],['T5',6.57,4.5],['T6',6.57,6],['T7',3.35,1.85],['T8',3.35,5.45],['T9',3.35,8.05]];
 function pin(id,pos,power=true){const el=document.createElement('div');el.className='ss-pin';const span=document.createElement('span');span.className='viz-badge text-small';span.textContent=id;el.append(span);overlay.append(el);const p={el,pos:new THREE.Vector3(...pos),power};pins.push(p);return p}
 for(const [id,x,z] of powerData){
