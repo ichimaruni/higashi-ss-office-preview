@@ -543,7 +543,6 @@ for(const [name,x,z,rot] of desks){
  box(g,.17,.028,.055,.405,.710,.255,M.black,'昇降コントローラー');
  box(g,.049,.005,.026,.365,.693,.257,M.screen);
  for(let i=0;i<4;i++)box(g,.01,.005,.01,.411+i*.018,.693,.257,M.trim);
- box(g,.3,.012,.11,-.035,.759,.11,M.trim);box(g,.05,.022,.08,.2,.765,.105,M.black);
  // Retain one west-side chair and all four east-side chairs, gathered centrally.
  if(deskObjects.length>=3){const chair=officeChair(roundGroup,0,0);chair.name=`中央テーブルのオフィスチェア ${officeChairs.length+1}`;officeChairs.push(chair);}
 }
