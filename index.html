@@ -168,7 +168,7 @@ button,input,select{font:inherit;color:inherit}
           </span>
         </div>
         <label class="check"><input id="ss-power" type="checkbox" checked>電源の位置（9箇所・36口）</label>
-        <label class="check"><input id="ss-laptops" type="checkbox">中央テーブルのMacBook（5台）</label>
+        <label class="check"><input id="ss-laptops" type="checkbox">中央テーブルのMacBook</label>
         <label class="check"><input id="ss-walls" type="checkbox">外壁を透かす</label>
         <button id="ss-meeting" type="button" hidden>4人のオンライン会議セットを見る</button>
         <button id="ss-balcony" type="button">ベランダの吸い殻容器を見る</button>
@@ -717,6 +717,40 @@ function kanademonoTable(name,diameter,middle,linoleum=false){
  }
  return g;
 }
+// Two independent 140 cm tops with 10 cm of clear space between them.
+const pairOffset=.75;
+function pairedRounds(name,pine){
+ const pair=group(name,3.35,4,0,roundGroup);
+ const unit=new THREE.Group();
+ const finish=pine?tableWood(0xe7be8a):mat(0x393738,.85);
+ const thickness=pine ? .05 : .018;
+ tabletop(unit,capsuleGeometry(.70,0,thickness,.003),.75,finish,thickness);
+ if(pine){
+  lathe(unit,'縦溝付きの円柱脚',[[.215,0],[.215,.70]],tableWood(0xb88858));
+  const rib=new THREE.CylinderGeometry(.009,.009,.70,8);
+  const ribs=new THREE.InstancedMesh(rib,finish,80);
+  for(let i=0;i<80;i++){
+   const angle=i*Math.PI/40;
+   ribs.setMatrixAt(i,new THREE.Matrix4().makeTranslation(.214*Math.cos(angle),.35,.214*Math.sin(angle)));
+  }
+  unit.add(ribs);
+ }else{
+  const steel=mat(0x282729,.43,.5);
+  lathe(unit,'金属の円盤台座',[[0,0],[.27,0],[.27,.014],[.24,.023],[0,.023]],steel);
+  // Four curved plates converge at the waist and spread at the foot.
+  for(let i=0;i<4;i++){
+   const blade=new THREE.Shape();
+   blade.moveTo(.02,.02);blade.lineTo(.24,.02);blade.bezierCurveTo(.075,.19,.068,.45,.27,.732);
+   blade.lineTo(.02,.732);blade.closePath();
+   const mesh=new THREE.Mesh(new THREE.ExtrudeGeometry(blade,{depth:.009,bevelEnabled:false}),steel);
+   mesh.rotation.y=i*Math.PI/2;unit.add(mesh);
+  }
+ }
+ const other=unit.clone(true);unit.position.z=-pairOffset;other.position.z=pairOffset;pair.add(unit,other);
+ return pair;
+}
+const tomoPair=pairedRounds('TOMOKAGU CZ-T013 × 2',true);
+const httPair=pairedRounds('BEST KAGU HTT-3844 × 2',false);
 const kana220=kanademonoTable('KANADEMONO ラバーウッド 2200×1400',1.4,.8);
 const kana240=kanademonoTable('KANADEMONO ラバーウッド 2400×1600',1.6,.8);
 const kana160=kanademonoTable('KANADEMONO 半円2台 φ1600',1.6,0);
@@ -819,7 +853,7 @@ function updateFargoCable(){
  // Keep the strip in the northern half; leave the paper and five laptops clear.
  const narrowWithPC=tableChoice==='rughaus'&&equipment.visible;
  fargoTap.rotation.y=-Math.PI/2;
- fargoTap.position.set(0,h,0);
+ fargoTap.position.set(0,h,option.shape==='paired'?-pairOffset:0);
  while(fargoCable.children.length){const mesh=fargoCable.children[0];fargoCable.remove(mesh);mesh.geometry.dispose()}
  const x=fargoTap.position.x,z=fargoTap.position.z;
  const tabletopRoute=narrowWithPC?[[x,h+.015,z-.169],[x,h+.003,north-.012],[-.310,h-.075,north-.080]]:[[x,h+.015,z-.169],[-.020,h+.009,z-.199],[-.220,h+.006,north+.065],[-.220,h+.003,north-.012],[-.240,h-.075,north-.080]];
@@ -946,20 +980,23 @@ frontDisc(tableCamera,.021,.018,0,.24,.025,M.black,'レンズ鏡筒');frontDisc(
 const meetingCables=new THREE.Group();meetingCables.name='USB-C充電・卓上会議機器の配線';roundGroup.add(meetingCables);
 function updateMeetingSetup(){
  const h=tableOptions[tableChoice].height;
- meetingMic.position.set(-.12,h,.30);meetingMic.rotation.y=-Math.PI/2;
- tableCamera.position.set(.12,h,.30);tableCamera.rotation.y=-Math.PI/2;
+ const paired=tableOptions[tableChoice].shape==='paired';
+ const station=paired?-pairOffset:0;
+ meetingMic.position.set(-.12,h,station+.30);meetingMic.rotation.y=-Math.PI/2;
+ tableCamera.position.set(.12,h,station+.30);tableCamera.rotation.y=-Math.PI/2;
  while(meetingCables.children.length){const m=meetingCables.children[0];meetingCables.remove(m);m.geometry.dispose()}
  if(!equipment.visible)return;
  laptops.forEach((pc,i)=>{
+  if(!pc.visible||(paired&&i>=3))return;
   const port=new THREE.Vector3(-.158,.008,.02).applyAxisAngle(new THREE.Vector3(0,1,0),pc.rotation.y).add(new THREE.Vector3(pc.position.x,h,pc.position.z));
-  const z=-.123+i*.037;
+  const z=station-.123+i*.037;
   box(meetingCables,.040,.026,.029,0,h+.047,z,M.white,'USB-C PD充電器 '+(i+1));
-  curve(meetingCables,[[.022,h+.049,z],[.08,h+.012,z],[port.x*.65,h+.005,port.z*.65],[port.x,h+.008,port.z]],.002,mat(0xd5d8db,.7)).name='PC '+(i+1)+' へのUSB-Cケーブル';
+  curve(meetingCables,[[.022,h+.049,z],[.08,h+.012,z],[port.x*.65,h+.005,station+(port.z-station)*.65],[port.x,h+.008,port.z]],.002,mat(0xd5d8db,.7)).name='PC '+(i+1)+' へのUSB-Cケーブル';
   box(meetingCables,.012,.006,.008,port.x,h+.008,port.z,M.white,'USB-C端子');
  });
  const pc=laptops[0].position;
- curve(meetingCables,[[-.02,h+.27,.30],[-.08,h+.06,.32],[-.18,h+.005,.25],[pc.x,h+.008,pc.z]],.002,M.black).name='MV7+ USB接続';
- curve(meetingCables,[[.12,h+.22,.28],[.16,h+.008,.27],[pc.x,h+.008,pc.z+.02]],.002,M.black).name='カメラUSB接続';
+ curve(meetingCables,[[-.02,h+.27,station+.30],[-.08,h+.06,station+.32],[-.18,h+.005,station+.25],[pc.x,h+.008,pc.z]],.002,M.black).name='MV7+ USB接続';
+ curve(meetingCables,[[.12,h+.22,station+.28],[.16,h+.008,station+.27],[pc.x,h+.008,pc.z+.02]],.002,M.black).name='カメラUSB接続';
 }
 
 // 14-inch MacBook Pro footprint: 312.6 × 221.2 mm. Five open laptops
@@ -982,7 +1019,8 @@ screenCtx.fillStyle='rgba(157,187,192,.16)';screenCtx.beginPath();screenCtx.elli
 const laptopScreenTex=new THREE.CanvasTexture(screenCanvas);laptopScreenTex.colorSpace=THREE.SRGBColorSpace;
 const laptopScreenMat=new THREE.MeshStandardMaterial({map:laptopScreenTex,emissiveMap:laptopScreenTex,emissive:0xffffff,emissiveIntensity:.18,roughness:.32});
 const laptops=[];
-const laptopPlaces=Array.from({length:5},()=>[0,0,0]);
+officeChairs.push(officeChair(roundGroup,0,0));
+const laptopPlaces=Array.from({length:6},()=>[0,0,0]);
 for(const [index,[x,z,angle]] of laptopPlaces.entries()){
  const g=new THREE.Group();g.name=`14インチMacBook ${index+1}`;g.position.set(x,.717,z);g.rotation.y=angle;equipment.add(g);laptops.push(g);
  box(g,.3126,.013,.2212,0,.007,0,laptopSilver,'アルミ筐体');
@@ -998,7 +1036,7 @@ for(const [index,[x,z,angle]] of laptopPlaces.entries()){
 // Real-scale coffee mugs, one per occupied central seat.
 const coffeeCups=[];
 const mugCeramic=mat(0xf1eee6,.24),coffeeLiquid=mat(0x352014,.22);
-for(let i=0;i<5;i++){
+for(let i=0;i<6;i++){
  const cup=new THREE.Group();cup.name=`コーヒーカップ ${i+1}・直径8cm 高さ9cm`;roundGroup.add(cup);coffeeCups.push(cup);
  lathe(cup,'厚みと内側のある陶器カップ',[[0,0],[.030,0],[.034,.006],[.040,.086],[.039,.090],[.035,.090],[.035,.084],[.029,.010],[0,.010]],mugCeramic);
  const coffee=new THREE.Mesh(new THREE.CylinderGeometry(.0345,.0345,.001,40),coffeeLiquid);coffee.position.y=.077;cup.add(coffee);
@@ -1671,7 +1709,14 @@ streetscape(true);streetscape(false);
 // Price kinds: fixed = a listed price for this exact size, range = the maker's
 // published range for the model (size and wood vary), from = starting price,
 // quote = no public price.
+function pairedOption(maker,model,total,url,finish){
+ return {maker,name:model+' 直径140cm × 2台',short:maker+' 円卓2台',shape:'paired',shapeLabel:'円形2台・3席ずつ',mm:[2900,1400,750],height:.75,pinZ:.75,
+  note:finish+'。南北に10cm間隔。脚部の寸法は写真から近似。',url,
+  price:{kind:'fixed',min:total,text:'¥'+total.toLocaleString('ja-JP'),basis:'140cm仕様2台分の本体価格'}};
+}
 const tableOptions={
+ tomoPair:pairedOption('TOMOKAGU','CZ-T013',309288,'https://tomokagu.com/products/ダイニングテーブル-パイン材-丸みを帯びたデザイン-厚みのある天板-木目調-広々とした天板-円形-cz-t013?variant=49541358223650','パイン材の天板と縦溝の円柱脚'),
+ httPair:pairedOption('BEST KAGU','HTT-3844',213798,'https://www.bestkagu.com/products/htt-3844','ブラックのセラミック天板とくびれた金属脚'),
 graph:{"name": "Wilkhahn Graph 中古・商品625729", "short": "Graph 3200", "maker": "Wilkhahn", "shape": "boat", "shapeLabel": "ボート形", "mm": [3200, 1500, 720], "note": "掲載実寸。ボート形天板・銀色6本脚・配線口。脚位置と天板曲線は商品写真から近似。送料別", "price": {"kind": "fixed", "min": 198000, "text": "¥198,000", "basis": "2026-11-06確認・税込本体。KANADEMONOは標準脚の合算、追加加工・配線収納別"}, "url": "https://www.officebusters.com/items/625729", "height": 0.72, "laptopX": 0.4, "laptopZ": [-0.5, 0.1, 0.6], "pinZ": 0.1},
 kana220:{"name": "ラバーウッド 半円2台＋長方形140×80", "short": "KANADEMONO 木製220×140", "maker": "KANADEMONO", "shape": "capsule", "shapeLabel": "半円＋長方形", "mm": [2200, 1400, 710], "note": "半円140×70を2台＋中央140×80。黒脚。固定方法は未確認・脚位置は近似", "price": {"kind": "fixed", "min": 181700, "text": "¥181,700", "basis": "2026-11-06確認・税込本体。KANADEMONOは標準脚の合算、追加加工・配線収納別"}, "url": "https://kanademono.design/products/htb-k03-bk", "height": 0.71, "laptopX": 0.4, "laptopZ": [-0.5, 0.1, 0.6], "pinZ": 0.1},
 kana240:{"name": "ラバーウッド 半円2台＋長方形160×80", "short": "KANADEMONO 木製240×160", "maker": "KANADEMONO", "shape": "capsule", "shapeLabel": "半円＋長方形", "mm": [2400, 1600, 710], "note": "半円160×80を2台＋中央160×80。黒脚。固定方法は未確認・脚位置は近似", "price": {"kind": "fixed", "min": 191700, "text": "¥191,700", "basis": "2026-11-06確認・税込本体。KANADEMONOは標準脚の合算、追加加工・配線収納別"}, "url": "https://kanademono.design/products/htb-k03-bk", "height": 0.71, "laptopX": 0.4, "laptopZ": [-0.5, 0.1, 0.6], "pinZ": 0.1},
@@ -1700,12 +1745,12 @@ kanaLino240:{"name": "リノリウム 半円2台＋長方形160×80", "short": "
   price:{kind:'street',min:151000,text:'約¥151,000',basis:'税込・販売店の実売価格（定価は¥237,600）'},url:'https://www.office-com.jp/products/detail.php?product_id=458005',
   height:.720,laptopX:.35,laptopZ:[-.46,.07,.59],pinZ:.09}
 };
-const tableMeshes={graph,kana220,kana240,kana160,kanaLino220,kanaLino240,cashew,rughaus,modern:roundTable,oneLux,oneLuxOval,gfield,viena2};
+const tableMeshes={tomoPair,httPair,graph,kana220,kana240,kana160,kanaLino220,kanaLino240,cashew,rughaus,modern:roundTable,oneLux,oneLuxOval,gfield,viena2};
 const fmt=n=>n.toLocaleString('ja-JP');
-function topArea(o){const [w,d]=o.mm,m2=w*d/1e6;if(o.shape==='boat')return m2*17/18;if(o.shape==='round'||o.shape==='ellipse')return Math.PI/4*m2;if(o.shape==='capsule')return m2-(1-Math.PI/4)*(d/1000)**2;return m2}
+function topArea(o){const [w,d]=o.mm,m2=w*d/1e6;if(o.shape==='paired')return 2*Math.PI*(d/2000)**2;if(o.shape==='boat')return m2*17/18;if(o.shape==='round'||o.shape==='ellipse')return Math.PI/4*m2;if(o.shape==='capsule')return m2-(1-Math.PI/4)*(d/1000)**2;return m2}
 function shortPrice(p){if(p.kind==='quote')return '要見積';if(p.kind==='fixed')return p.text;if(p.kind==='street')return p.text;const man=(p.min/10000).toFixed(1).replace(/\.0$/,'');return `¥${man}万〜`}
 function priceSub(p){return {fixed:'税込',street:'実売',range:'価格帯の下限',from:'税抜・下限',quote:'公開価格なし'}[p.kind]}
-function dimText(o){const [w,d,h]=o.mm;return o.shape==='round'?`φ${fmt(w)}×${h}`:`${fmt(w)}×${fmt(d)}×${h}`}
+function dimText(o){const [w,d,h]=o.mm;return o.shape==='paired'?'φ1,400×2台・H750':o.shape==='round'?`φ${fmt(w)}×${h}`:`${fmt(w)}×${fmt(d)}×${h}`}
 
 // ---- UI ------------------------------------------------------------------------
 const $=s=>root.querySelector(s);
@@ -1723,7 +1768,7 @@ function renderCard(){
  const o=tableOptions[tableChoice];
  card.hidden=layout!=='B';
  select.value=tableChoice;
- $('#card-dims').textContent=o.shape==='round'?`φ${fmt(o.mm[0])} × H${o.mm[2]} mm`:`W${fmt(o.mm[0])} × D${fmt(o.mm[1])} × H${o.mm[2]} mm`;
+ $('#card-dims').textContent=o.shape==='paired'?'φ1,400 × H750 mm・2台':o.shape==='round'?`φ${fmt(o.mm[0])} × H${o.mm[2]} mm`:`W${fmt(o.mm[0])} × D${fmt(o.mm[1])} × H${o.mm[2]} mm`;
  $('#card-price').textContent=o.price.text;
  $('#card-basis').textContent=o.price.basis.split('。')[0];
 }
@@ -1766,14 +1811,21 @@ function setTable(next){
  updateCentralSeats();
  updateCoffeeCups();
  updateMeetingSetup();
- const [w,d]=option.mm;tableDimensionPin.el.firstElementChild.textContent=option.shape==='round'?`φ${fmt(w)}`:`${fmt(w)}×${fmt(d)}`;
+ const [w,d]=option.mm;tableDimensionPin.el.firstElementChild.textContent=option.shape==='paired'?'φ1,400 × 2台':option.shape==='round'?`φ${fmt(w)}`:`${fmt(w)}×${fmt(d)}`;
  tableDimensionPin.pos.z=option.pinZ;
  renderCard();if(!drawer.hidden)renderLedger();updateLabel();if(view==='display'||view==='meeting')setView(view);else render();
 }
 function updateCentralSeats(){
  const option=tableOptions[tableChoice],halfWidth=option.mm[1]/2000,halfLength=option.mm[0]/2000;
  const span=Math.min(.60,halfLength-.24);
- const seats=option.shape==='round'
+ const paired=option.shape==='paired';
+ officeChairs[5].visible=laptops[5].visible=coffeeCups[5].visible=paired;
+ const seats=paired
+  ?[-1,1].flatMap(side=>(side<0?[75,220,285]:[0,95,265]).map(degrees=>{
+   const angle=degrees*Math.PI/180,x=Math.sin(angle),z=Math.cos(angle);
+   return {angle,x:x*1.04,z:side*pairOffset+z*1.04,px:x*.44,pz:side*pairOffset+z*.44};
+  }))
+  :option.shape==='round'
   ?Array.from({length:5},(_,i)=>{const angle=Math.PI+i*Math.PI*2/5;return {x:Math.sin(angle)*(halfWidth+.38),z:Math.cos(angle)*(halfLength+.38),px:Math.sin(angle)*(halfWidth-.25),pz:Math.cos(angle)*(halfLength-.25),angle}})
   :[-1,1].flatMap(side=>[-span,span].map(z=>({x:side*(halfWidth+.38),z,px:side*(halfWidth-.18),pz:z,angle:side*Math.PI/2}))).concat([{x:0,z:-halfLength-.38,px:0,pz:-halfLength+.18,angle:Math.PI}]);
  seats.forEach((seat,i)=>{
@@ -1799,7 +1851,7 @@ function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const 
 function render(){renderer.render(scene,camera);projectPins();root.dataset.layout=layout;root.dataset.tableModel=layout==='B'?tableChoice:'';root.dataset.laptops=String(equipment.visible)}
 function updateLabel(){
  layoutLabel.textContent=layout==='B'
-  ?`配置B：デスク 西3台・東4台／中央にオフィスチェア5脚／北壁沿いに収納ボックス16個／ノートPC ${equipment.visible?'表示':'非表示'}`
+  ?`配置B：デスク 西3台・東4台／中央にオフィスチェア${tableOptions[tableChoice].shape==="paired"?6:5}脚／北壁沿いに収納ボックス16個／ノートPC ${equipment.visible?'表示':'非表示'}`
   :'配置A：デスク7台の島／会議テーブル RUGHAUS 1,750×800と会議チェア4脚';
  stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。卓上スピーカーマイクを配置。各席のコーヒーカップ、テーブル上の北寄りの黄色いFargo電源タップ（北側の床電源から給電コード）、フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その上の家庭用プリンター、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、北壁に木製の神棚、ベランダの吸い殻専用容器（室内持込禁止）、入口脇のヒノキのリードディフューザー、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
 }
