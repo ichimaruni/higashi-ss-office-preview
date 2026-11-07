@@ -131,7 +131,7 @@ button,input,select{font:inherit;color:inherit}
 <body>
 <div class="app" id="ss-office-3d">
   <header class="top">
-    <h1>東SSビル 6階 レイアウト</h1>
+    <h1>東SSビル｜中央テーブル比較</h1>
     <div class="ctl" role="radiogroup" aria-label="配置">
       <span class="ctl-label">配置</span>
       <span class="seg" id="ss-layout">
@@ -144,7 +144,8 @@ button,input,select{font:inherit;color:inherit}
       <span class="seg" id="ss-view">
         <label><input type="radio" name="ss-view" value="overview" checked>全体</label>
         <label><input type="radio" name="ss-view" value="top">真上</label>
-        <label><input type="radio" name="ss-view" value="table">中央</label>
+        <label><input type="radio" name="ss-view" value="table">卓上</label>
+        <label><input type="radio" name="ss-view" value="tabletop">卓上真上</label>
         <label><input type="radio" name="ss-view" value="rack">機器棚</label>
         <label><input type="radio" name="ss-view" value="kitchen">家電棚</label>
         <label><input type="radio" name="ss-view" value="pantry">食器</label>
@@ -543,8 +544,7 @@ for(const [name,x,z,rot] of desks){
  box(g,.17,.028,.055,.405,.710,.255,M.black,'昇降コントローラー');
  box(g,.049,.005,.026,.365,.693,.257,M.screen);
  for(let i=0;i<4;i++)box(g,.01,.005,.01,.411+i*.018,.693,.257,M.trim);
- // Retain one west-side chair and all four east-side chairs, gathered centrally.
- if(deskObjects.length>=3){const chair=officeChair(roundGroup,0,0);chair.name=`中央テーブルのオフィスチェア ${officeChairs.length+1}`;officeChairs.push(chair);}
+
 }
 const table=group('M1',5.3,2.525,Math.PI/2,meetingGroup);
 const rughausTop=roundedTableGeometry(.8,1.75,.008,.035,.002);rughausTop.rotateY(Math.PI/2);
@@ -786,7 +786,7 @@ const gfieldTop=new THREE.MeshStandardMaterial({map:ceramicTex,roughness:.34}),g
 const ceramic=new THREE.Mesh(new THREE.CylinderGeometry(.8,.8,.012,128),gfieldTop);ceramic.position.y=.744;ceramic.castShadow=true;ceramic.receiveShadow=true;gfield.add(ceramic);planarTopUV(ceramic.geometry,1.6,1.6);
 const underside=new THREE.Mesh(new THREE.CylinderGeometry(.785,.785,.015,96),mat(0xdbd8d0,.7));underside.position.y=.7305;underside.castShadow=true;gfield.add(underside);
 lathe(gfield,'滑らかなチューリップ型スチール脚',[[0,.008],[.337,.008],[.352,.014],[.348,.022],[.30,.051],[.248,.093],[.192,.155],[.15,.221],[.119,.296],[.108,.37],[.111,.45],[.129,.532],[.165,.61],[.211,.67],[.276,.712],[.3,.723],[0,.723]],gfieldBase);
-const equipment=group('中央テーブルのMacBook 5台',3.35,4,0,roundGroup);equipment.visible=false;
+const equipment=group('中央テーブルのMacBook 6台',3.35,4,0,roundGroup);equipment.visible=false;
 // Photo-inspired silver three-tier cart: 550 × 400 top, close to the 480 × 310 monitor stand.
 const mediaCart=group('北側シルバーワゴン 天板550 × 400・テーブルと同じ高さ',3.35,2.5,0,roundGroup);
 const cartFrame=new THREE.Group();cartFrame.name='ワゴンのフレームと棚';cartFrame.position.y=.08;mediaCart.add(cartFrame);
@@ -850,15 +850,15 @@ rod(fargoTap,[-.155,.015,0],[-.169,.015,0],.005,M.black).name='コード出口�
 const fargoCable=new THREE.Group();fargoCable.name='ワゴンから卓上Fargoへの給電コード';roundGroup.add(fargoCable);
 function updateFargoCable(){
  const option=tableOptions[tableChoice],h=option.height,north=-option.mm[0]/2000;
- // Keep the strip in the northern half; leave the paper and five laptops clear.
- const narrowWithPC=tableChoice==='rughaus'&&equipment.visible;
- fargoTap.rotation.y=-Math.PI/2;
- fargoTap.position.set(0,h,option.shape==='paired'?-pairOffset:0);
+ const paired=option.shape==='paired';
+ const hole=tableChoice==='graph'?-.72:tableChoice==='viena2'?-.335:null;
+ const z=hole!==null?hole+.18:paired?-pairOffset-.20:north*.48;
+ fargoTap.rotation.y=-Math.PI/2;fargoTap.position.set(0,h,z);
  while(fargoCable.children.length){const mesh=fargoCable.children[0];fargoCable.remove(mesh);mesh.geometry.dispose()}
- const x=fargoTap.position.x,z=fargoTap.position.z;
- const tabletopRoute=narrowWithPC?[[x,h+.015,z-.169],[x,h+.003,north-.012],[-.310,h-.075,north-.080]]:[[x,h+.015,z-.169],[-.020,h+.009,z-.199],[-.220,h+.006,north+.065],[-.220,h+.003,north-.012],[-.240,h-.075,north-.080]];
- curve(fargoCable,[...tabletopRoute,[-.310,.06,north-.12],[-.310,.012,north-.24],[0,.012,-2.02],[0,.042,-2.15]],.0038,M.black).name='天板の北端から床へ下ろし北側電源につなぐ黒いコード';
- box(fargoCable,.027,.020,.016,0,.047,-2.15,M.black,'北側の床電源に差したプラグ');
+ const exitZ=hole??north,exitX=tableChoice==='viena2'?.028:0;
+ const path=[[0,h+.015,z-.169],[exitX,h+.005,exitZ],[exitX,h-.035,exitZ-.012],[exitX,h-.08,exitZ+.045],[0,.06,exitZ+.055],[0,.012,exitZ-.02],[-roundGroup.position.x,.012,-2.05-roundGroup.position.z],[-roundGroup.position.x,.042,-2.15-roundGroup.position.z]];
+ curve(fargoCable,path,.0038,M.black).name='北側給電・天板から床へのコード';
+ box(fargoCable,.027,.020,.016,-roundGroup.position.x,.047,-2.15-roundGroup.position.z,M.black,'北側の床電源に差したプラグ');
 }
 
 const sharedDisplay=new THREE.Group();sharedDisplay.name='ワゴン上の50インチ画面・テーブル向き';sharedDisplay.position.set(0,-.720,0);mediaEquipment.add(sharedDisplay);
@@ -978,29 +978,9 @@ rod(tableCamera,[0,.08,0],[0,.22,0],.007,meetingFinish);
 meetingRound(tableCamera,.095,.055,.035,0,.24,0,meetingFinish,'コンパクトカメラ本体');
 frontDisc(tableCamera,.021,.018,0,.24,.025,M.black,'レンズ鏡筒');frontDisc(tableCamera,.016,.002,0,.24,.035,lensGlass,'カメラレンズ');
 const meetingCables=new THREE.Group();meetingCables.name='USB-C充電・卓上会議機器の配線';roundGroup.add(meetingCables);
-function updateMeetingSetup(){
- const h=tableOptions[tableChoice].height;
- const paired=tableOptions[tableChoice].shape==='paired';
- const station=paired?-pairOffset:0;
- meetingMic.position.set(-.12,h,station+.30);meetingMic.rotation.y=-Math.PI/2;
- tableCamera.position.set(.12,h,station+.30);tableCamera.rotation.y=-Math.PI/2;
- while(meetingCables.children.length){const m=meetingCables.children[0];meetingCables.remove(m);m.geometry.dispose()}
- if(!equipment.visible)return;
- laptops.forEach((pc,i)=>{
-  if(!pc.visible||(paired&&i>=3))return;
-  const port=new THREE.Vector3(-.158,.008,.02).applyAxisAngle(new THREE.Vector3(0,1,0),pc.rotation.y).add(new THREE.Vector3(pc.position.x,h,pc.position.z));
-  const z=station-.123+i*.037;
-  box(meetingCables,.040,.026,.029,0,h+.047,z,M.white,'USB-C PD充電器 '+(i+1));
-  curve(meetingCables,[[.022,h+.049,z],[.08,h+.012,z],[port.x*.65,h+.005,station+(port.z-station)*.65],[port.x,h+.008,port.z]],.002,mat(0xd5d8db,.7)).name='PC '+(i+1)+' へのUSB-Cケーブル';
-  box(meetingCables,.012,.006,.008,port.x,h+.008,port.z,M.white,'USB-C端子');
- });
- const pc=laptops[0].position;
- curve(meetingCables,[[-.02,h+.27,station+.30],[-.08,h+.06,station+.32],[-.18,h+.005,station+.25],[pc.x,h+.008,pc.z]],.002,M.black).name='MV7+ USB接続';
- curve(meetingCables,[[.12,h+.22,station+.28],[.16,h+.008,station+.27],[pc.x,h+.008,pc.z+.02]],.002,M.black).name='カメラUSB接続';
-}
-
-// 14-inch MacBook Pro footprint: 312.6 × 221.2 mm. Five open laptops
-// sit three on each long side, leaving the north end for the shared display.
+meetingMic.removeFromParent();tableCamera.removeFromParent();meetingCables.removeFromParent();
+// 14-inch MacBook Pro footprint: 312.6 × 221.2 mm. Six open laptops
+// use the same footprint for all six place settings.
 const laptopSilver=mat(0xaeb2b5,.36,.7),trackpadMat=mat(0x979da0,.44,.5);
 const keyboardCanvas=document.createElement('canvas');keyboardCanvas.width=560;keyboardCanvas.height=240;
 const keyCtx=keyboardCanvas.getContext('2d');keyCtx.fillStyle='#25282b';keyCtx.fillRect(0,0,560,240);
@@ -1019,7 +999,45 @@ screenCtx.fillStyle='rgba(157,187,192,.16)';screenCtx.beginPath();screenCtx.elli
 const laptopScreenTex=new THREE.CanvasTexture(screenCanvas);laptopScreenTex.colorSpace=THREE.SRGBColorSpace;
 const laptopScreenMat=new THREE.MeshStandardMaterial({map:laptopScreenTex,emissiveMap:laptopScreenTex,emissive:0xffffff,emissiveIntensity:.18,roughness:.32});
 const laptops=[];
-officeChairs.push(officeChair(roundGroup,0,0));
+// Woven upholstery follows a curved seat and back, with an open mesh on task chairs.
+function sling(parent,point,fabric,frame){
+ const geo=new THREE.PlaneGeometry(1,1,18,16),pos=geo.attributes.position;
+ for(let i=0;i<pos.count;i++)pos.setXYZ(i,...point(pos.getX(i)*2,pos.getY(i)+.5));
+ geo.computeVertexNormals();const mesh=new THREE.Mesh(geo,fabric);mesh.castShadow=true;parent.add(mesh);
+ for(const t of [0,1])curve(parent,Array.from({length:9},(_,i)=>point(i/4-1,t)),frame,M.dark);
+ for(const u of [-1,1])curve(parent,Array.from({length:9},(_,i)=>point(u,i/8)),frame,M.dark);
+}
+const weave=document.createElement('canvas');weave.width=weave.height=16;
+const weaveCtx=weave.getContext('2d');weaveCtx.fillStyle='#666a69';weaveCtx.fillRect(0,0,16,4);weaveCtx.fillStyle='#45494a';weaveCtx.fillRect(0,0,4,16);
+const net=new THREE.CanvasTexture(weave);net.wrapS=net.wrapT=THREE.RepeatWrapping;net.repeat.set(70,64);net.colorSpace=THREE.SRGBColorSpace;
+const meshFabric=new THREE.MeshStandardMaterial({map:net,side:THREE.DoubleSide,alphaTest:.24,roughness:.92});
+const canvasFabric=mat(0x383c40,.97);canvasFabric.side=THREE.DoubleSide;
+function comparisonChair(camp){
+ const g=new THREE.Group();roundGroup.add(g);g.name=camp?'折りたたみディレクターズチェア':'メッシュのオフィスチェア';
+ const fabric=camp?canvasFabric:meshFabric;
+ sling(g,(u,t)=>[u*(camp?.24:.225+.018*Math.sin(Math.PI*t)),.455+.025*u*u-.016*Math.sin(t*Math.PI),t*.42-.21],fabric,.009);
+ sling(g,(u,t)=>[u*(camp?.24:.19+.058*Math.sin(Math.PI*t)),(camp?.63:.51)+t*(camp?.18:.47),.205+.065*t-.036*u*u-.038*Math.sin(2*Math.PI*t)],fabric,.009);
+ for(const side of [-1,1]){
+  const x=side*.25;
+  if(camp){
+   for(const z of [-.18,.18])rod(g,[-x,.035,z],[x,.45,z],.013,cartChrome);
+   rod(g,[x,.038,-.21],[x,.038,.21],.013,cartChrome);
+   rod(g,[x,.45,.18],[x,.83,.25],.012,cartChrome);
+  }
+  rod(g,[x,.44,.14],[x,.64,.14],.014,camp?cartChrome:M.dark);
+  box(g,.045,.025,.27,x,.647,.035,M.pad);
+ }
+ if(!camp){
+  rod(g,[0,.12,0],[0,.45,0],.032,cartChrome);
+  for(let i=0;i<5;i++){const a=i*2*Math.PI/5,x=.27*Math.sin(a),z=.27*Math.cos(a);
+   rod(g,[0,.15,0],[x,.063,z],.016,M.dark);
+   const wheel=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,.036,16),M.black);wheel.rotation.z=Math.PI/2;wheel.position.set(x,.037,z);g.add(wheel);
+  }
+  for(const side of [-1,1])curve(g,[[0,.39,.04],[side*.07,.46,.23],[side*.15,.68,.26]],.019,M.dark);
+ }
+ return g;
+}
+for(let i=0;i<6;i++)officeChairs.push(comparisonChair(i>=4));
 const laptopPlaces=Array.from({length:6},()=>[0,0,0]);
 for(const [index,[x,z,angle]] of laptopPlaces.entries()){
  const g=new THREE.Group();g.name=`14インチMacBook ${index+1}`;g.position.set(x,.717,z);g.rotation.y=angle;equipment.add(g);laptops.push(g);
@@ -1042,14 +1060,25 @@ for(let i=0;i<6;i++){
  const coffee=new THREE.Mesh(new THREE.CylinderGeometry(.0345,.0345,.001,40),coffeeLiquid);coffee.position.y=.077;cup.add(coffee);
  curve(cup,[[.035,.071,0],[.061,.075,0],[.067,.048,0],[.055,.023,0],[.034,.026,0]],.005,mugCeramic);
 }
-function updateCoffeeCups(){
- const o=tableOptions[tableChoice];
- laptops.forEach((pc,i)=>{
-  // Beside each laptop, tangential to the table edge; do not shrink the props.
-  const offset=new THREE.Vector3(.22,0,.015).applyAxisAngle(new THREE.Vector3(0,1,0),pc.rotation.y);
-  coffeeCups[i].position.set(pc.position.x+offset.x,o.height,pc.position.z+offset.z);
-  coffeeCups[i].rotation.y=pc.rotation.y;
- });
+const meals=[];
+const riceBowl=mat(0xdbe3df,.26),lacquer=mat(0x562d24,.28),broth=mat(0xb48346,.32),grain=mat(0xfff4dc,.86),onion=mat(0x668043,.7);
+for(let i=0;i<6;i++){
+ const g=new THREE.Group();g.name='ご飯・味噌汁・箸 '+(i+1);roundGroup.add(g);meals.push(g);
+ for(const soup of [false,true]){
+  const bowl=new THREE.Group();bowl.position.z=soup?-.074:.068;g.add(bowl);
+  const r=soup?.055:.06;
+  lathe(bowl,soup?'汁椀':'飯碗',[[0,0],[.023,0],[.023,.007],[.032,.014],[r-.005,.041],[r,.059],[r-.003,.061],[r-.006,.048],[.024,.018],[0,.015]],soup?lacquer:riceBowl);
+  lathe(bowl,soup?'味噌汁':'白米',soup?[[0,.048],[r-.006,.048],[0,.049]]:[[0,.049],[r-.006,.049],[.048,.063],[.033,.073],[0,.078]],soup?broth:grain);
+  if(soup){for(let k=0;k<3;k++)box(bowl,.014,.008,.013,.024*Math.cos(k*2),.050,.025*Math.sin(k*2),grain);
+   for(let k=0;k<5;k++)box(bowl,.009,.001,.003,.026*Math.cos(k*2+1),.051,.025*Math.sin(k*2+1),onion).rotation.y=k;
+  }else{for(let k=0;k<24;k++){const a=k*2.4,r=.047*Math.sqrt(k/24);const grainMesh=new THREE.Mesh(new THREE.SphereGeometry(.0034,6,4),grain);grainMesh.position.set(Math.cos(a)*r,.078-.015*(r/.047)**2,Math.sin(a)*r);grainMesh.scale.set(1.6,.7,.8);bowl.add(grainMesh);}}
+ }
+ for(const x of [.076,.084])rod(g,[x,.004,-.095],[x+.002,.004,.105],.0022,diningOak);
+}
+function placeOnTable(object,x,z,angle,side,depth,height){
+ object.rotation.y=angle;
+ object.position.set(x+side*Math.cos(angle)+depth*Math.sin(angle),height,z-side*Math.sin(angle)+depth*Math.cos(angle));
+
 }
 
 // Phone on the middle shelf, facing south toward the table: an iPad running the
@@ -1820,7 +1849,7 @@ select.append(...Object.entries(tableOptions).map(([key,o])=>new Option(`${o.sho
 
 function renderCard(){
  const o=tableOptions[tableChoice];
- card.hidden=layout!=='B';
+ card.hidden=false;
  select.value=tableChoice;
  $('#card-dims').textContent=o.shape==='paired'?'φ1,400 × H750 mm・2台':o.shape==='round'?`φ${fmt(o.mm[0])} × H${o.mm[2]} mm`:`W${fmt(o.mm[0])} × D${fmt(o.mm[1])} × H${o.mm[2]} mm`;
  $('#card-price').textContent=o.price.text;
@@ -1863,28 +1892,40 @@ function setTable(next){
  updateCartCable(cartZ,option.height);
  updateFargoCable();
  updateCentralSeats();
- updateCoffeeCups();
- updateMeetingSetup();
+
  const [w,d]=option.mm;tableDimensionPin.el.firstElementChild.textContent=option.shape==='paired'?'φ1,400 × 2台':option.shape==='round'?`φ${fmt(w)}`:`${fmt(w)}×${fmt(d)}`;
  tableDimensionPin.pos.z=option.pinZ;
- renderCard();if(!drawer.hidden)renderLedger();updateLabel();if(view==='display'||view==='meeting')setView(view);else render();
+ renderCard();if(!drawer.hidden)renderLedger();updateLabel();if(view==='table'||view==='tabletop'||view==='display'||view==='meeting')setView(view);else render();
 }
 function updateCentralSeats(){
  const option=tableOptions[tableChoice],halfWidth=option.mm[1]/2000,halfLength=option.mm[0]/2000;
- const span=Math.min(.60,halfLength-.24);
- const paired=option.shape==='paired';
- officeChairs[5].visible=laptops[5].visible=coffeeCups[5].visible=paired;
- const seats=paired
-  ?[-1,1].flatMap(side=>(side<0?[75,220,285]:[0,95,265]).map(degrees=>{
-   const angle=degrees*Math.PI/180,x=Math.sin(angle),z=Math.cos(angle);
-   return {angle,x:x*1.04,z:side*pairOffset+z*1.04,px:x*.44,pz:side*pairOffset+z*.44};
-  }))
-  :option.shape==='round'
-  ?Array.from({length:5},(_,i)=>{const angle=Math.PI+i*Math.PI*2/5;return {x:Math.sin(angle)*(halfWidth+.38),z:Math.cos(angle)*(halfLength+.38),px:Math.sin(angle)*(halfWidth-.25),pz:Math.cos(angle)*(halfLength-.25),angle}})
-  :[-1,1].flatMap(side=>[-span,span].map(z=>({x:side*(halfWidth+.38),z,px:side*(halfWidth-.18),pz:z,angle:side*Math.PI/2}))).concat([{x:0,z:-halfLength-.38,px:0,pz:-halfLength+.18,angle:Math.PI}]);
- seats.forEach((seat,i)=>{
-  officeChairs[i].position.set(seat.x,0,seat.z);officeChairs[i].rotation.y=seat.angle;
-  laptops[i].position.set(seat.px,.717,seat.pz);laptops[i].rotation.y=seat.angle;
+ const paired=option.shape==='paired',round=option.shape==='round',h=option.height;
+ const seats=[];
+ function seat(angle,x,z){
+  seats.push({angle,x,z});
+ }
+ if(paired){
+  for(const side of [-1,1])for(const delta of [-105,0,105]){
+   const a=(side<0?Math.PI:0)+delta*Math.PI/180;
+   seat(a,.70*Math.sin(a),side*pairOffset+.70*Math.cos(a));
+  }
+ }else if(round || halfLength/halfWidth<1.75){
+  for(let i=0;i<6;i++){const a=(i+.5)*Math.PI/3;const x=halfWidth*Math.sin(a),z=halfLength*Math.cos(a);seat(Math.atan2(x/halfWidth**2,z/halfLength**2),x,z);}
+ }else{
+  for(const side of [-1,1])for(const fraction of [-.66,0,.66]){
+   const z=halfLength*fraction;
+   let x=halfWidth;
+   if(option.shape==='ellipse')x*=Math.sqrt(1-fraction*fraction);
+   if(option.shape==='capsule'){const end=Math.max(0,Math.abs(z)-(halfLength-halfWidth));x=Math.sqrt(halfWidth**2-end**2);}
+   if(option.shape==='boat')x*=1-.14*fraction*fraction;
+   seat(side*Math.PI/2,side*x,z);
+  }
+ }
+ seats.forEach(({angle,x,z},i)=>{
+  placeOnTable(officeChairs[i],x,z,angle,0,.33,0);
+  placeOnTable(laptops[i],x,z,angle,-.065,-.219,.717);
+  placeOnTable(meals[i],x,z,angle,.167,-.212,h);
+  placeOnTable(coffeeCups[i],x,z,angle,-.175,-.065,h);
  });
 }
 function updateCartCable(z,h){
@@ -1898,27 +1939,28 @@ function updateCartCable(z,h){
  const phoneY=.08+.347*(h-.08)/.64;
  curve(cartCables,[[.02,phoneY+.01,z+.01],[.13,phoneY+.008,z-.15],[.16,phoneY+.05,z-.21],[.10,h-.026,z-.18]],.003,M.black).name='中段の電話の充電ケーブル';
 }
-function setLaptops(show){laptopToggle.checked=!!show;equipment.visible=!!show;updateFargoCable();updateMeetingSetup();updateLabel();render()}
+function setLaptops(show){laptopToggle.checked=!!show;equipment.visible=!!show;updateFargoCable();updateLabel();render()}
 function setFloor(next){floorFinish=next==='linoleum'?'linoleum':'carpet';officeFloor.material=floorFinish==='carpet'?M.carpet:sheetMaterial;floorGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===floorFinish);render()}
 function interior(){return view==='inside'||view==='reverse'}
-function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&&!powerToggle.checked)||(p.layout&&p.layout!==layout)||interior()||view==='clothes'||view==='shrine'||view==='display'||view==='balcony'||view==='fragrance'||view==='meeting'||(view==='table'&&p===tableDimensionPin)||v.z>1||v.z< -1||Math.abs(v.x)>.97||Math.abs(v.y)>.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
-function render(){renderer.render(scene,camera);projectPins();root.dataset.layout=layout;root.dataset.tableModel=layout==='B'?tableChoice:'';root.dataset.laptops=String(equipment.visible)}
+function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&&!powerToggle.checked)||(p.layout&&p.layout!==layout)||interior()||view==='clothes'||view==='shrine'||view==='display'||view==='balcony'||view==='fragrance'||view==='meeting'||(['table','tabletop'].includes(view)&&p===tableDimensionPin)||v.z>1||v.z< -1||Math.abs(v.x)>.97||Math.abs(v.y)>.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
+function render(){renderer.render(scene,camera);projectPins();root.dataset.layout=layout;root.dataset.tableModel=tableChoice;root.dataset.laptops=String(equipment.visible)}
 function updateLabel(){
  layoutLabel.textContent=layout==='B'
-  ?`配置B：デスク 西3台・東4台／中央にオフィスチェア${tableOptions[tableChoice].shape==="paired"?6:5}脚／北壁沿いに収納ボックス16個／ノートPC ${equipment.visible?'表示':'非表示'}`
-  :'配置A：デスク7台の島／会議テーブル RUGHAUS 1,750×800と会議チェア4脚';
- stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。卓上スピーカーマイクを配置。各席のコーヒーカップ、テーブル上の北寄りの黄色いFargo電源タップ（北側の床電源から給電コード）、フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その上の家庭用プリンター、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、北壁に木製の神棚、ベランダの吸い殻専用容器（室内持込禁止）、入口脇のヒノキのリードディフューザー、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
+  ?`配置B：デスク 西3台・東4台／中央にメッシュチェア4脚＋キャンプチェア2脚／北壁沿いに収納ボックス16個／ノートPC ${equipment.visible?'表示':'非表示'}`
+  :'配置A：デスク7台の島／中央テーブルにメッシュチェア4脚＋キャンプチェア2脚';
+ stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。6人分のご飯・味噌汁・箸。各席のコーヒーカップ、テーブル上の北寄りの黄色いFargo電源タップ（北側の床電源から給電コード）、フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その上の家庭用プリンター、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、北壁に木製の神棚、ベランダの吸い殻専用容器（室内持込禁止）、入口脇のヒノキのリードディフューザー、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
 }
-function setLayout(next){layout=next==='A'?'A':'B';layoutGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===layout);trashBins.forEach((g,i)=>{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=Math.PI/2});deskObjects.forEach((g,i)=>{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=layout==='A';roundGroup.visible=layout==='B';layoutShadows.A.visible=layout==='A';layoutShadows.B.visible=layout==='B';
+function setLayout(next){layout=next==='A'?'A':'B';layoutGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===layout);trashBins.forEach((g,i)=>{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=Math.PI/2});deskObjects.forEach((g,i)=>{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=false;roundGroup.position.set(layout==='A'?1.95:0,0,layout==='A'?-1.475:0);updateFargoCable();layoutShadows.A.visible=layout==='A';layoutShadows.B.visible=layout==='B';
 
  if(layout!=='B'){openCompare(false);if(view==='display'||view==='meeting')view='table';}
- renderCard();updateLabel();if(view==='table'||view==='display'||view==='meeting')setView(view);else render()}
+ renderCard();updateLabel();if(view==='table'||view==='tabletop'||view==='display'||view==='meeting')setView(view);else render()}
 function wallTransparency(){outer.traverse(o=>{if(!o.isMesh)return;if(o.material===glass)return;if(!o.userData.original)o.userData.original=o.material;o.material=wallToggle.checked?o.userData.original.clone():o.userData.original;if(wallToggle.checked){o.material.transparent=true;o.material.opacity=.13;o.material.depthWrite=false;o.castShadow=false}else o.castShadow=true});render()}
-function setView(next){if(['display','clothes','meeting'].includes(next))next='overview';view=['overview','inside','reverse','top','table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display','balcony','fragrance','meeting'].includes(next)?next:'overview';if((view==='display'||view==='meeting')&&layout==='A')view='table';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
+function setView(next){if(['display','clothes','meeting'].includes(next))next='overview';view=['overview','inside','reverse','top','table','tabletop','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display','balcony','fragrance','meeting'].includes(next)?next:'overview';if((view==='display'||view==='meeting')&&layout==='A')view='table';viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
  if(view==='overview'){camera.position.set(.6,9.1,10.4);controls.target.set(0,.55,-.35);controls.maxPolarAngle=Math.PI*.49}
  if(view==='inside'){camera.position.set(.25,1.6,2.25);controls.target.set(-.25,1.35,-2.5);controls.maxPolarAngle=Math.PI*.72}
  if(view==='reverse'){camera.position.set(-2.25,1.6,-2.15);controls.target.set(.45,1.30,2.60);controls.maxPolarAngle=Math.PI*.72}
- if(view==='table'){camera.position.set(layout==='B'?1.9:1,1.85,layout==='B'?2.4:1.05);controls.target.set(layout==='B'?0:1.95,.62,layout==='B'?-.30:-1.475);controls.maxPolarAngle=Math.PI*.49}
+ if(view==='table'){const center=roundGroup.position,scale=Math.max(1,tableOptions[tableChoice].mm[0]/2400);camera.position.set(center.x+1.65*scale,2.8*scale,center.z+2.15*scale);controls.target.set(center.x,.54,center.z);controls.maxPolarAngle=Math.PI*.49}
+ if(view==='tabletop'){const center=roundGroup.position;camera.position.set(center.x,Math.max(3.5,tableOptions[tableChoice].mm[0]/1000+2.1),center.z+.001);controls.target.set(center.x,.5,center.z);controls.maxPolarAngle=Math.PI*.49}
  if(view==='display'){const z=mediaCart.position.z,h=tableOptions[tableChoice].height;camera.position.set(.64,h+.91,z+1.82);controls.target.set(0,h+.43,z+.02);controls.maxPolarAngle=Math.PI*.49}
  if(view==='meeting'){camera.position.set(2.15,2.45,2.55);controls.target.set(0,.96,-.57);controls.maxPolarAngle=Math.PI*.49}
  if(view==='balcony'){camera.position.set(-2.16,1.25,-4.65);controls.target.set(-2.92,.36,-3.60);controls.maxPolarAngle=Math.PI*.49}
@@ -1934,7 +1976,7 @@ function setView(next){if(['display','clothes','meeting'].includes(next))next='o
  if(view==='top'){camera.position.set(0,16.8,.02);controls.target.set(0,0,-.32);controls.maxPolarAngle=Math.PI*.49}
  lastFit=1;resize();controls.update();render();
 }
-function save(){store.set({defaultsVersion,view,layout,tableChoice,floorFinish,sortKey,power:powerToggle.checked,walls:wallToggle.checked,laptops:laptopToggle.checked,seatingVersion:1})}
+function save(){store.set({defaultsVersion,view,layout,tableChoice,floorFinish,sortKey,power:powerToggle.checked,walls:wallToggle.checked,laptops:laptopToggle.checked,seatingVersion:2})}
 floorGroup.addEventListener('change',e=>{setFloor(e.target.value);save()});
 layoutGroup.addEventListener('change',e=>{setLayout(e.target.value);save()});
 viewGroup.addEventListener('change',e=>{setView(e.target.value);save()});
@@ -1959,7 +2001,7 @@ $('#ss-meeting').addEventListener('click',()=>{if(layout!=='B')setLayout('B');se
 $('#ss-balcony').addEventListener('click',()=>{setView('balcony');root.querySelector('.menu').open=false;save()});
 $('#ss-fragrance').addEventListener('click',()=>{setView('fragrance');root.querySelector('.menu').open=false;save()});
 $('#ss-reset').addEventListener('click',()=>setView(view));
-function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display','balcony','fragrance','meeting'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display','balcony','fragrance','meeting'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)return;renderer.setSize(w,h);camera.aspect=w/h;camera.updateProjectionMatrix();camera.fov=(['table','tabletop','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display','balcony','fragrance','meeting'].includes(view))?(w<600?64:42):(interior()?72:42);camera.updateProjectionMatrix();const fit=interior()||['table','tabletop','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display','balcony','fragrance','meeting'].includes(view)?1:Math.max(1,(w<600?.9:1.15)/(w/h));camera.position.sub(controls.target).multiplyScalar(fit/lastFit).add(controls.target);lastFit=fit;render()}
 new ResizeObserver(resize).observe(stage);
 // Temporarily remove the rack and the complete shared monitor station.
 // Keep their model definitions so the layout can be reconsidered later.
@@ -1971,14 +2013,14 @@ sortKey=saved.sortKey==='area'?'area':'price';
 powerToggle.checked=saved.power!==false;wallToggle.checked=!!saved.walls;
 setFloor(saved.floorFinish);
 setTable(saved.tableChoice);
-setLaptops(saved.seatingVersion===1?saved.laptops===true:true);
-setLayout(saved.layout==='A'?'A':'B');
-setView(saved.view);
+setLaptops(saved.seatingVersion===2?saved.laptops===true:true);
+setLayout(saved.seatingVersion===2 && saved.layout==='A'?'A':'B');
+setView(saved.seatingVersion===2?saved.view:'table');
 wallTransparency();
 save();
 root.querySelector('.ss-loading').hidden=true;
 root.dataset.ready='true';
-root.__scene={coffeeCups,scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,officeChairs,laptops,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory,printerCart,printer,printerSupplies,printerCables,calendarTablet,calendarScreen,workJackets,kamidana,shrineOfuda,shrineOfferings,shrineSakaki,fargoTap,fargoSockets,fargoCable,sharedDisplay,sharedScreen,meetingCamera,tableCamera,meetingMic,meetingLights,meetingPC,meetingCables,cigaretteBin,fragranceShelf,hinokiDiffuser};
+root.__scene={meals,coffeeCups,scene,model,camera,controls,renderer,tableMeshes,equipment,mediaCart,cartCables,deskObjects,officeChairs,laptops,trashBins,storageBoxes,wallClock,doorSigns,hangerRack,networkShelf,wifiRouter,smartDevices,pantry,microwave,pot,riceCooker,tableware,pantryInventory,printerCart,printer,printerSupplies,printerCables,calendarTablet,calendarScreen,workJackets,kamidana,shrineOfuda,shrineOfferings,shrineSakaki,fargoTap,fargoSockets,fargoCable,sharedDisplay,sharedScreen,meetingCamera,tableCamera,meetingMic,meetingLights,meetingPC,meetingCables,cigaretteBin,fragranceShelf,hinokiDiffuser};
 render();
 }catch(err){root.querySelector('.ss-loading').textContent='3Dの読み込みに失敗しました。ページを再読み込みしてください。';console.error(err)}
 })();
