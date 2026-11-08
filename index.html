@@ -72,6 +72,7 @@ button,input,select{font:inherit;color:inherit}
 /* Small table card: what is on the central table right now. */
 .table-card{position:absolute;left:12px;bottom:12px;width:min(360px,calc(100% - 24px));padding:10px 12px;background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
 .table-card[hidden]{display:none}
+.candidate-nav{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:6px}.candidate-nav span{font-size:12px;color:var(--muted)}.candidate-nav button{background:white;border:1px solid var(--line);border-radius:5px;padding:5px 10px;cursor:pointer}.candidate-nav button:disabled{opacity:.4;cursor:default}
 .table-card .row1{display:flex;align-items:center;gap:8px}
 .table-card .k{font-size:12px;color:var(--muted);white-space:nowrap}
 .table-card select{flex:1;min-width:0;min-height:32px;padding:4px 8px;border:1px solid var(--line-strong);border-radius:var(--radius);background:var(--panel)}
@@ -188,6 +189,7 @@ button,input,select{font:inherit;color:inherit}
     <p class="status" id="ss-layout-label" aria-live="polite"></p>
 
     <div class="table-card" id="table-card">
+      <nav class="candidate-nav" aria-label="中央テーブルの切り替え"><button id="prev-table" type="button">← 前の候補</button><span id="table-rank" aria-live="polite"></span><button id="next-table" type="button">次の候補 →</button></nav>
       <div class="row1">
         <label class="k" for="table-select">中央テーブル</label>
         <select id="table-select"></select>
@@ -1845,10 +1847,23 @@ let view='overview',lastFit=1,layout='B',floorFinish='carpet',tableChoice='rugha
 const defaultsVersion='2026-10-20';
 const store={get(){try{return JSON.parse(localStorage.getItem('ss-office-3d')||'null')}catch{return null}},set(v){try{localStorage.setItem('ss-office-3d',JSON.stringify(v))}catch{}}};
 
-select.append(...Object.entries(tableOptions).map(([key,o])=>new Option(`${o.short}　${shortPrice(o.price)}`,key)));
-
+function sortedTableKeys(){
+ return Object.keys(tableOptions).sort((a,b)=>{
+  const A=tableOptions[a],B=tableOptions[b];
+  return sortKey==='area'?topArea(B)-topArea(A):(A.price.min??Infinity)-(B.price.min??Infinity);
+ });
+}
+function populateSelect(){
+ select.replaceChildren(...sortedTableKeys().map(key=>{
+  const o=tableOptions[key];return new Option(o.short+'　'+shortPrice(o.price),key);
+ }));
+ select.value=tableChoice;
+}
 function renderCard(){
  const o=tableOptions[tableChoice];
+ const keys=sortedTableKeys(),index=keys.indexOf(tableChoice);
+ $('#table-rank').textContent=(sortKey==='price'?'安い順':'面積順')+' '+(index+1)+' / '+keys.length;
+ $('#prev-table').disabled=index===0;$('#next-table').disabled=index===keys.length-1;
  card.hidden=false;
  select.value=tableChoice;
  $('#card-dims').textContent=o.shape==='paired'?'φ1,400 × H750 mm・2台':o.shape==='round'?`φ${fmt(o.mm[0])} × H${o.mm[2]} mm`:`W${fmt(o.mm[0])} × D${fmt(o.mm[1])} × H${o.mm[2]} mm`;
@@ -1856,10 +1871,7 @@ function renderCard(){
  $('#card-basis').textContent=o.price.basis.split('。')[0];
 }
 function renderLedger(){
- const keys=Object.keys(tableOptions);
- keys.sort((a,b)=>{const A=tableOptions[a],B=tableOptions[b];
-  if(sortKey==='area')return topArea(B)-topArea(A);
-  return (A.price.min??Infinity)-(B.price.min??Infinity)});
+ const keys=sortedTableKeys();
  ledger.replaceChildren(...keys.map(key=>{
   const o=tableOptions[key],li=document.createElement('li'),b=document.createElement('button');
   b.type='button';b.className='row';b.setAttribute('role','radio');b.dataset.key=key;
@@ -1895,7 +1907,7 @@ function setTable(next){
 
  const [w,d]=option.mm;tableDimensionPin.el.firstElementChild.textContent=option.shape==='paired'?'φ1,400 × 2台':option.shape==='round'?`φ${fmt(w)}`:`${fmt(w)}×${fmt(d)}`;
  tableDimensionPin.pos.z=option.pinZ;
- renderCard();if(!drawer.hidden)renderLedger();updateLabel();if(view==='table'||view==='tabletop'||view==='display'||view==='meeting')setView(view);else render();
+ renderCard();if(!drawer.hidden)renderLedger();updateLabel();render();
 }
 function updateCentralSeats(){
  const option=tableOptions[tableChoice],halfWidth=option.mm[1]/2000,halfLength=option.mm[0]/2000;
@@ -1980,6 +1992,9 @@ function save(){store.set({defaultsVersion,view,layout,tableChoice,floorFinish,s
 floorGroup.addEventListener('change',e=>{setFloor(e.target.value);save()});
 layoutGroup.addEventListener('change',e=>{setLayout(e.target.value);save()});
 viewGroup.addEventListener('change',e=>{setView(e.target.value);save()});
+for(const [id,step] of [['#prev-table',-1],['#next-table',1]]){
+ $(id).addEventListener('click',()=>{const keys=sortedTableKeys(),key=keys[keys.indexOf(tableChoice)+step];if(key){setTable(key);save()}});
+}
 select.addEventListener('change',()=>{setTable(select.value);save()});
 openBtn.addEventListener('click',()=>openCompare(drawer.hidden));
 $('#close-compare').addEventListener('click',()=>{openCompare(false);openBtn.focus()});
@@ -1987,7 +2002,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(!drawer.hidden){
 document.addEventListener('click',e=>{const m=root.querySelector('.menu[open]');if(m&&!m.contains(e.target))m.removeAttribute('open')});
 ledger.addEventListener('click',e=>{const b=e.target.closest('.row');if(!b)return;setTable(b.dataset.key);ledger.querySelector(`[data-key="${b.dataset.key}"]`).focus();save()});
 ledger.addEventListener('keydown',e=>{if(!['ArrowDown','ArrowUp'].includes(e.key))return;const rows=[...ledger.querySelectorAll('.row')];const i=rows.indexOf(document.activeElement);if(i<0)return;e.preventDefault();const n=rows[(i+(e.key==='ArrowDown'?1:-1)+rows.length)%rows.length];n.click()});
-root.querySelectorAll('.sort button').forEach(b=>b.addEventListener('click',()=>{sortKey=b.dataset.sort;renderLedger();save()}));
+root.querySelectorAll('.sort button').forEach(b=>b.addEventListener('click',()=>{sortKey=b.dataset.sort;populateSelect();renderCard();renderLedger();save()}));
 laptopToggle.addEventListener('change',()=>{setLaptops(laptopToggle.checked);save()});
 powerToggle.addEventListener('change',()=>{render();save()});wallToggle.addEventListener('change',()=>{wallTransparency();save()});
 controls.addEventListener('change',render);
@@ -2009,7 +2024,7 @@ for(const object of [hangerRack,mediaCart,cartCables,printerCart])object.removeF
 const saved=store.get()||{};
 // Apply the agreed defaults once to older saved preferences, then remember later choices.
 if(saved.defaultsVersion!==defaultsVersion){Object.assign(saved,{floorFinish:'carpet',layout:'B',tableChoice:'rughaus'})}
-sortKey=saved.sortKey==='area'?'area':'price';
+populateSelect();
 powerToggle.checked=saved.power!==false;wallToggle.checked=!!saved.walls;
 setFloor(saved.floorFinish);
 setTable(saved.tableChoice);
