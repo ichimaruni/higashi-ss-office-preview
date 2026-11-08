@@ -155,6 +155,8 @@ button,input,select{font:inherit;color:inherit}
         <label><input type="radio" name="ss-view" value="calendar">予定表示</label>
         <label><input type="radio" name="ss-view" value="shrine">神棚</label>
         <label><input type="radio" name="ss-view" value="inside">室内</label>
+        <label><input type="radio" name="ss-view" value="east">東側デスク</label>
+        <label><input type="radio" name="ss-view" value="west">西側デスク</label>
         <label><input type="radio" name="ss-view" value="reverse">入口を見る</label>
       </span>
     </div>
@@ -240,10 +242,11 @@ button,input,select{font:inherit;color:inherit}
 const root=document.getElementById('ss-office-3d');
 const stage=root.querySelector('.ss-stage'), overlay=root.querySelector('.ss-labels');
 try{
-const [THREE,{OrbitControls},{RoomEnvironment}]=await Promise.all([
+const [THREE,{OrbitControls},{RoomEnvironment},{Reflector}]=await Promise.all([
   import('https://esm.sh/three@0.180.0'),
   import('https://esm.sh/three@0.180.0/examples/jsm/controls/OrbitControls.js'),
-  import('https://esm.sh/three@0.180.0/examples/jsm/environments/RoomEnvironment.js')
+  import('https://esm.sh/three@0.180.0/examples/jsm/environments/RoomEnvironment.js'),
+  import('https://esm.sh/three@0.180.0/examples/jsm/objects/Reflector.js')
 ]);
 const scene=new THREE.Scene();
 const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
@@ -344,11 +347,11 @@ function windowSide(x,z0,z1,west){
   const a=-length/2+i*length/panes,b=a+length/panes;
   for(const y of [1.045,2.29])box(g,.065,.023,b-a-.05,west?.022:-.022,y,(a+b)/2,M.black);
   box(g,.06,.115,.015,west?.065:-.065,1.48,b-.08,M.black);
-  if((west&&length>2)||(!west&&z0>4)){
+  if(length>1){
    const inward=west?1:-1;
    box(g,.055,.048,b-a-.045,inward*.095,2.27,(a+b)/2,M.blind);
-   for(let j=0;j<43;j++){const slat=box(g,.028,.002,b-a-.052,inward*.093,2.23-j*.026,(a+b)/2,M.blind);slat.rotation.z=-.32;slat.castShadow=false}
-   for(const z of [a+.17,b-.17])rod(g,[inward*.105,1.12,z],[inward*.105,2.25,z],.0015,M.trim);
+   for(let j=0;j<4;j++){const slat=box(g,.028,.002,b-a-.052,inward*.093,2.23-j*.026,(a+b)/2,M.blind);slat.rotation.z=-.32;slat.castShadow=false}
+   for(const z of [a+.17,b-.17])rod(g,[inward*.105,2.13,z],[inward*.105,2.25,z],.0015,M.trim);
   }
  }
  box(g,.19,.04,length+.09,west?.02:-.02,.99,0,M.wall);
@@ -364,10 +367,16 @@ for(const [a,b] of [[.66,1.726],[3.026,6.18]]){lineWall(model,a,8.156,b,8.156,.2
 lineWall(frontHigh,1.726,8.156,3.026,8.156,.4,2.2);
 // Entrance opens south into the EV hall in the original 2–7F drawing.
 // The site photo shows an unequal pair: a wide active leaf and narrow inactive leaf.
-for(const [hinge,angle,sign,width] of [[1.726,-.7,1,.94],[3.026,.7,-1,.33]]){
- const g=group(sign===1?'入口・主扉':'入口・子扉',hinge,8.12,angle,frontHigh);
- box(g,width,2.15,.045,sign*width/2,1.075,0,M.door);
- if(sign===1){box(g,.018,.14,.04,sign*(width-.075),1.05,-.036,M.metal);box(g,.18,.045,.06,sign*.20,2.04,-.05,M.metal)}
+for(const [hinge,sign,width] of [[3.026,-1,.94],[1.726,1,.356]]){
+ const g=group(sign<0?'入口・主扉':'入口・子扉',hinge,8.12,0,frontHigh);
+ box(g,width,2.17,.045,sign*width/2,1.085,0,M.door);
+ if(sign<0){
+  rod(g,[-.86,1.045,-.025],[-.86,1.045,-.085],.032,M.metal);
+  const knob=new THREE.Mesh(new THREE.SphereGeometry(.036,24,16),M.metal);knob.position.set(-.86,1.045,-.088);g.add(knob);
+  box(g,.068,.125,.041,-.86,1.43,-.043,M.black,'電子錠');
+  box(g,.22,.052,.054,-.16,2.10,-.046,M.metal,'ドアクローザー');
+  rod(g,[-.10,2.13,-.075],[-.31,2.155,-.12],.009,M.metal);
+ }
 }
 for(const x of [1.70,3.05])W(frontHigh,.055,2.22,.09,x,1.11,8.12,M.door);
 W(frontHigh,1.4,.055,.09,2.375,2.21,8.12,M.door);
@@ -408,11 +417,12 @@ for(const [x,z] of [[2.87,.52],[3.94,.52]]){
  lineWall(model,x,z,x+.67,z,.5,2.1);
  for(const edge of [x-.018,x+.682])W(model,.035,2.08,.14,edge,1.04,z,M.door);
  W(model,.71,.035,.14,x+.335,2.08,z,M.door);
- const g=group(x===2.87?'湯沸室の扉':'洗面所の扉',x,z,.68);box(g,.67,2.05,.035,.335,1.025,0,M.door);box(g,.07,.03,.03,.57,.96,.04,M.metal);addDoorSign(g,x===2.87);
+ const kitchen=x===2.87;
+ const g=group(kitchen?'湯沸室の扉':'洗面所の扉',kitchen?x+.67:x,z,kitchen?1.63:1.50);box(g,.67,2.05,.035,.335,1.025,0,M.door);box(g,.07,.03,.03,.57,.96,.04,M.metal);addDoorSign(g,x===2.87);
 }
 // BRAUN black 30 cm wall clock, reference appearance: BC17B; exact owned model unspecified.
 // Between the north doors, above their lintels: centre height 2350 mm.
-const wallClock=group('北壁 BRAUN風時計 直径300mm',3.74,.605);wallClock.position.y=2.35;
+const wallClock=group('北壁 BRAUN風時計 直径300mm',3.57,.605);wallClock.position.y=2.35;
 const clockCase=mat(0x121514,.78);
 const clockBody=new THREE.Mesh(new THREE.CylinderGeometry(.15,.15,.045,80),clockCase);clockBody.rotation.x=Math.PI/2;clockBody.castShadow=true;wallClock.add(clockBody);
 const dialCanvas=document.createElement('canvas');dialCanvas.width=dialCanvas.height=1024;
@@ -486,10 +496,38 @@ const calendarScreen=new THREE.Mesh(new THREE.PlaneGeometry(.352,.22),new THREE.
 calendarScreen.name='全員の当日予定・日表示のサンプル画面';calendarScreen.position.z=.0168;calendarTablet.add(calendarScreen);
 const tabletCamera=new THREE.Mesh(new THREE.CircleGeometry(.0013,16),M.dark);tabletCamera.position.set(0,.118,.0168);calendarTablet.add(tabletCamera);
 box(calendarTablet,.0015,.013,.004,.1902,.047,.0075,M.dark,'電源ボタン');
-W(model,1.0,.84,.52,2.91,.42,-.73,M.white);W(model,1.05,.04,.57,2.91,.86,-.73,M.metal);W(model,.33,.03,.31,2.62,.89,-.71,M.dark);
-rod(model,[2.63-3.35,.9,-.91-4],[2.63-3.35,1.14,-.91-4],.015,M.metal);
-W(model,.43,.48,.22,3.26,1.76,-.91,M.white);
-W(model,.46,.8,.4,4.22,.4,-.72,M.white);W(model,.52,.08,.44,4.22,.84,-.69,M.white);W(model,.5,.6,.04,4.22,1.4,-1.01,M.metal);
+// Cabinets and fittings visible through the two open north doors.
+const cream=mat(0xd9cdb3,.48),tile=mat(0xe4dbc4,.32),grout=mat(0xb2aa9b,.84);
+for(const [cx,width] of [[2.89,1.35],[4.24,1.08]]){
+ W(model,width,2.04,.018,cx,1.03,-1.027,grout);
+ for(let row=0;row<9;row++)for(let col=0;col<6;col++){
+  const pitch=width/6;
+  W(model,pitch-.003,.222,.012,cx-width/2+(col+.5)*pitch,.12+row*.225,-1.011,tile);
+ }
+ W(model,width-.035,.79,.51,cx,.395,-.752,cream,'流し台収納');
+ for(const side of [-1,1]){
+  const dx=cx+side*width*.245;
+  W(model,width*.485,.70,.021,dx,.418,-.485,cream);
+  W(model,.095,.014,.025,dx,.723,-.464,M.metal);
+ }
+}
+W(model,1.31,.042,.55,2.89,.809,-.75,M.metal);
+W(model,.49,.007,.32,3.14,.833,-.745,M.trim,'シンク内側');
+W(model,.43,.008,.27,3.14,.837,-.745,M.metal);
+const faucet=group('給湯室の水栓',3.19,-.93);
+curve(faucet,[[0,.833,0],[0,1.01,0],[-.04,1.045,.06],[-.06,1.01,.14]],.011,M.metal);
+W(model,.39,.27,.31,2.54,.968,-.76,cream,'白い電子レンジ');
+W(model,.27,.19,.012,2.50,.972,-.598,M.screen);
+W(model,.36,.44,.20,2.63,1.53,-.90,cream,'湯沸器');
+W(model,.81,.31,.32,3.11,1.92,-.84,cream,'吊戸棚');
+W(model,.94,.07,.54,4.24,.82,-.75,cream);
+const basin=group('洗面ボウル',4.24,-.71);
+const bowl=pantryLathe(basin,'陶器の洗面器',[[0,.785],[.16,.785],[.25,.86],[.25,.883],[.22,.883],[.12,.81],[0,.805]],M.white);bowl.scale.z=.72;
+curve(basin,[[.16,.854,-.16],[.16,.995,-.16],[.13,1.005,-.10],[.12,.977,-.078]],.013,M.metal);
+W(model,.83,.96,.030,4.24,1.47,-.982,M.door);
+const washMirror=new Reflector(new THREE.PlaneGeometry(.795,.924),{color:0xdddeda,textureWidth:384,textureHeight:448,clipBias:.003,multisample:0});
+washMirror.name='洗面鏡';washMirror.position.set(4.24-3.35,1.47,-.959-4);model.add(washMirror);
+for(const [a,b] of [[2.15,2.85],[3.56,3.925],[4.63,6.6]])lineWall(model,a,.595,b,.595,.055,0,M.trim,.015);
 W(model,.37,.55,.18,5.34,.44,-.87,M.white);W(model,.4,.41,.54,5.34,.22,-.51,M.white);
 // Balcony wall and access glazing, plus exposed handrail.
 lineWall(model,-.04,.85,1.26,.85,1);lineWall(model,2.06,.85,2.15,.85);
@@ -499,7 +537,7 @@ lineWall(ceiling,1.24,.85,2.09,.85,.35,2.25);
 // the leaf opens north onto the balcony. The older construction drawing differs.
 for(const x of [1.27,2.05])W(model,.055,2.24,.10,x,1.12,.85,M.black,'ベランダ扉の固定枠');
 W(model,.835,.055,.10,1.66,2.22,.85,M.black,'ベランダ扉の上枠');
-const balconyDoor=group('ベランダ扉・外開き',2.03,.85,-.38);
+const balconyDoor=group('ベランダ扉・外開き',2.03,.85,0);
 const balconyLowerGlass=glass.clone();balconyLowerGlass.opacity=.48;balconyLowerGlass.roughness=.72;
 box(balconyDoor,.69,1.26,.018,-.37,1.495,0,glass,'ベランダ扉・上部透明ガラス');
 box(balconyDoor,.69,.73,.018,-.37,.435,0,balconyLowerGlass,'ベランダ扉・下部すりガラス');
@@ -537,7 +575,7 @@ const deskObjects=[],officeChairs=[];
 const deskLayouts={
  A:desks.map(([name,x,z,r])=>[x+(name==='D7'?.6:.3),z+(name==='D7'?.3:.6),r]),
  // South-aligned rows, 50 mm between tops; stop before the columns and booths.
- B:[[.38,4.32,Math.PI/2],[.38,5.57,Math.PI/2],[.38,6.82,Math.PI/2],[6.28,2.45,-Math.PI/2],[6.28,3.70,-Math.PI/2],[6.28,4.95,-Math.PI/2],[6.28,6.20,-Math.PI/2]]
+ B:[[.38,4.32,Math.PI/2],[.38,5.57,Math.PI/2],[.38,6.82,Math.PI/2],[6.28,1.40,-Math.PI/2],[6.28,2.61,-Math.PI/2],[6.28,3.82,-Math.PI/2],[6.28,5.03,-Math.PI/2]]
 };
 for(const [name,x,z,rot] of desks){
  const cap=name==='D7';const g=group(name,x+(cap?.6:.3),z+(cap?.3:.6),rot);
@@ -1045,6 +1083,29 @@ function comparisonChair(camp){
  return g;
 }
 for(let i=0;i<6;i++)officeChairs.push(comparisonChair(i>=4));
+const wallDeskDetails=[];
+deskObjects.forEach((desk,i)=>{
+ const g=new THREE.Group();desk.add(g);wallDeskDetails.push(g);
+ if(i===0)return;
+ if(i>=3){
+  const chair=comparisonChair(false);g.add(chair);chair.position.set(i===4?.08:0,0,i===4?.79:.63);chair.rotation.y=[.05,-.09,.10,-.12][i-3];
+  if(i===4){
+   for(const side of [-1,1])curve(chair,[[side*.19,.46,.23],[side*.18,.70,.31],[side*.04,.95,.32],[side*.045,1.08,.31]],.013,M.metal);
+   sling(chair,(u,t)=>[u*.17,1.025+t*.105,.29+.024*t-.03*u*u],meshFabric,.012);
+  }
+ }
+ if(i===4){
+  box(g,.31,.012,.22,0,.756,0,M.metal);
+  const lid=box(g,.31,.19,.012,0,.85,-.125,M.screen);lid.rotation.x=-.15;
+ }else{
+  const w=[0,.48,.48,.68,0,.50,.70][i];
+  box(g,.19,.012,.14,0,.756,-.14,M.dark);
+  box(g,.029,.155,.026,0,.833,-.16,M.black);
+  box(g,w,w*9/16,.031,0,.878+w*9/32,-.16,M.black);
+  box(g,w-.011,w*9/16-.012,.002,0,.878+w*9/32,-.143,M.screen);
+ }
+ curve(g,[[.03,.78,-.18],[.16,.71,-.27],[.20,.48,-.29],[.28,.41,-.29],[.33,.65,-.28]],.003,M.black);
+});
 const laptopPlaces=Array.from({length:6},()=>[0,0,0]);
 for(const [index,[x,z,angle]] of laptopPlaces.entries()){
  const g=new THREE.Group();g.name=`14インチMacBook ${index+1}`;g.position.set(x,.717,z);g.rotation.y=angle;equipment.add(g);laptops.push(g);
@@ -1379,7 +1440,7 @@ function applyShelf(){
   const [x,z]=original?binLayouts[layout][i]:[shelfBack+spec.depth/2+.025,shelfStart+spec.width/2+(i-1)*.43];
   bin.position.set(x-3.35,0,z-4);
  });
- shelfCard.hidden=view!=='kitchen';card.hidden=view==='kitchen';shelfSelect.value=shelfChoice;
+ shelfCard.hidden=view!=='kitchen';card.hidden=['kitchen','doors','reverse','east','west'].includes(view);shelfSelect.value=shelfChoice;
  document.querySelector('#shelf-dims').textContent=original?'シルバーラック・家電と食器の2段':('幅'+Math.round(spec.width*100)+' × 奥行'+Math.round(spec.depth*100)+' × 高さ'+Math.round(spec.height*100)+' cm');
 }
 shelfSelect.addEventListener('change',()=>{shelfChoice=shelfSelect.value;applyShelf();render();save()});
@@ -1402,8 +1463,12 @@ function boxHandhole(g,x,z,rot=0){
  const hole=new THREE.Mesh(new THREE.ShapeGeometry(shape,12),boxInk);hole.position.set(x,.212,z);hole.rotation.y=rot;g.add(hole);
 }
 for(let column=0;column<4;column++)for(let level=0;level<4;level++){
- const number=column*4+level+1,g=group(`バンカーズボックス ${String(number).padStart(2,'0')}`,5.03+column*.355,.89);
- g.position.y=level*.265;storageBoxes.push(g);
+ const number=column*4+level+1,g=group(`バンカーズボックス ${String(number).padStart(2,'0')}`,6.40-(column%2)*.36,5.87+Math.floor(column/2)*.43,-Math.PI/2);
+ // The outer stacks step down toward the aisle.
+ if(column===1&&level>=2){g.position.x-=.36;g.position.y=(level-2)*.265}
+ else if(column===3&&level>=1){g.position.x-=.36;g.position.y=(level-1)*.265}
+ else g.position.y=level*.265;
+ storageBoxes.push(g);
  box(g,.337,.243,.402,0,.1215,0,boxWhite,'白い収納ボックス本体');
  box(g,.345,.022,.410,0,.254,0,boxWhite,'かぶせ蓋');
  for(const z of [-.2055,.2055])box(g,.345,.002,.001,0,.244,z,boxInk);
@@ -1430,7 +1495,7 @@ for(const y of [.15,.42,.738]){
 }
 rod(printerCart,[-.28,.18,-.19],[.28,.72,-.19],.004,printerSteel);
 rod(printerCart,[.28,.18,-.19],[-.28,.72,-.19],.004,printerSteel);
-const printer=new THREE.Group();printer.name='家庭用インクジェット複合機（仮モデル）';printer.position.set(5.2075-3.35,1.061,.91-4);model.add(printer);
+const printer=new THREE.Group();printer.name='家庭用インクジェット複合機（仮モデル）';printer.position.set(6.40-3.35,1.061,6.085-4);model.add(printer);
 for(const x of [-.14,.14])for(const z of [-.11,.11])box(printer,.023,.008,.024,x,.004,z,M.dark);
 const printerBody=new THREE.Mesh(roundedTableGeometry(.41,.35,.025,.152,.003),printerPlastic);printerBody.position.y=.008;printerBody.castShadow=printerBody.receiveShadow=true;printerBody.name='丸みのあるプリンター本体';printer.add(printerBody);
 box(printer,.385,.004,.32,0,.162,0,printerDark,'スキャナーふたの継ぎ目');
@@ -1465,11 +1530,11 @@ for(let i=0;i<4;i++){box(inkBasket,.032,.095,.068,-.057+i*.038,.053,0,M.white,'�
 box(printerSupplies,.39,.17,.30,0,.247,0,paperReamWrap,'コピー用紙のストック箱');sticker(printerSupplies,'A4 PAPER',.22,.054,0,.247,.151);
 // Cable follows the archive-box side, then the north-east wall outlet; no door crossing.
 const printerCables=new THREE.Group();printerCables.name='プリンターから北東壁コンセントへの配線';model.add(printerCables);
-curve(printerCables,[[5.38,1.14,.75],[5.40,1.08,.67],[5.40,.06,.66],[6.49,.013,.66],[6.54,.03,.78],[6.55,.29,.92]].map(([x,y,z])=>[x-3.35,y,z-4]),.004,M.white);
-W(printerCables,.022,.031,.040,6.55,.29,.92,M.white,'壁コンセントに差したプラグ');
+curve(printerCables,[[6.50,1.14,5.96],[6.59,1.06,5.96],[6.615,.08,5.96],[6.58,.035,6.0]].map(([x,y,z])=>[x-3.35,y,z-4]),.004,M.white);
+W(printerCables,.022,.031,.040,6.58,.035,6.0,M.white,'壁コンセントに差したプラグ');
 // Representative Dyson cordless profile; exact model is unspecified.
-const vacuum=group('ダイソン コードレス掃除機',6.45,.90);
-const vacuumPurple=mat(0x624180,.42,.32),vacuumTube=mat(0xba713a,.36,.62);
+const vacuum=group('ダイソン コードレス掃除機',3.46,8.00,Math.PI);
+const vacuumPurple=mat(0x624180,.42,.32),vacuumTube=mat(0x9d2245,.36,.62);
 box(vacuum,.255,.052,.15,0,.039,.11,M.dark,'クリーナーヘッド');
 const roller=new THREE.Mesh(new THREE.CylinderGeometry(.023,.023,.22,24),vacuumPurple);roller.rotation.z=Math.PI/2;roller.position.set(0,.035,.153);vacuum.add(roller);
 rod(vacuum,[0,.07,.08],[0,.93,-.025],.016,vacuumTube);
@@ -1686,13 +1751,42 @@ pantryLathe(hinokiDiffuser,'木製のボトル口',[[.010,.127],[.017,.127],[.01
 const reeds=[];for(let i=0;i<7;i++){const angle=i*2.39996,x=Math.sin(angle)*.008,z=Math.cos(angle)*.008;reeds.push(rod(hinokiDiffuser,[x,.025,z],[Math.sin(angle)*.060,.310+(i%3)*.009,Math.cos(angle)*.046],.0016,mat(0xb49b6e,.95)))}
 const scentCanvas=document.createElement('canvas');scentCanvas.width=480;scentCanvas.height=360;const sc=scentCanvas.getContext('2d');sc.fillStyle='#f5f0e3';sc.fillRect(0,0,480,360);sc.fillStyle='#405247';sc.textAlign='center';sc.font='bold 56px serif';sc.fillText('HINOKI',240,110);sc.font='49px sans-serif';sc.fillText('ヒノキ',240,194);sc.font='25px sans-serif';sc.fillText('REED DIFFUSER',240,280);const scentTex=new THREE.CanvasTexture(scentCanvas);scentTex.colorSpace=THREE.SRGBColorSpace;
 const scentLabel=new THREE.Mesh(new THREE.PlaneGeometry(.054,.041),new THREE.MeshStandardMaterial({map:scentTex,roughness:.9}));scentLabel.position.set(0,.067,-.0405);scentLabel.rotation.y=Math.PI;hinokiDiffuser.add(scentLabel);
-// The wall display faces west into the room, centered at the former board position.
-const wallDisplay=group('東壁の壁掛けモニター',6.56,3.652,-Math.PI/2);
-box(wallDisplay,.52,.29,.055,0,1.55,-.035,M.dark,'壁掛け金具');
-box(wallDisplay,1.80,1.02,.042,0,1.55,.012,M.black,'薄型ディスプレイ本体');
-const wallScreen=new THREE.Mesh(new THREE.PlaneGeometry(1.776,.999),sharedScreen.material);
-wallScreen.position.set(0,1.55,.034);
-wallDisplay.add(wallScreen);
+// South wall details viewed from inside, facing the entrance.
+const entry=group('入口の設備',2.375,8.056);
+const cabinetPaint=mat(0xbcb7b0,.55),cardboard=mat(0xad865b,.95);
+box(entry,.69,1.33,.025,-.99,.83,0,M.door,'点検扉の枠');
+box(entry,.656,1.29,.012,-.99,.83,-.020,cabinetPaint);
+box(entry,.019,.10,.008,-.71,.80,-.029,M.metal);
+for(const [x,y,w,h] of [[.78,1.42,.084,.12],[.92,1.42,.13,.13],[.92,1.56,.10,.08],[1.13,1.43,.13,.13],[1.18,1.57,.10,.14]]){
+ box(entry,w,h,.026,x,y,-.008,y>1.56?M.black:M.white);
+ box(entry,w*.68,h*.42,.008,x,y+.012,-.025,y>1.55?M.screen:M.trim);
+}
+for(let i=0;i<5;i++){
+ const packing=box(entry,.48-i*.041,.54-i*.051,.024,-1.20+i*.047,.27-i*.024,-.08-i*.035,i<3?cardboard:M.dark,'壁に立てた梱包材');
+ packing.rotation.x=-.13-i*.04;packing.rotation.z=(i-2)*.06;
+}
+box(entry,.37,.33,.33,1.12,.165,-.26,M.white,'サーキュレーターの台');
+box(entry,.30,.05,.22,1.12,.365,-.26,M.white);
+for(const side of [-1,1])rod(entry,[1.12+side*.10,.38,-.26],[1.12+side*.15,.55,-.27],.014,M.white);
+const fan=new THREE.Group();entry.add(fan);fan.position.set(1.12,.56,-.28);fan.rotation.x=.22;
+for(const [radius,length,z,material] of [[.15,.09,-.045,M.white],[.141,.008,-.096,M.dark]]){
+ const shell=new THREE.Mesh(new THREE.CylinderGeometry(radius,radius,length,48),material);shell.rotation.x=Math.PI/2;shell.position.z=z;fan.add(shell);
+}
+for(let i=0;i<32;i++){const a=i*Math.PI/16;rod(fan,[.03*Math.cos(a),.03*Math.sin(a),-.117],[.137*Math.cos(a+.18),.137*Math.sin(a+.18),-.102],.002,M.black)}
+rod(fan,[0,0,-.115],[0,0,-.123],.032,M.trim);
+box(entry,.125,.71,.23,.825,.37,-.25,M.black,'スリムヒーター');
+for(let i=0;i<13;i++)box(entry,.093,.006,.006,.825,.60+i*.008,-.368,M.trim);
+const folded=group('窓下に畳んだ椅子',.43,3.51,Math.PI/2);
+for(let i=0;i<2;i++){
+ const z=i*.075;box(folded,.38,.35,.034,0,.50,z,M.pad);
+ for(const sign of [-1,1])rod(folded,[sign*.20,.018,z+.04],[sign*.20,.69,z-.03],.013,M.metal);
+ rod(folded,[-.2,.69,z-.03],[.2,.69,z-.03],.013,M.metal);
+}
+const board=group('東窓の間のホワイトボード',6.575,3.652,-Math.PI/2);
+box(board,1.61,.94,.024,0,1.58,0,M.metal);
+box(board,1.585,.914,.005,0,1.58,.015,mat(0xf2f1e9,.23));
+box(board,1.55,.012,.05,0,1.113,.03,M.metal);
+for(let i=0;i<3;i++)rod(board,[.69+i*.035,2.00,.020],[.69+i*.035,2.00,.028],.013,[M.black,M.red,M.trim][i]);
 const powerData=[['T1',.06,3],['T2',.06,4.5],['T3',.06,6],['T4',6.57,3],['T5',6.57,4.5],['T6',6.57,6],['T7',3.35,1.85],['T8',3.35,5.45],['T9',3.35,8.05]];
 function pin(id,pos,power=true){const el=document.createElement('div');el.className='ss-pin';const span=document.createElement('span');span.className='viz-badge text-small';span.textContent=id;el.append(span);overlay.append(el);const p={el,pos:new THREE.Vector3(...pos),power};pins.push(p);return p}
 for(const [id,x,z] of powerData){
@@ -1909,7 +2003,7 @@ function renderCard(){
  const keys=sortedTableKeys(),index=keys.indexOf(tableChoice);
  $('#table-rank').textContent=(sortKey==='price'?'安い順':'面積順')+' '+(index+1)+' / '+keys.length;
  $('#prev-table').disabled=index===0;$('#next-table').disabled=index===keys.length-1;
- card.hidden=view==='kitchen';
+ card.hidden=['kitchen','doors','reverse','east','west'].includes(view);
  select.value=tableChoice;
  $('#card-dims').textContent=o.shape==='paired'?'φ1,400 × H750 mm・2台':o.shape==='round'?`φ${fmt(o.mm[0])} × H${o.mm[2]} mm`:`W${fmt(o.mm[0])} × D${fmt(o.mm[1])} × H${o.mm[2]} mm`;
  $('#card-price').textContent=o.price.text;
@@ -1998,24 +2092,27 @@ function updateCartCable(z,h){
 }
 function setLaptops(show){laptopToggle.checked=!!show;equipment.visible=!!show;updateFargoCable();updateLabel();render()}
 function setFloor(next){floorFinish=next==='linoleum'?'linoleum':'carpet';officeFloor.material=floorFinish==='carpet'?M.carpet:sheetMaterial;floorGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===floorFinish);render()}
-function interior(){return view==='inside'||view==='reverse'}
+function interior(){return ['inside','reverse','east','west','doors'].includes(view)}
 function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&&!powerToggle.checked)||(p.layout&&p.layout!==layout)||interior()||view==='clothes'||view==='shrine'||view==='display'||view==='balcony'||view==='fragrance'||view==='meeting'||(['table','tabletop'].includes(view)&&p===tableDimensionPin)||v.z>1||v.z< -1||Math.abs(v.x)>.97||Math.abs(v.y)>.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
 function render(){renderer.render(scene,camera);projectPins();root.dataset.layout=layout;root.dataset.tableModel=tableChoice;root.dataset.laptops=String(equipment.visible)}
 function updateLabel(){
  layoutLabel.textContent=layout==='B'
-  ?`配置B：デスク 西3台・東4台／中央にメッシュチェア4脚＋キャンプチェア2脚／北壁沿いに収納ボックス16個／ノートPC ${equipment.visible?'表示':'非表示'}`
+  ?`配置B：デスク 西3台・東4台／中央にメッシュチェア4脚＋キャンプチェア2脚／東のブース脇に収納ボックス16個／ノートPC ${equipment.visible?'表示':'非表示'}`
   :'配置A：デスク7台の島／中央テーブルにメッシュチェア4脚＋キャンプチェア2脚';
  stage.setAttribute('aria-label',`東SSビル6階・${layoutLabel.textContent}。6人分のご飯・味噌汁・箸。各席のコーヒーカップ、テーブル上の北寄りの黄色いFargo電源タップ（北側の床電源から給電コード）、フォンブース2台、冷蔵庫、大型シルバー家電ラック（レンジ・ポット・Panasonic炊飯器・10人分の食器・お茶・コーヒー・カトラリー・紙類）、ラック下のゴミ箱3個、バンカーズボックス16個、その上の家庭用プリンター、北側ドアのキッチン・トイレサイン、北壁の時計、ベランダ脇の予定表示タブレット（カレンダーの表示例）、北壁に木製の神棚、ベランダの吸い殻専用容器（室内持込禁止）、入口脇のヒノキのリードディフューザー、南東の機器棚とWi-Fiルーター・センサー、電源9箇所。`);
 }
-function setLayout(next){layout=next==='A'?'A':'B';layoutGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===layout);trashBins.forEach((g,i)=>{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=Math.PI/2});deskObjects.forEach((g,i)=>{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r});meetingGroup.visible=false;roundGroup.position.set(layout==='A'?1.95:0,0,layout==='A'?-1.475:0);updateFargoCable();layoutShadows.A.visible=layout==='A';layoutShadows.B.visible=layout==='B';
+function setLayout(next){layout=next==='A'?'A':'B';layoutGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===layout);trashBins.forEach((g,i)=>{const [x,z]=binLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=Math.PI/2});deskObjects.forEach((g,i)=>{const [x,z,r]=deskLayouts[layout][i];g.position.set(x-3.35,0,z-4);g.rotation.y=r;
+ wallDeskDetails[i].visible=layout==='B';
+ if(i===0)g.scale.y=layout==='B'?1.36:1;
+ });meetingGroup.visible=false;roundGroup.position.set(layout==='A'?1.95:0,0,layout==='A'?-1.475:0);updateFargoCable();layoutShadows.A.visible=layout==='A';layoutShadows.B.visible=layout==='B';
 
  if(layout!=='B'){openCompare(false);if(view==='display'||view==='meeting')view='table';}
  applyShelf();renderCard();updateLabel();if(view==='table'||view==='tabletop'||view==='display'||view==='meeting')setView(view);else render()}
 function wallTransparency(){outer.traverse(o=>{if(!o.isMesh)return;if(o.material===glass)return;if(!o.userData.original)o.userData.original=o.material;o.material=wallToggle.checked?o.userData.original.clone():o.userData.original;if(wallToggle.checked){o.material.transparent=true;o.material.opacity=.13;o.material.depthWrite=false;o.castShadow=false}else o.castShadow=true});render()}
-function setView(next){if(['display','clothes','meeting'].includes(next))next='overview';view=['overview','inside','reverse','top','table','tabletop','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display','balcony','fragrance','meeting'].includes(next)?next:'overview';if((view==='display'||view==='meeting')&&layout==='A')view='table';applyShelf();viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
+function setView(next){if(['display','clothes','meeting'].includes(next))next='overview';view=['overview','inside','reverse','east','west','top','table','tabletop','rack','kitchen','doors','pantry','printer','calendar','clothes','shrine','display','balcony','fragrance','meeting'].includes(next)?next:'overview';if((view==='display'||view==='meeting')&&layout==='A')view='table';applyShelf();viewGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===view);ceiling.visible=interior();frontHigh.visible=interior();surroundings.visible=interior();camera.fov=interior()?72:42;camera.updateProjectionMatrix();
  if(view==='overview'){camera.position.set(.6,9.1,10.4);controls.target.set(0,.55,-.35);controls.maxPolarAngle=Math.PI*.49}
  if(view==='inside'){camera.position.set(.25,1.6,2.25);controls.target.set(-.25,1.35,-2.5);controls.maxPolarAngle=Math.PI*.72}
- if(view==='reverse'){camera.position.set(-2.25,1.6,-2.15);controls.target.set(.45,1.30,2.60);controls.maxPolarAngle=Math.PI*.72}
+ if(view==='reverse'){camera.position.set(-.92,1.47,1.56);controls.target.set(-.98,1.20,4.12);controls.maxPolarAngle=Math.PI*.72}
  if(view==='table'){const center=roundGroup.position,scale=Math.max(1,tableOptions[tableChoice].mm[0]/2400);camera.position.set(center.x+1.65*scale,2.8*scale,center.z+2.15*scale);controls.target.set(center.x,.54,center.z);controls.maxPolarAngle=Math.PI*.49}
  if(view==='tabletop'){const center=roundGroup.position;camera.position.set(center.x,Math.max(3.5,tableOptions[tableChoice].mm[0]/1000+2.1),center.z+.001);controls.target.set(center.x,.5,center.z);controls.maxPolarAngle=Math.PI*.49}
  if(view==='display'){const z=mediaCart.position.z,h=tableOptions[tableChoice].height;camera.position.set(.64,h+.91,z+1.82);controls.target.set(0,h+.43,z+.02);controls.maxPolarAngle=Math.PI*.49}
@@ -2025,11 +2122,13 @@ function setView(next){if(['display','clothes','meeting'].includes(next))next='o
  if(view==='kitchen'){camera.position.set(-.18,1.65,-1.50);controls.target.set(-3.0,.76,-1.16);controls.maxPolarAngle=Math.PI*.49}
  if(view==='rack'){camera.position.set(3.04,2.0,2.35);controls.target.set(3.04,.55,3.18);controls.maxPolarAngle=Math.PI*.49}
  if(view==='pantry'){camera.position.set(-1.20,2.95,-1.55);controls.target.set(-2.80,1.74,-1.18);controls.maxPolarAngle=Math.PI*.49}
- if(view==='printer'){camera.position.set(1.10,2.00,-1.25);controls.target.set(1.8575,1.15,-3.09);controls.maxPolarAngle=Math.PI*.49}
+ if(view==='printer'){camera.position.set(1.52,1.80,1.36);controls.target.set(3.05,1.13,2.08);controls.maxPolarAngle=Math.PI*.49}
  if(view==='shrine'){camera.position.set(2.44,2.38,-2.04);controls.target.set(1.80,1.99,-3.27);controls.maxPolarAngle=Math.PI*.49}
  if(view==='clothes'){camera.position.set(3.53,2.10,-2.38);controls.target.set(1.80,1.22,-2.94);controls.maxPolarAngle=Math.PI*.49}
  if(view==='calendar'){camera.position.set(-.95,1.70,-2.20);controls.target.set(-.84,1.55,-3.38);controls.maxPolarAngle=Math.PI*.49}
- if(view==='doors'){camera.position.set(.30,2.05,-1.00);controls.target.set(.30,1.68,-3.58);controls.maxPolarAngle=Math.PI*.49}
+ if(view==='doors'){camera.position.set(.25,1.49,.54);controls.target.set(.32,1.33,-3.9);controls.maxPolarAngle=Math.PI*.49}
+ if(view==='east'){camera.position.set(-.85,1.47,-.10);controls.target.set(3.30,1.14,-.31);controls.maxPolarAngle=Math.PI*.72}
+ if(view==='west'){camera.position.set(1.25,1.47,.23);controls.target.set(-3.32,1.15,.10);controls.maxPolarAngle=Math.PI*.72}
  if(view==='top'){camera.position.set(0,16.8,.02);controls.target.set(0,0,-.32);controls.maxPolarAngle=Math.PI*.49}
  lastFit=1;resize();controls.update();render();
 }
@@ -2076,7 +2175,7 @@ setFloor(saved.floorFinish);
 setTable(saved.tableChoice);
 setLaptops(saved.seatingVersion===2?saved.laptops===true:true);
 setLayout(saved.seatingVersion===2 && saved.layout==='A'?'A':'B');
-setView(location.hash==='#shelves'?'kitchen':saved.seatingVersion===2?saved.view:'table');
+setView(({'#shelves':'kitchen','#east':'east','#west':'west','#entrance':'reverse','#north':'doors'}[location.hash] || (saved.seatingVersion===2?saved.view:'table')));
 wallTransparency();
 save();
 root.querySelector('.ss-loading').hidden=true;
