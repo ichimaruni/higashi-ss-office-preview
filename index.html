@@ -206,7 +206,7 @@ button,input,select{font:inherit;color:inherit}
 
     <div class="table-card" id="shelf-card" hidden>
       <div class="row1"><label class="k" for="shelf-select">ゴミ箱上の棚</label>
-      <select id="shelf-select"><option value="kana160">KANADEMONO 幅160cm</option><option value="kana180">KANADEMONO 幅180cm</option><option value="arne">arne ZERO-X 幅140cm</option><option value="original">従来のシルバーラック</option></select></div>
+      <select id="shelf-select"><option value="kana160">KANADEMONO 幅160cm</option><option value="kana180" selected>KANADEMONO 幅180cm</option><option value="arne">arne ZERO-X 幅140cm</option><option value="original">従来のシルバーラック</option></select></div>
       <div class="spec" id="shelf-dims"></div>
     </div>
     <section class="drawer" id="compare" hidden aria-labelledby="compare-h">
@@ -1159,8 +1159,9 @@ box(networkShelf,.19,.027,.055,0,.142,0,M.white,'機器棚内の電源タップ'
 for(let i=0;i<3;i++)for(const z of [-.008,.008])box(networkShelf,.008,.001,.003,-.06+i*.06,.156,z,M.dark);
 curve(networkShelf,[[.06,.935,.065],[.14,.89,.15],[.19,.70,.18],[.19,.38,.18],[.09,.16,.06],[.06,.158,0]],.0035,M.black).name='棚内のルーター電源ケーブル';
 curve(networkShelf,[[-.12,.51,-.12],[-.12,.505,.15],[-.18,.42,.18],[-.16,.20,.16],[-.06,.157,0]],.0025,M.white).name='棚内のハブ充電ケーブル';
-const fridge=group('F1',.6335,1.5675);
-box(fridge,.667,1.775,.835,0,.8875,0,M.fridge);
+const fridgeCenter={x:.4335,z:1.3675},fridgeWidth=.835;
+const fridge=group('F1',fridgeCenter.x,fridgeCenter.z);
+box(fridge,.667,1.775,fridgeWidth,0,.8875,0,M.fridge);
 for(const z of [-.21,.21])box(fridge,.033,1.70,.407,.346,.89,z,M.fridge);
 for(const z of [-.035,.035])box(fridge,.045,.5,.018,.374,1.02,z,M.black);
 box(fridge,.015,1.67,.007,.366,.90,0,M.black);
@@ -1344,7 +1345,7 @@ for(let i=0;i<3;i++){
  sticker(g,String(i+1).padStart(2,'0'),.10,.038,0,.615,.202);
 }
 // West wall, three centimetres south of the fridge. The window sill starts at 97 cm.
-const shelfStart=2.015,shelfBack=.022;
+const shelfStart=fridgeCenter.z+fridgeWidth/2+.03,shelfBack=.022;
 const shelfVariants={
  kana160:{width:1.60,depth:.40,height:.95},kana180:{width:1.80,depth:.40,height:.95},arne:{width:1.40,depth:.45,height:.90}
 };
@@ -1365,7 +1366,7 @@ for(const [key,spec] of Object.entries(shelfVariants)){
  }
 }
 const shelfSelect=document.querySelector('#shelf-select'),shelfCard=document.querySelector('#shelf-card');
-let shelfChoice='kana160';
+let shelfChoice='kana180';
 function applyShelf(){
  const original=shelfChoice==='original'||view==='pantry',spec=shelfVariants[shelfChoice];
  for(const candidate of Object.values(shelfVariants))candidate.mesh.visible=!original&&candidate===spec;
@@ -2032,7 +2033,7 @@ function setView(next){if(['display','clothes','meeting'].includes(next))next='o
  if(view==='top'){camera.position.set(0,16.8,.02);controls.target.set(0,0,-.32);controls.maxPolarAngle=Math.PI*.49}
  lastFit=1;resize();controls.update();render();
 }
-function save(){store.set({defaultsVersion,shelfChoice,view,layout,tableChoice,floorFinish,sortKey,power:powerToggle.checked,walls:wallToggle.checked,laptops:laptopToggle.checked,seatingVersion:2})}
+function save(){store.set({defaultsVersion,shelfDefaultVersion:2,shelfChoice,view,layout,tableChoice,floorFinish,sortKey,power:powerToggle.checked,walls:wallToggle.checked,laptops:laptopToggle.checked,seatingVersion:2})}
 floorGroup.addEventListener('change',e=>{setFloor(e.target.value);save()});
 layoutGroup.addEventListener('change',e=>{setLayout(e.target.value);save()});
 viewGroup.addEventListener('change',e=>{setView(e.target.value);save()});
@@ -2068,7 +2069,7 @@ for(const object of [hangerRack,mediaCart,cartCables,printerCart])object.removeF
 const saved=store.get()||{};
 // Apply the agreed defaults once to older saved preferences, then remember later choices.
 if(saved.defaultsVersion!==defaultsVersion){Object.assign(saved,{floorFinish:'carpet',layout:'B',tableChoice:'rughaus'})}
-if(Object.hasOwn(shelfVariants,saved.shelfChoice)||saved.shelfChoice==='original')shelfChoice=saved.shelfChoice;
+if((saved.shelfDefaultVersion===2||saved.shelfChoice!=='kana160')&&(Object.hasOwn(shelfVariants,saved.shelfChoice)||saved.shelfChoice==='original'))shelfChoice=saved.shelfChoice;
 populateSelect();
 powerToggle.checked=saved.power!==false;wallToggle.checked=!!saved.walls;
 setFloor(saved.floorFinish);
