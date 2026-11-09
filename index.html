@@ -1086,7 +1086,8 @@ for(let i=0;i<6;i++)officeChairs.push(comparisonChair(i>=4));
 const wallDeskDetails=[];
 deskObjects.forEach((desk,i)=>{
  const g=new THREE.Group();desk.add(g);wallDeskDetails.push(g);
- if(i===0)return;
+ // The three west desks have clear tops.
+ if(i<3)return;
  if(i===4){
   box(g,.31,.012,.22,0,.756,0,M.metal);
   const lid=box(g,.31,.19,.012,0,.85,-.125,M.screen);lid.rotation.x=-.15;
