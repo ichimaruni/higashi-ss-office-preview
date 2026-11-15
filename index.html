@@ -1088,18 +1088,12 @@ for(let i=0;i<6;i++)officeChairs.push(comparisonChair(i>=4));
 const wallDeskDetails=[];
 deskObjects.forEach((desk,i)=>{
  const g=new THREE.Group();desk.add(g);wallDeskDetails.push(g);
- // The three west desks have clear tops.
- if(i<3)return;
- if(i===4){
-  box(g,.31,.012,.22,0,.756,0,M.metal);
-  const lid=box(g,.31,.19,.012,0,.85,-.125,M.screen);lid.rotation.x=-.15;
- }else{
-  const w=[0,.48,.48,.68,0,.50,.70][i];
-  box(g,.19,.012,.14,0,.756,-.14,M.dark);
-  box(g,.029,.155,.026,0,.833,-.16,M.black);
-  box(g,w,w*9/16,.031,0,.878+w*9/32,-.16,M.black);
-  box(g,w-.011,w*9/16-.012,.002,0,.878+w*9/32,-.143,M.screen);
- }
+ // External monitors, stands and their cables have been removed from every desk.
+ // Retain the existing laptop on the second east-side desk.
+ if(i!==4)return;
+ g.name='東側デスクのノートPC';
+ box(g,.31,.012,.22,0,.756,0,M.metal);
+ const lid=box(g,.31,.19,.012,0,.85,-.125,M.screen);lid.rotation.x=-.15;
  curve(g,[[.03,.78,-.18],[.16,.71,-.27],[.20,.48,-.29],[.28,.41,-.29],[.33,.65,-.28]],.003,M.black);
 });
 const laptopPlaces=Array.from({length:6},()=>[0,0,0]);
@@ -2289,7 +2283,7 @@ function resize(){const w=stage.clientWidth,h=stage.clientHeight;if(!w||!h)retur
 new ResizeObserver(resize).observe(stage);
 // Temporarily remove the rack and the complete shared monitor station.
 // Keep their model definitions so the layout can be reconsidered later.
-for(const object of [hangerRack,mediaCart,cartCables,printerCart])object.removeFromParent();
+for(const object of [hangerRack,mediaCart,cartCables,printerCart,sharedDisplay])object.removeFromParent();
 const saved=store.get()||{};
 const oakEntry=location.hash==='#oak';
 const fmdEntry=location.hash==='#fmd';
