@@ -193,7 +193,7 @@ button,input,select{font:inherit;color:inherit}
     <p class="status" id="ss-layout-label" aria-live="polite"></p>
 
     <div class="table-card" id="table-card">
-      <div class="oak-controls"><label><input type="checkbox" id="oak-only" checked> ホワイトオーク候補</label><label>6席 <select id="oak-seating"><option value="ends">2＋2＋両端</option><option value="sides">3＋3</option></select></label></div>
+      <div class="oak-controls"><label><input type="checkbox" id="oak-only" checked> KANADEMONO 問い合わせ済みの2案</label><label>6席 <select id="oak-seating"><option value="ends">2＋2＋両端</option><option value="sides">3＋3</option></select></label></div>
       <nav class="candidate-nav" aria-label="中央テーブルの切り替え"><button id="prev-table" type="button">← 前の候補</button><span id="table-rank" aria-live="polite"></span><button id="next-table" type="button">次の候補 →</button></nav>
       <div class="row1">
         <label class="k" for="table-select">中央テーブル</label>
@@ -801,11 +801,6 @@ function pairedRounds(name,pine){
 }
 const tomoPair=pairedRounds('TOMOKAGU CZ-T013 × 2',true);
 const httPair=pairedRounds('BEST KAGU HTT-3844 × 2',false);
-const kana220=kanademonoTable('KANADEMONO ラバーウッド 2200×1400',1.4,.8);
-const kana240=kanademonoTable('KANADEMONO ラバーウッド 2400×1600',1.6,.8);
-const kana160=kanademonoTable('KANADEMONO 半円2台 φ1600',1.6,0);
-const kanaLino220=kanademonoTable('KANADEMONO リノリウム 2200×1400',1.4,.8,true);
-const kanaLino240=kanademonoTable('KANADEMONO リノリウム 2400×1600',1.6,.8,true);
 
 // VIENA MT-VD211B (the original VIENA, not Viena2): two T feet, small
 // end casters and two rectangular cable-box lids flush with the oak top.
@@ -1941,15 +1936,8 @@ for(const [key,item] of Object.entries(extensionModels)){
 
 // White oak study, 2026-11-15. Catalogue dimensions vs unconfirmed custom studies.
 const oakSpecs=[
- {id:'oak160',l:1.6,d:.8,label:'160×80 角柱・黒',status:'実商品ベース'},
- {id:'oak180',l:1.8,d:.8,label:'180×80 角柱・黒',status:'実商品ベース'},
- {id:'oak180white',l:1.8,d:.8,label:'180×80 角柱・白',white:true,status:'実商品ベース'},
- {id:'oak180square',l:1.8,d:.8,label:'180×80 コの字・黒',square:true,status:'実商品ベース'},
- {id:'oak180caster',l:1.8,d:.8,label:'180×80 角柱・キャスター',caster:true,status:'組合せ要確認'},
- {id:'oak200100',l:2,d:1,r:.1,label:'200×100 角丸R100',custom:true,status:'特注可否未確認'},
- {id:'oak200110',l:2,d:1.1,r:.1,label:'200×110 角丸R100',custom:true,status:'特注可否未確認'},
- {id:'oak200120',l:2,d:1.2,r:.1,label:'200×120 角丸R100',custom:true,status:'特注可否未確認'},
- {id:'oak220oval',l:2.2,d:1.1,oval:true,label:'220×110 小判形',custom:true,status:'特注可否未確認'}
+ {id:'oak240120',l:2.4,d:1.2,r:.1,label:'240×120 角丸（問い合わせ済み）',custom:true,status:'KANADEMONOへ問い合わせ済み・製作可否未確定'},
+ {id:'oak240oval',l:2.4,d:1.2,oval:true,label:'240×120 小判形（問い合わせ済み）',custom:true,status:'KANADEMONOへ問い合わせ済み・製作可否未確定'}
 ];
 const oakTexture=await new THREE.TextureLoader().loadAsync('assets/white-oak-reference.jpg');
 oakTexture.colorSpace=THREE.SRGBColorSpace;
@@ -2006,13 +1994,13 @@ for(const spec of oakSpecs){
  oakMeshes[spec.id]=oakTable(spec);
  const actual=!spec.custom;
  oakOptions[spec.id]={oak:true,name:'無垢ホワイトオーク／マットウレタン '+spec.label,
-  short:'オーク '+spec.label,maker:spec.custom?'希望仕様（メーカー未確認）':'KANADEMONO',
+  short:'オーク '+spec.label,maker:'KANADEMONO（問い合わせ中）',
   status:spec.status,shape:spec.oval?'capsule':'rect',shapeLabel:spec.oval?'小判形・希望案':spec.r?'角丸長方形・希望案':'長方形・縁R5',
   corner:spec.r||0,mm:[spec.l*1000,spec.d*1000,spec.caster?747:710],height:spec.caster?.747:.710,pinZ:0,
-  note:(actual?'TBL-K23系・天板30mm。縁R5と中央アイアン配線トレイ追加の構成案。':'標準販売範囲外。サイズ・四隅の加工・支持構造・搬入・価格すべて要相談。描画した4脚で製作できるとは未確認。')+
+  note:(actual?'TBL-K23系・天板30mm。縁R5と中央アイアン配線トレイ追加の構成案。':'2400×1200mm・6人用・マットウレタン・配線トレイ必須で問い合わせ済み。分割天板と脚の取り外しによる搬入を相談中。キャスターは任意希望。製作可否・支持構造・分割方法・価格・納期は未確定。高さ710mm、天板厚30mm、角丸R100／縁R5、黒4脚とトレイ位置は検討用の仮表現で、確定仕様ではない。')+
    (spec.caster?' キャスター径40mm・取付高47mm。高さ747mmは670+30+47の計算値。組合せの安定性は未確認。':'')+
    ' 木目は公式表面写真を使用。色は画面・照明で異なる。脚位置・縁・配線トレイの細部は近似。6人の快適性は未判定。',
-  price:actual?{kind:'from',min:140000,text:'本体 ¥140,000＋加工等',basis:'本体Lサイズの参考価格。R5・配線加工・キャスター別／総額未確定'}:{kind:'quote',text:'製作可否・価格未確認',basis:'希望仕様の比較モデル。購入できる商品として未確認'},
+  price:actual?{kind:'from',min:140000,text:'本体 ¥140,000＋加工等',basis:'本体Lサイズの参考価格。R5・配線加工・キャスター別／総額未確定'}:{kind:'quote',text:'見積・納期の回答待ち',basis:'問い合わせ済みの希望仕様。製作可否・価格・納期は未確定'},
   url:'https://kanademono.design/products/tbl-k23-'+(spec.white?'wh':'bk'),
   photo:spec.square?'https://cdn.shopify.com/s/files/1/0254/1964/4990/files/SQ_1_cef23172-13c4-445b-9a48-552cdbc35b63.jpg?v=1697377175':'https://cdn.shopify.com/s/files/1/0254/1964/4990/files/SB_1_1cbaea47-2163-410f-ba27-9069eafba062.jpg?v=1716870784'
  };
@@ -2024,11 +2012,6 @@ const tableOptions={
  tomoPair:pairedOption('TOMOKAGU','CZ-T013',309288,'https://tomokagu.com/products/ダイニングテーブル-パイン材-丸みを帯びたデザイン-厚みのある天板-木目調-広々とした天板-円形-cz-t013?variant=49541358223650','パイン材の天板と縦溝の円柱脚'),
  httPair:pairedOption('BEST KAGU','HTT-3844',213798,'https://www.bestkagu.com/products/htt-3844','ブラックのセラミック天板とくびれた金属脚'),
 graph:{"name": "Wilkhahn Graph 中古・商品625729", "short": "Graph 3200", "maker": "Wilkhahn", "shape": "boat", "shapeLabel": "ボート形", "mm": [3200, 1500, 720], "note": "掲載実寸。ボート形天板・銀色6本脚・配線口。脚位置と天板曲線は商品写真から近似。送料別", "price": {"kind": "fixed", "min": 198000, "text": "¥198,000", "basis": "2026-11-06確認・税込本体。KANADEMONOは標準脚の合算、追加加工・配線収納別"}, "url": "https://www.officebusters.com/items/625729", "height": 0.72, "laptopX": 0.4, "laptopZ": [-0.5, 0.1, 0.6], "pinZ": 0.1},
-kana220:{"name": "ラバーウッド 半円2台＋長方形140×80", "short": "KANADEMONO 木製220×140", "maker": "KANADEMONO", "shape": "capsule", "shapeLabel": "半円＋長方形", "mm": [2200, 1400, 710], "note": "半円140×70を2台＋中央140×80。黒脚。固定方法は未確認・脚位置は近似", "price": {"kind": "fixed", "min": 181700, "text": "¥181,700", "basis": "2026-11-06確認・税込本体。KANADEMONOは標準脚の合算、追加加工・配線収納別"}, "url": "https://kanademono.design/products/htb-k03-bk", "height": 0.71, "laptopX": 0.4, "laptopZ": [-0.5, 0.1, 0.6], "pinZ": 0.1},
-kana240:{"name": "ラバーウッド 半円2台＋長方形160×80", "short": "KANADEMONO 木製240×160", "maker": "KANADEMONO", "shape": "capsule", "shapeLabel": "半円＋長方形", "mm": [2400, 1600, 710], "note": "半円160×80を2台＋中央160×80。黒脚。固定方法は未確認・脚位置は近似", "price": {"kind": "fixed", "min": 191700, "text": "¥191,700", "basis": "2026-11-06確認・税込本体。KANADEMONOは標準脚の合算、追加加工・配線収納別"}, "url": "https://kanademono.design/products/htb-k03-bk", "height": 0.71, "laptopX": 0.4, "laptopZ": [-0.5, 0.1, 0.6], "pinZ": 0.1},
-kana160:{"name": "ラバーウッド 半円160×80を2台", "short": "KANADEMONO 木製φ160", "maker": "KANADEMONO", "shape": "round", "shapeLabel": "半円2台の円形", "mm": [1600, 1600, 710], "note": "独立した半円2台・合計6本脚。固定方法は未確認・脚位置は近似", "price": {"kind": "fixed", "min": 131800, "text": "¥131,800", "basis": "2026-11-06確認・税込本体。KANADEMONOは標準脚の合算、追加加工・配線収納別"}, "url": "https://kanademono.design/products/htb-k03-bk", "height": 0.71, "laptopX": 0.4, "laptopZ": [-0.5, 0.1, 0.6], "pinZ": 0.1},
-kanaLino220:{"name": "リノリウム 半円2台＋長方形140×80", "short": "KANADEMONO リノ220×140", "maker": "KANADEMONO", "shape": "capsule", "shapeLabel": "半円＋長方形", "mm": [2200, 1400, 710], "note": "グレー天板・白脚。半円140×70を2台＋中央140×80。高さはアジャスター含む約71cm。脚位置は近似・固定方法未確認", "price": {"kind": "fixed", "min": 276000, "text": "¥276,000", "basis": "2026-11-06確認・税込本体。KANADEMONOは標準脚の合算、追加加工・配線収納別"}, "url": "https://kanademono.design/products/htb-k20-wh", "height": 0.71, "laptopX": 0.4, "laptopZ": [-0.5, 0.1, 0.6], "pinZ": 0.1},
-kanaLino240:{"name": "リノリウム 半円2台＋長方形160×80", "short": "KANADEMONO リノ240×160", "maker": "KANADEMONO", "shape": "capsule", "shapeLabel": "半円＋長方形", "mm": [2400, 1600, 710], "note": "グレー天板・白脚。半円160×80を2台＋中央160×80。高さはアジャスター含む約71cm。脚位置は近似・固定方法未確認", "price": {"kind": "fixed", "min": 291000, "text": "¥291,000", "basis": "2026-11-06確認・税込本体。KANADEMONOは標準脚の合算、追加加工・配線収納別"}, "url": "https://kanademono.design/products/htb-k20-wh", "height": 0.71, "laptopX": 0.4, "laptopZ": [-0.5, 0.1, 0.6], "pinZ": 0.1},
  cashew:{name:'カシュー182 楕円テーブル',short:'カシュー182',maker:'KAGUWORLD',shape:'ellipse',shapeLabel:'楕円形',mm:[1820,1100,720],note:'オーク突板。中央で交差する木製脚。脚の細部は商品写真を基にした近似',
   price:{kind:'fixed',min:71900,text:'¥71,900',basis:'税込・公式サイト通常掲載価格。購入時の価格・送料は要確認'},url:'https://kagu-world.com/view/item/000000004914',
   height:.720,laptopX:.34,laptopZ:[-.36,.06,.48],pinZ:.15},
@@ -2051,7 +2034,7 @@ kanaLino240:{"name": "リノリウム 半円2台＋長方形160×80", "short": "
   price:{kind:'street',min:151000,text:'約¥151,000',basis:'税込・販売店の実売価格（定価は¥237,600）'},url:'https://www.office-com.jp/products/detail.php?product_id=458005',
   height:.720,laptopX:.35,laptopZ:[-.46,.07,.59],pinZ:.09}
 };
-const tableMeshes={...oakMeshes,...extensionMeshes,tomoPair,httPair,graph,kana220,kana240,kana160,kanaLino220,kanaLino240,cashew,rughaus,modern:roundTable,oneLux,oneLuxOval,gfield,viena2};
+const tableMeshes={...oakMeshes,...extensionMeshes,tomoPair,httPair,graph,cashew,rughaus,modern:roundTable,oneLux,oneLuxOval,gfield,viena2};
 const fmt=n=>n.toLocaleString('ja-JP');
 function topArea(o){const [w,d]=o.mm,m2=w*d/1e6;if(o.shape==='paired')return 2*Math.PI*(d/2000)**2;if(o.shape==='boat')return m2*17/18;if(o.shape==='round'||o.shape==='ellipse')return Math.PI/4*m2;if(o.shape==='capsule')return m2-(1-Math.PI/4)*(d/1000)**2;if(o.corner)return m2-(4-Math.PI)*o.corner**2;return m2}
 function shortPrice(p){if(p.kind==='quote')return '要見積';if(p.kind==='fixed')return p.text;if(p.kind==='street')return p.text;const man=(p.min/10000).toFixed(1).replace(/\.0$/,'');return `¥${man}万〜`}
@@ -2108,7 +2091,7 @@ function renderLedger(){
    const more=document.createElement('div');more.className='more';
    const dl=document.createElement('dl');
    for(const [k,v] of [['商品',o.name],['形',`${o.shapeLabel}・天板 約${topArea(o).toFixed(2)}㎡`],['特徴',o.note],['価格',`${o.price.text}（${o.price.basis}）`]]){const dt=document.createElement('dt'),dd=document.createElement('dd');dt.textContent=k;dd.textContent=v;dl.append(dt,dd)}
-   const a=document.createElement('a');a.href=o.url;a.target='_blank';a.rel='noopener';a.textContent='商品ページを開く ↗';
+   const a=document.createElement('a');a.href=o.url;a.target='_blank';a.rel='noopener';a.textContent=o.oak?'素材・標準商品の参考ページ ↗':'商品ページを開く ↗';
    const dt=document.createElement('dt'),dd=document.createElement('dd');dd.append(a);dl.append(dt,dd);
    if(o.oak){
     const fig=document.createElement('figure');fig.className='oak-reference';
@@ -2267,12 +2250,13 @@ new ResizeObserver(resize).observe(stage);
 for(const object of [hangerRack,mediaCart,cartCables,printerCart])object.removeFromParent();
 const saved=store.get()||{};
 const oakEntry=location.hash==='#oak';
+if(/^(oak|kana)/.test(saved.tableChoice||'')&&!tableOptions[saved.tableChoice])saved.tableChoice='oak240120';
 oakOnly=oakEntry||saved.oakOnly!==false;
 oakSeating=saved.oakSeating==='sides'?'sides':'ends';
 $('#oak-only').checked=oakOnly;$('#oak-seating').value=oakSeating;
 $('#oak-product-only').addEventListener('change',e=>{oakProductOnly=e.target.checked;render()});
 $('#oak-legs-view').addEventListener('click',()=>{setView('table');const c=roundGroup.position,scale=tableOptions[tableChoice].mm[0]/1800;camera.position.set(c.x+1.8*scale,.64,c.z+1.7*scale);controls.target.set(c.x,.39,c.z);controls.update();render()});
-$('#oak-only').addEventListener('change',e=>{oakOnly=e.target.checked;if(oakOnly&&!tableOptions[tableChoice].oak)tableChoice='oak180';populateSelect();setTable(tableChoice);save()});
+$('#oak-only').addEventListener('change',e=>{oakOnly=e.target.checked;if(oakOnly&&!tableOptions[tableChoice].oak)tableChoice='oak240120';populateSelect();setTable(tableChoice);save()});
 $('#oak-seating').addEventListener('change',e=>{oakSeating=e.target.value;updateCentralSeats();render();save()});
 // Apply the agreed defaults once to older saved preferences, then remember later choices.
 if(saved.defaultsVersion!==defaultsVersion){Object.assign(saved,{floorFinish:'carpet',layout:'B',tableChoice:'rughaus'})}
@@ -2280,7 +2264,7 @@ if((saved.shelfDefaultVersion===2||saved.shelfChoice!=='kana160')&&(Object.hasOw
 populateSelect();
 powerToggle.checked=saved.power!==false;wallToggle.checked=!!saved.walls;
 setFloor(saved.floorFinish);
-setTable(oakEntry||(oakOnly&&!tableOptions[saved.tableChoice]?.oak)?'oak180':saved.tableChoice);
+setTable(oakEntry||(oakOnly&&!tableOptions[saved.tableChoice]?.oak)?'oak240120':saved.tableChoice);
 setLaptops(saved.seatingVersion===2?saved.laptops===true:true);
 setLayout(saved.seatingVersion===2 && saved.layout==='A'?'A':'B');
 setView(({'#oak':'table','#shelves':'kitchen','#east':'east','#west':'west','#entrance':'reverse','#north':'doors'}[location.hash] || (saved.seatingVersion===2?saved.view:'table')));
