@@ -193,7 +193,7 @@ button,input,select{font:inherit;color:inherit}
     <p class="status" id="ss-layout-label" aria-live="polite"></p>
 
     <div class="table-card" id="table-card">
-      <div class="oak-controls"><label><input type="checkbox" id="oak-only" checked> KANADEMONO 問い合わせ済みの2案</label><label>6席 <select id="oak-seating"><option value="ends">2＋2＋両端</option><option value="sides">3＋3</option></select></label></div>
+      <div class="oak-controls"><label><input type="checkbox" id="oak-only" checked> 検討中：KANADEMONO・FMD-S</label><label>6席 <select id="oak-seating"><option value="ends">2＋2＋両端</option><option value="sides">3＋3</option></select></label></div>
       <nav class="candidate-nav" aria-label="中央テーブルの切り替え"><button id="prev-table" type="button">← 前の候補</button><span id="table-rank" aria-live="polite"></span><button id="next-table" type="button">次の候補 →</button></nav>
       <div class="row1">
         <label class="k" for="table-select">中央テーブル</label>
@@ -897,7 +897,7 @@ function updateFargoCable(){
  const option=tableOptions[tableChoice],h=option.height,north=-option.mm[0]/2000;
  const paired=option.shape==='paired';
  fargoTap.visible=!option.oak;
- const hole=tableChoice==='graph'?-.72:tableChoice==='viena2'?-.335:null;
+ const hole=option.fmd?-.6:tableChoice==='graph'?-.72:tableChoice==='viena2'?-.335:null;
  const z=hole!==null?hole+.18:paired?-pairOffset-.20:north*.48;
  fargoTap.rotation.y=-Math.PI/2;fargoTap.position.set(0,h,z);
  while(fargoCable.children.length){const mesh=fargoCable.children[0];fargoCable.remove(mesh);mesh.geometry.dispose()}
@@ -2006,7 +2006,49 @@ for(const spec of oakSpecs){
  };
 }
 
+// FMD-S: two independent 1200 mm square units, eight legs/casters in total.
+// Overall dimensions and 18 mm top are catalogue values; small parts are photo approximations.
+function fmdTable(white){
+ const g=group('井上金庫 FMD-S '+(white?'ホワイト':'アッシュ柄'),3.35,4,0,roundGroup);
+ const steel=mat(0x242929,.65),ivory=mat(0xd9ddd1,.6),brake=mat(0x929b84,.7);
+ const ash=tableWood(0xadafa9);
+ // Desaturate the procedural wood texture to approximate the weathered ash laminate.
+ const canvas=ash.map.image,ctx=canvas.getContext('2d'),pixels=ctx.getImageData(0,0,1024,1024);
+ for(let n=0;n<pixels.data.length;n+=4){const v=pixels.data[n]*.3+pixels.data[n+1]*.59+pixels.data[n+2]*.11;pixels.data[n]=v*.88;pixels.data[n+1]=v*.86;pixels.data[n+2]=v*.81;}ctx.putImageData(pixels,0,0);ash.map.needsUpdate=true;
+ const finish=white?mat(0xe7eae7,.75):ash;
+ for(const center of [-.6,.6]){
+  const unit=new THREE.Group();unit.position.z=center;unit.name='FMD-1212 独立ユニット';g.add(unit);
+  tabletop(unit,roundedTableGeometry(1.2,1.2,.027,.018,.001),.720,finish,.018).name='1200×1200・18mmメラミン天板';
+  for(const x of [-.54,.54])box(unit,.035,.055,1.08,x,.670,0,steel,'天板下フレーム');
+  for(const z of [-.54,.54])box(unit,1.08,.055,.035,0,.670,z,steel,'天板下フレーム');
+  for(const x of [-.54,.54])for(const z of [-.54,.54]){
+   box(unit,.055,.607,.055,x,.3885,z,steel,'黒角脚・寸法近似');
+   box(unit,.022,.018,.022,x,.077,z,M.metal,'キャスターねじ・アジャスター');
+   box(unit,.048,.025,.035,x,.057,z,ivory,'双輪キャスターフォーク');
+   for(const side of [-1,1]){
+    const wheel=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,.014,24),M.black);wheel.rotation.z=Math.PI/2;wheel.position.set(x+side*.019,.025,z+.008);wheel.name='双輪キャスター・径近似';unit.add(wheel);
+    const hub=new THREE.Mesh(new THREE.CylinderGeometry(.018,.018,.015,24),ivory);hub.rotation.z=Math.PI/2;hub.position.copy(wheel.position);unit.add(hub);
+   }
+   const stop=box(unit,.027,.009,.034,x,.044,z-.023,brake,'ストッパー・形状近似');stop.rotation.x=-.45;
+  }
+  box(unit,.400,.003,.140,0,.721,0,steel,'配線口・写真から寸法近似');
+  box(unit,.375,.004,.087,0,.723,0,mat(0x454d4d,.7),'配線口の蓋');
+  for(const z of [-.056,.056])box(unit,.375,.001,.018,0,.723,z,M.black,'配線スリット');
+ }
+ return g;
+}
+const fmdAsh=fmdTable(false),fmdWhite=fmdTable(true);
+const fmdOptions={};
+for(const [key,label] of [['fmdAsh','アッシュ柄'],['fmdWhite','ホワイト']])fmdOptions[key]={
+ fmd:true,name:'井上金庫 FMD-S 基本セット・'+label,short:'FMD-S 240×120 '+label,maker:'井上金庫',
+ shape:'rectangle',shapeLabel:'小さな角丸の正方形2台',mm:[2400,1200,720],height:.720,pinZ:0,
+ note:'FMD-1212（1200×1200mm）2台。18mmパーティクルボード＋低圧メラミン、PVCソフトエッジ。黒脚8本・アジャスター付きキャスター8個・配線口2か所。アッシュは天然木ではなく木目柄。脚断面・位置、角の半径、キャスターと配線口の寸法、色・木目は商品写真からの近似。中央にも脚があるため6席の足元は要確認。配線トレイ必須の条件は継続し、取付方法・収納容量・追加費用は未確認（3Dには未追加）。別売ケーブルダクトAR-CDの案内あり。搬入可否・梱包寸法・2台の固定方法は未確認。',
+ price:{kind:'fixed',min:131200,text:'本体2台セット ¥131,200',basis:'2026-11-15確認・税込。配線収納追加・6階への搬入組立費は別途確認。送料無料は軒先渡し'},
+ url:'https://www.look-it.jp/view/item/000000028668'
+};
+
 const tableOptions={
+ ...fmdOptions,
  ...oakOptions,
  ...extensionOptions,
  tomoPair:pairedOption('TOMOKAGU','CZ-T013',309288,'https://tomokagu.com/products/ダイニングテーブル-パイン材-丸みを帯びたデザイン-厚みのある天板-木目調-広々とした天板-円形-cz-t013?variant=49541358223650','パイン材の天板と縦溝の円柱脚'),
@@ -2034,7 +2076,7 @@ graph:{"name": "Wilkhahn Graph 中古・商品625729", "short": "Graph 3200", "m
   price:{kind:'street',min:151000,text:'約¥151,000',basis:'税込・販売店の実売価格（定価は¥237,600）'},url:'https://www.office-com.jp/products/detail.php?product_id=458005',
   height:.720,laptopX:.35,laptopZ:[-.46,.07,.59],pinZ:.09}
 };
-const tableMeshes={...oakMeshes,...extensionMeshes,tomoPair,httPair,graph,cashew,rughaus,modern:roundTable,oneLux,oneLuxOval,gfield,viena2};
+const tableMeshes={fmdAsh,fmdWhite,...oakMeshes,...extensionMeshes,tomoPair,httPair,graph,cashew,rughaus,modern:roundTable,oneLux,oneLuxOval,gfield,viena2};
 const fmt=n=>n.toLocaleString('ja-JP');
 function topArea(o){const [w,d]=o.mm,m2=w*d/1e6;if(o.shape==='paired')return 2*Math.PI*(d/2000)**2;if(o.shape==='boat')return m2*17/18;if(o.shape==='round'||o.shape==='ellipse')return Math.PI/4*m2;if(o.shape==='capsule')return m2-(1-Math.PI/4)*(d/1000)**2;if(o.corner)return m2-(4-Math.PI)*o.corner**2;return m2}
 function shortPrice(p){if(p.kind==='quote')return '要見積';if(p.kind==='fixed')return p.text;if(p.kind==='street')return p.text;const man=(p.min/10000).toFixed(1).replace(/\.0$/,'');return `¥${man}万〜`}
@@ -2053,7 +2095,7 @@ const defaultsVersion='2026-10-20';
 const store={get(){try{return JSON.parse(localStorage.getItem('ss-office-3d')||'null')}catch{return null}},set(v){try{localStorage.setItem('ss-office-3d',JSON.stringify(v))}catch{}}};
 
 function sortedTableKeys(){
- return Object.keys(tableOptions).filter(k=>!oakOnly||tableOptions[k].oak).sort((a,b)=>{
+ return Object.keys(tableOptions).filter(k=>!oakOnly||tableOptions[k].oak||tableOptions[k].fmd).sort((a,b)=>{
   const A=tableOptions[a],B=tableOptions[b];
   return sortKey==='area'?topArea(B)-topArea(A):(A.price.min??Infinity)-(B.price.min??Infinity);
  });
@@ -2127,7 +2169,7 @@ function updateCentralSeats(){
  function seat(angle,x,z){
   seats.push({angle,x,z});
  }
- if(option.oak){
+ if(option.oak||option.fmd){
   if(oakSeating==='sides'){
    for(const side of [-1,1])for(const fraction of [-.62,0,.62]){
     const z=halfLength*fraction;
@@ -2177,7 +2219,7 @@ function setLaptops(show){laptopToggle.checked=!!show;equipment.visible=!!show;u
 function setFloor(next){floorFinish=next==='linoleum'?'linoleum':'carpet';officeFloor.material=floorFinish==='carpet'?M.carpet:sheetMaterial;floorGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===floorFinish);render()}
 function interior(){return ['inside','reverse','east','west','doors'].includes(view)}
 function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&&!powerToggle.checked)||(p.layout&&p.layout!==layout)||interior()||view==='clothes'||view==='shrine'||view==='display'||view==='balcony'||view==='fragrance'||view==='meeting'||(['table','tabletop'].includes(view)&&p===tableDimensionPin)||v.z>1||v.z< -1||Math.abs(v.x)>.97||Math.abs(v.y)>.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
-function render(){const clean=!!tableOptions[tableChoice]?.oak&&oakProductOnly;equipment.visible=laptopToggle.checked&&!clean;for(const o of [...officeChairs,...meals,...coffeeCups])o.visible=!clean;renderer.render(scene,camera);projectPins();root.dataset.layout=layout;root.dataset.tableModel=tableChoice;root.dataset.laptops=String(equipment.visible)}
+function render(){const clean=!!(tableOptions[tableChoice]?.oak||tableOptions[tableChoice]?.fmd)&&oakProductOnly;equipment.visible=laptopToggle.checked&&!clean;for(const o of [...officeChairs,...meals,...coffeeCups])o.visible=!clean;renderer.render(scene,camera);projectPins();root.dataset.layout=layout;root.dataset.tableModel=tableChoice;root.dataset.laptops=String(equipment.visible)}
 function updateLabel(){
  layoutLabel.textContent=layout==='B'
   ?`配置B：デスク 西3台・東4台／中央にメッシュチェア4脚＋キャンプチェア2脚／東のブース脇に収納ボックス16個／ノートPC ${equipment.visible?'表示':'非表示'}`
@@ -2250,13 +2292,14 @@ new ResizeObserver(resize).observe(stage);
 for(const object of [hangerRack,mediaCart,cartCables,printerCart])object.removeFromParent();
 const saved=store.get()||{};
 const oakEntry=location.hash==='#oak';
+const fmdEntry=location.hash==='#fmd';
 if(/^(oak|kana)/.test(saved.tableChoice||'')&&!tableOptions[saved.tableChoice])saved.tableChoice='oak240120';
-oakOnly=oakEntry||saved.oakOnly!==false;
+oakOnly=oakEntry||fmdEntry||saved.oakOnly!==false;
 oakSeating=saved.oakSeating==='sides'?'sides':'ends';
 $('#oak-only').checked=oakOnly;$('#oak-seating').value=oakSeating;
 $('#oak-product-only').addEventListener('change',e=>{oakProductOnly=e.target.checked;render()});
 $('#oak-legs-view').addEventListener('click',()=>{setView('table');const c=roundGroup.position,scale=tableOptions[tableChoice].mm[0]/1800;camera.position.set(c.x+1.8*scale,.64,c.z+1.7*scale);controls.target.set(c.x,.39,c.z);controls.update();render()});
-$('#oak-only').addEventListener('change',e=>{oakOnly=e.target.checked;if(oakOnly&&!tableOptions[tableChoice].oak)tableChoice='oak240120';populateSelect();setTable(tableChoice);save()});
+$('#oak-only').addEventListener('change',e=>{oakOnly=e.target.checked;if(oakOnly&&!tableOptions[tableChoice].oak&&!tableOptions[tableChoice].fmd)tableChoice='oak240120';populateSelect();setTable(tableChoice);save()});
 $('#oak-seating').addEventListener('change',e=>{oakSeating=e.target.value;updateCentralSeats();render();save()});
 // Apply the agreed defaults once to older saved preferences, then remember later choices.
 if(saved.defaultsVersion!==defaultsVersion){Object.assign(saved,{floorFinish:'carpet',layout:'B',tableChoice:'rughaus'})}
@@ -2264,10 +2307,10 @@ if((saved.shelfDefaultVersion===2||saved.shelfChoice!=='kana160')&&(Object.hasOw
 populateSelect();
 powerToggle.checked=saved.power!==false;wallToggle.checked=!!saved.walls;
 setFloor(saved.floorFinish);
-setTable(oakEntry||(oakOnly&&!tableOptions[saved.tableChoice]?.oak)?'oak240120':saved.tableChoice);
+setTable(fmdEntry?'fmdAsh':oakEntry||(oakOnly&&!tableOptions[saved.tableChoice]?.oak&&!tableOptions[saved.tableChoice]?.fmd)?'oak240120':saved.tableChoice);
 setLaptops(saved.seatingVersion===2?saved.laptops===true:true);
 setLayout(saved.seatingVersion===2 && saved.layout==='A'?'A':'B');
-setView(({'#oak':'table','#shelves':'kitchen','#east':'east','#west':'west','#entrance':'reverse','#north':'doors'}[location.hash] || (saved.seatingVersion===2?saved.view:'table')));
+setView(({'#fmd':'table','#oak':'table','#shelves':'kitchen','#east':'east','#west':'west','#entrance':'reverse','#north':'doors'}[location.hash] || (saved.seatingVersion===2?saved.view:'table')));
 wallTransparency();
 save();
 root.querySelector('.ss-loading').hidden=true;
