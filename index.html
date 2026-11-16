@@ -203,6 +203,8 @@ button,input,select{font:inherit;color:inherit}
         <span class="dims num" id="card-dims"></span>
         <span class="price num" id="card-price"></span>
       </div>
+      <div class="oak-controls"><label>配線口 <select id="proposal-wiring" aria-label="配線キャップの比較"><option value="square">四角キャップ・黒</option><option value="round">丸キャップ・黒</option><option value="none">なし</option></select></label></div>
+      <p id="wiring-note" style="font-size:11px;line-height:1.5;margin:4px 0;color:#685c4c">配線口のみ・収納ボックスなし。2個の配置案／取付位置・追加総額は未確定。</p>
       <div class="oak-controls"><label><input type="checkbox" id="oak-product-only"> テーブルだけ見る</label><button type="button" class="link-btn" id="oak-legs-view">脚・継ぎ目を見る</button></div>
       <p id="oak-status" role="status"></p>
       <div class="row3">
@@ -2093,6 +2095,20 @@ const [proposalMelamine,proposalVeneer]=await Promise.all([
  proposalPhotoMaterial('assets/proposal-melamine-detail.jpg',[[50,850],[750,400],[1550,700],[850,1150]],.72),
  proposalPhotoMaterial('assets/proposal-veneer-detail.jpg',[[80,450],[400,240],[1050,485],[730,730]],.62)
 ]);
+function proposalCableCap(parent,x,z,h,rotation=0){
+ const g=new THREE.Group();g.name='配線キャップ・配置参考';g.position.set(x,h,z);g.rotation.y=rotation;parent.add(g);
+ const black=mat(0x303236,.7),hole=mat(0x080909,1),square=new THREE.Group(),round=new THREE.Group();
+ square.name='四角キャップ100×50mm';round.name='丸キャップφ50mm';g.add(square,round);
+ // 100×50 cover / 90×40 bore / 76×19 cable outlet, per official specification.
+ box(square,.09,.0005,.04,0,.0004,0,hole,'配線孔の暗部・簡略表示');
+ box(square,.10,.002,.005,0,.0015,-.0225,black,'キャップ外枠');
+ for(const xx of [-.0475,.0475])box(square,.005,.002,.05,xx,.0015,0,black,'キャップ外枠');
+ box(square,.10,.002,.026,0,.0015,.012,black,'四角キャップの蓋');
+ for(const xx of [-.0415,.0415])box(square,.007,.002,.019,xx,.0015,-.0105,black,'配線出口の端');
+ const disk=new THREE.Mesh(new THREE.CylinderGeometry(.025,.025,.002,64),black);disk.position.y=.0015;round.add(disk);
+ box(round,.020,.0003,.010,0,.00265,-.012,hole,'丸キャップ20×10mm配線出口');
+ g.userData.square=square;g.userData.round=round;return g;
+}
 function supplierProposal(oval){
  const g=group(oval?'提案② ホワイトオーク突板3台':'提案① SITURAEMON メラミン1台',3.35,4,0,roundGroup);
  const steel=mat(0x252629,.73,.08),finish=oval?proposalVeneer:proposalMelamine,h=oval?.710:.706,t=oval?.030:.026;
@@ -2150,15 +2166,20 @@ function supplierProposal(oval){
    }
   }
  }
+ // Layout reference: width-split central-2 diagram vs depth-split ±64mm diagram.
+ // Product-specific drilling position and number require supplier confirmation.
+ const caps=oval?[proposalCableCap(g,-.064,0,h,Math.PI/2),proposalCableCap(g,.064,0,h,Math.PI/2)]
+  :[proposalCableCap(g,0,-.55,h,Math.PI/2),proposalCableCap(g,0,.55,h,Math.PI/2)];
+ g.userData.caps=caps;
  return g;
 }
 const supplierRect=supplierProposal(false),supplierOval=supplierProposal(true);
 const tableOptions={
- supplierRect:{proposal:true,oak:true,name:'スマート造作テーブル／メラミン 2400×1200',short:'① メラミン長方形・1台',maker:'SITURAEMON／KANADEMONO提案',shape:'rectangle',shapeLabel:'長方形・天板2分割連結',mm:[2400,1200,706],height:.706,pinZ:0,status:'提案①｜長方形・2分割連結｜配線トレイ未対応',
-  note:'メーカー提案：2400×1200、1200×1200の天板2枚を連結。メラミン26mm厚、面取り加工不可。木目6色・無地6色、脚は黒／白／ステンレスから選択可能。3Dは参考写真の木目調・黒Square Bar6本脚、キャスターなし。色柄・脚の最終選択前。写真のTJY2600K柄を反映。中央2脚は長辺から約300mm内側（写真推定・取付寸法未確認）。高さは696mm＋アジャスター約10mm。配線はキャップのみ（追加11,990円）、別売キャスター取付可能。いずれも未選択のため描画なし。希望する配線トレイの取付方法・費用は未確認。納期は注文・入金から最短16営業日目出荷、到着日ではない。分割後も梱包状態の搬入可否は未確認。',
+ supplierRect:{proposal:true,oak:true,name:'スマート造作テーブル／メラミン 2400×1200',short:'① メラミン長方形・1台',maker:'SITURAEMON／KANADEMONO提案',shape:'rectangle',shapeLabel:'長方形・天板2分割連結',mm:[2400,1200,706],height:.706,pinZ:0,status:'提案①｜長方形・2分割連結｜配線キャップ対応',
+  note:'メーカー提案：2400×1200、1200×1200の天板2枚を連結。メラミン26mm厚、面取り加工不可。木目6色・無地6色、脚は黒／白／ステンレスから選択可能。3Dは参考写真の木目調・黒Square Bar6本脚、キャスターなし。色柄・脚の最終選択前。写真のTJY2600K柄を反映。中央2脚は長辺から約300mm内側（写真推定・取付寸法未確認）。高さは696mm＋アジャスター約10mm。配線はキャップのみ（追加11,990円）、別売キャスター取付可能。キャスターは描画なし。配線口は黒キャップ2個の配置案を表示（丸／四角／なし切替）。個数・位置・追加総額は最終確認前。希望する配線トレイの取付方法・費用は未確認。納期は注文・入金から最短16営業日目出荷、到着日ではない。分割後も梱包状態の搬入可否は未確認。',
   price:{kind:'from',min:186780,text:'本体 ¥186,780〜',basis:'メーカー提案の税込下限。配線キャップ11,990円、キャスター・搬入組立等の総額は未確定'},url:'https://situraemon.com/products/dsk-mlm2-lrs02-bk?variant=59579606138961',photo:'assets/situraemon-reference.jpg'},
  supplierOval:{proposal:true,oak:true,name:'ホワイトオーク突板／Tube T中央＋半円2台',short:'② ホワイトオーク突板・小判配置',maker:'KANADEMONO提案',shape:'capsule',shapeLabel:'長方形1台＋半円2台（半円は連結不可）',mm:[2400,1200,710],height:.710,pinZ:0,status:'提案②｜3台配置・半円は連結不可｜キャスター不可',
-  note:'メーカー提案：中央1200×1200（DSK-K55-DLT-BK）＋半円1200×600（HTB-K46-BK）2台＝全体2400×1200。中央天板は奥行方向に2分割連結、半円2台は連結不可。ホワイトオーク突板・天然木エッジ・30mm厚・マットウレタン。無垢材ではない。面取り加工不可、キャスター不可。中央は黒Tube T脚、半円は参考写真の黒Pin3本脚で表示（脚選択未確定）。高さ700mm＋アジャスター約10mm。中央脚は公式900mm幅・端から40mm・内向き140mmの図面を反映。半円Pin脚は写真から位置・外開き角度・断面を近似。木目は公式突板写真を参照（天然木の個体差あり）。配線はキャップのみ3,000円〜／台、未選択のため描画なし。配線トレイ条件は未解決。納期は注文・入金から最短8営業日目出荷。梱包状態の搬入可否は未確認。',
+  note:'メーカー提案：中央1200×1200（DSK-K55-DLT-BK）＋半円1200×600（HTB-K46-BK）2台＝全体2400×1200。中央天板は奥行方向に2分割連結、半円2台は連結不可。ホワイトオーク突板・天然木エッジ・30mm厚・マットウレタン。無垢材ではない。面取り加工不可、キャスター不可。中央は黒Tube T脚、半円は参考写真の黒Pin3本脚で表示（脚選択未確定）。高さ700mm＋アジャスター約10mm。中央脚は公式900mm幅・端から40mm・内向き140mmの図面を反映。半円Pin脚は写真から位置・外開き角度・断面を近似。木目は公式突板写真を参照（天然木の個体差あり）。配線はキャップのみ3,000円〜／台。3Dは中央テーブルに黒キャップ2個の配置案（丸／四角／なし切替）、半円は加工なし。個数・位置・追加総額は最終確認前。配線トレイ条件は未解決。納期は注文・入金から最短8営業日目出荷。梱包状態の搬入可否は未確認。',
   price:{kind:'from',min:306800,text:'3台合計 ¥306,800〜',basis:'メーカー提案の税込下限。配線キャップ3,000円〜／台、搬入組立等の総額は未確定'},url:'https://kanademono.design/products/dsk-k55-dlt-bk',extraUrl:'https://kanademono.design/products/htb-k46-bk',photo:'assets/tube-t-reference.jpg',halfPhoto:'assets/half-oak-reference.jpg'}
 };
 const tableMeshes={supplierRect,supplierOval,fmdAsh,fmdWhite,...oakMeshes,...extensionMeshes,tomoPair,httPair,graph,cashew,rughaus,modern:roundTable,oneLux,oneLuxOval,gfield,viena2};
@@ -2304,7 +2325,7 @@ function setLaptops(show){laptopToggle.checked=!!show;equipment.visible=!!show;u
 function setFloor(next){floorFinish=next==='linoleum'?'linoleum':'carpet';officeFloor.material=floorFinish==='carpet'?M.carpet:sheetMaterial;floorGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===floorFinish);render()}
 function interior(){return ['inside','reverse','east','west','doors'].includes(view)}
 function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&&!powerToggle.checked)||(p.layout&&p.layout!==layout)||interior()||view==='clothes'||view==='shrine'||view==='display'||view==='balcony'||view==='fragrance'||view==='meeting'||(['table','tabletop'].includes(view)&&p===tableDimensionPin)||v.z>1||v.z< -1||Math.abs(v.x)>.97||Math.abs(v.y)>.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
-function render(){const clean=!!(tableOptions[tableChoice]?.oak||tableOptions[tableChoice]?.fmd)&&oakProductOnly;equipment.visible=laptopToggle.checked&&!clean;fargoTap.visible=!clean&&(!tableOptions[tableChoice]?.oak||!!tableOptions[tableChoice]?.proposal);fargoCable.visible=!clean;for(const o of [...officeChairs,...meals,...coffeeCups])o.visible=!clean;renderer.render(scene,camera);projectPins();root.dataset.layout=layout;root.dataset.tableModel=tableChoice;root.dataset.laptops=String(equipment.visible)}
+function render(){const clean=!!(tableOptions[tableChoice]?.oak||tableOptions[tableChoice]?.fmd)&&oakProductOnly;equipment.visible=laptopToggle.checked&&!clean;fargoTap.visible=!clean&&(!tableOptions[tableChoice]?.oak||!!tableOptions[tableChoice]?.proposal);fargoCable.visible=!clean;for(const model of [supplierRect,supplierOval])for(const cap of model.userData.caps){const kind=$('#proposal-wiring').value;cap.visible=kind!=='none';cap.userData.square.visible=kind==='square';cap.userData.round.visible=kind==='round';}for(const o of [...officeChairs,...meals,...coffeeCups])o.visible=!clean;renderer.render(scene,camera);projectPins();root.dataset.layout=layout;root.dataset.tableModel=tableChoice;root.dataset.laptops=String(equipment.visible)}
 function updateLabel(){
  layoutLabel.textContent=layout==='B'
   ?`配置B：デスク 西3台・東4台／中央にメッシュチェア4脚＋キャンプチェア2脚／東のブース脇に収納ボックス16個／ノートPC ${equipment.visible?'表示':'非表示'}`
@@ -2382,6 +2403,7 @@ if(/^(oak|kana)/.test(saved.tableChoice||'')&&!tableOptions[saved.tableChoice])s
 oakOnly=oakEntry||fmdEntry||saved.oakOnly!==false;
 oakSeating=saved.oakSeating==='sides'?'sides':'ends';
 $('#oak-only').checked=oakOnly;$('#oak-seating').value=oakSeating;
+$('#proposal-wiring').addEventListener('change',()=>render());
 $('#oak-product-only').addEventListener('change',e=>{oakProductOnly=e.target.checked;render()});
 $('#oak-legs-view').addEventListener('click',()=>{setView('table');const c=roundGroup.position,scale=tableOptions[tableChoice].mm[0]/1800;camera.position.set(c.x+1.8*scale,.64,c.z+1.7*scale);controls.target.set(c.x,.39,c.z);controls.update();render()});
 $('#oak-only').addEventListener('change',e=>{oakOnly=e.target.checked;if(oakOnly&&!tableOptions[tableChoice].oak&&!tableOptions[tableChoice].fmd)tableChoice='supplierRect';populateSelect();setTable(tableChoice);save()});
