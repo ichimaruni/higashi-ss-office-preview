@@ -2070,40 +2070,83 @@ graph:{"name": "Wilkhahn Graph 中古・商品625729", "short": "Graph 3200", "m
   price:{kind:'street',min:151000,text:'約¥151,000',basis:'税込・販売店の実売価格（定価は¥237,600）'},url:'https://www.office-com.jp/products/detail.php?product_id=458005',
   height:.720,laptopX:.35,laptopZ:[-.46,.07,.59],pinZ:.09}
 };
-// Supplier proposals, received 2026-11-16. Product geometry, not the earlier custom studies.
+// Supplier proposals: official photos and dimension diagrams rechecked 2026-11-16.
+// Texture coordinates sample only the tabletop from public catalogue photographs.
+async function proposalPhotoMaterial(url,quad,roughness){
+ const image=await new THREE.ImageLoader().loadAsync(url),src=document.createElement('canvas');
+ src.width=image.width;src.height=image.height;const ctx=src.getContext('2d',{willReadFrequently:true});ctx.drawImage(image,0,0);
+ const pixels=ctx.getImageData(0,0,src.width,src.height).data,c=document.createElement('canvas');c.width=c.height=1024;
+ const out=c.getContext('2d'),data=out.createImageData(1024,1024);
+ // Inset sampling avoids the bright edge and background. Bilinear photo rectification.
+ for(let y=0;y<1024;y++)for(let x=0;x<1024;x++){
+  const u=.015+.97*x/1023,v=.025+.95*y/1023;
+  const px=(1-v)*((1-u)*quad[0][0]+u*quad[1][0])+v*((1-u)*quad[3][0]+u*quad[2][0]);
+  const py=(1-v)*((1-u)*quad[0][1]+u*quad[1][1])+v*((1-u)*quad[3][1]+u*quad[2][1]);
+  const a=(Math.round(py)*src.width+Math.round(px))*4,b=(y*1024+x)*4;
+  for(let k=0;k<3;k++)data.data[b+k]=pixels[a+k];data.data[b+3]=255;
+ }
+ out.putImageData(data,0,0);const map=new THREE.CanvasTexture(c);map.colorSpace=THREE.SRGBColorSpace;
+ map.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
+ return new THREE.MeshStandardMaterial({map,color:0xe2d7c9,roughness,metalness:0});
+}
+const [proposalMelamine,proposalVeneer]=await Promise.all([
+ proposalPhotoMaterial('assets/proposal-melamine-detail.jpg',[[50,850],[750,400],[1550,700],[850,1150]],.72),
+ proposalPhotoMaterial('assets/proposal-veneer-detail.jpg',[[80,450],[400,240],[1050,485],[730,730]],.62)
+]);
 function supplierProposal(oval){
  const g=group(oval?'提案② ホワイトオーク突板3台':'提案① SITURAEMON メラミン1台',3.35,4,0,roundGroup);
- const steel=mat(0x252627,.6),finish=tableWood(oval?0xf3deba:0xd6ba94),h=oval?.710:.706,t=oval?.030:.026;
- const top=(parent,w,l)=>{const mesh=tabletop(parent,roundedTableGeometry(w,l,.001,t,0),h,finish,t);mesh.name='分割天板';return mesh;};
- const foot=(x,z)=>box(g,.032,.010,.032,x,.005,z,M.black,'アジャスター');
- if(!oval){
-  for(const z of [-.6,.6]){const part=new THREE.Group();part.position.z=z;g.add(part);top(part,1.2,1.2);}
-  // Six Square Bar supports as shown in the supplier's product photograph.
-  for(const x of [-.53,.53])for(const z of [-1.13,0,1.13]){
-   box(g,.05,.67,.05,x,.345,z,steel,'Square Bar・6本支柱');
-   box(g,.085,.005,.085,x,.6775,z,steel,'取付プレート・近似');foot(x,z);
+ const steel=mat(0x252629,.73,.08),finish=oval?proposalVeneer:proposalMelamine,h=oval?.710:.706,t=oval?.030:.026;
+ const edge=finish.clone();edge.roughness=.7;
+ const top=(parent,w,l,offsetX=0,offsetZ=0)=>{
+  const geo=roundedTableGeometry(w,l,.001,t,0),pos=geo.attributes.position,uv=geo.attributes.uv,n=geo.attributes.normal;
+  for(let i=0;i<pos.count;i++){
+   if(Math.abs(n.getY(i))>.5){
+    if(oval)uv.setXY(i,(pos.getX(i)+offsetX)/1.2+.5,pos.getZ(i)/1.2+.5);
+    else uv.setXY(i,(pos.getZ(i)+offsetZ)/2.4+.5,pos.getX(i)/1.2+.5);
+   }else uv.setXY(i,.25+pos.getY(i)*.7,(pos.getX(i)+pos.getZ(i))/2.4+.5);
   }
-  box(g,.8,.012,.10,0,.673,0,steel,'中央連結金具・近似');
+  const mesh=tabletop(parent,geo,h,[finish,edge],t);mesh.name='分割天板';return mesh;
+ };
+ const foot=(parent,x,z)=>{const m=new THREE.Mesh(new THREE.CylinderGeometry(.014,.014,.010,24),M.black);m.position.set(x,.005,z);m.name='アジャスター';parent.add(m);};
+ if(!oval){
+  for(const z of [-.6,.6]){const part=new THREE.Group();part.position.z=z;g.add(part);top(part,1.2,1.2,0,z);}
+  // Four corner supports use the standard 37.5mm edge clearance. Centre pair
+  // inset ~300mm from the long edge, estimated from the supplier's six-leg photo.
+  for(const z of [-1.1375,0,1.1375])for(const x of (z===0?[-.30,.30]:[-.5375,.5375])){
+   box(g,.05,.665,.05,x,.3425,z,steel,'Square Bar・6本支柱');
+   box(g,.085,.005,.085,x,.6775,z,steel,'取付プレート・近似');foot(g,x,z);
+  }
  }else{
-  // Centre table: width1200 / depth1200 split across depth into two 1200×600 panels.
-  for(const x of [-.3,.3]){const part=new THREE.Group();part.position.x=x;g.add(part);top(part,.6,1.2);}
+  for(const x of [-.3,.3]){const part=new THREE.Group();part.position.x=x;g.add(part);top(part,.6,1.2,x,0);}
   for(const side of [-1,1]){
    const z=side*.53;
    box(g,.90,.04,.06,0,.03,z,steel,'Tube T・900mm横材');
    box(g,.90,.005,.08,0,.6775,z,steel,'Tube T・天板取付部');
-   for(const x of [-.43,.43]){box(g,.04,.63,.06,x,.365,z,steel,'Tube T・端支柱');foot(x,z);}
-   box(g,.04,.04,.14,0,.03,z-side*.09,steel,'Tube T・内向き脚先');
-   box(g,.04,.63,.06,0,.365,z-side*.14,steel,'Tube T・中央支柱');foot(0,z-side*.14);
+   for(const x of [-.43,.43]){box(g,.04,.625,.06,x,.3625,z,steel,'Tube T・端支柱');foot(g,x,z);}
+   // Official plan: 140mm from inner face of the 60mm crossbar to stub end.
+   box(g,.06,.04,.14,0,.03,z-side*.10,steel,'Tube T・内向き脚先140mm');
+   box(g,.06,.625,.04,0,.3625,z-side*.15,steel,'Tube T・中央支柱');foot(g,0,z-side*.15);
+   box(g,.08,.005,.14,0,.6775,z-side*.10,steel,'Tube T・中央取付部');
   }
   for(const side of [-1,1]){
    const part=new THREE.Group();part.position.z=side*.6;part.rotation.y=side===1?0:Math.PI;part.name='連結不可の独立半円テーブル';g.add(part);
    const shape=new THREE.Shape();shape.moveTo(-.6,0);shape.lineTo(.6,0);shape.absarc(0,0,.6,0,Math.PI,false);shape.closePath();
-   const geo=new THREE.ExtrudeGeometry(shape,{depth:.03,bevelEnabled:false,curveSegments:64});geo.rotateX(Math.PI/2);geo.translate(0,.03,0);planarTopUV(geo,1.2,.6);
-   tabletop(part,geo,h,finish).name='1200×600半円天板';
-   for(const [x,z] of [[-.42,.12],[.42,.12],[0,.45]]){
-    const a=new THREE.Vector3(x*.78,.68,z*.78),b=new THREE.Vector3(x,.01,z),delta=a.clone().sub(b);
-    const leg=box(part,.04,delta.length(),.04,...a.clone().add(b).multiplyScalar(.5).toArray(),steel,'半円Pin脚・写真近似');leg.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),delta.normalize());
-    box(part,.03,.01,.03,x,.005,z,M.black,'半円アジャスター');
+   const geo=new THREE.ExtrudeGeometry(shape,{depth:.03,bevelEnabled:false,curveSegments:96});geo.rotateX(Math.PI/2);geo.translate(0,.03,0);
+   const pos=geo.attributes.position,uv=geo.attributes.uv,n=geo.attributes.normal;
+   for(let i=0;i<pos.count;i++){
+    // Half-round grain runs parallel to the straight 1200mm edge, independently of centre.
+    if(Math.abs(n.getY(i))>.5)uv.setXY(i,pos.getZ(i)/.6,pos.getX(i)/1.2+.5);
+    else uv.setXY(i,.25+pos.getY(i)*.7,(pos.getX(i)+pos.getZ(i))/1.8+.5);
+   }
+   tabletop(part,geo,h,[finish,edge]).name='1200×600半円天板';
+   // Photo-derived anchors: rear pair splay laterally AND toward the straight edge;
+   // forward leg splays toward the arc. No uniform scaling about the tabletop origin.
+   for(const [tx,tz,bx,bz] of [[-.37,.12,-.51,.045],[.37,.12,.51,.045],[0,.35,0,.535]]){
+    const a=new THREE.Vector3(tx,.675,tz),b=new THREE.Vector3(bx,.01,bz),delta=a.clone().sub(b),axis=delta.clone().normalize();
+    const tangent=new THREE.Vector3(bz-tz,0,-(bx-tx)).normalize(),radial=new THREE.Vector3().crossVectors(tangent,axis).normalize();
+    const leg=box(part,.03,delta.length(),.06,...a.clone().add(b).multiplyScalar(.5).toArray(),steel,'半円Pin脚・写真近似');
+    leg.quaternion.setFromRotationMatrix(new THREE.Matrix4().makeBasis(tangent,axis,radial));
+    box(part,.09,.005,.09,tx,.6775,tz,steel,'半円Pin取付プレート・近似');foot(part,bx,bz);
    }
   }
  }
@@ -2112,11 +2155,11 @@ function supplierProposal(oval){
 const supplierRect=supplierProposal(false),supplierOval=supplierProposal(true);
 const tableOptions={
  supplierRect:{proposal:true,oak:true,name:'スマート造作テーブル／メラミン 2400×1200',short:'① メラミン長方形・1台',maker:'SITURAEMON／KANADEMONO提案',shape:'rectangle',shapeLabel:'長方形・天板2分割連結',mm:[2400,1200,706],height:.706,pinZ:0,status:'提案①｜長方形・2分割連結｜配線トレイ未対応',
-  note:'メーカー提案：2400×1200、1200×1200の天板2枚を連結。メラミン26mm厚、面取り加工不可。木目6色・無地6色、脚は黒／白／ステンレスから選択可能。3Dは参考写真の木目調・黒Square Bar6本脚、キャスターなし。色柄・脚の最終選択前で、脚位置・連結金具・木目は近似。高さは696mm＋アジャスター約10mm。配線はキャップのみ（追加11,990円）、別売キャスター取付可能。いずれも未選択のため描画なし。希望する配線トレイの取付方法・費用は未確認。納期は注文・入金から最短16営業日目出荷、到着日ではない。分割後も梱包状態の搬入可否は未確認。',
+  note:'メーカー提案：2400×1200、1200×1200の天板2枚を連結。メラミン26mm厚、面取り加工不可。木目6色・無地6色、脚は黒／白／ステンレスから選択可能。3Dは参考写真の木目調・黒Square Bar6本脚、キャスターなし。色柄・脚の最終選択前。写真のTJY2600K柄を反映。中央2脚は長辺から約300mm内側（写真推定・取付寸法未確認）。高さは696mm＋アジャスター約10mm。配線はキャップのみ（追加11,990円）、別売キャスター取付可能。いずれも未選択のため描画なし。希望する配線トレイの取付方法・費用は未確認。納期は注文・入金から最短16営業日目出荷、到着日ではない。分割後も梱包状態の搬入可否は未確認。',
   price:{kind:'from',min:186780,text:'本体 ¥186,780〜',basis:'メーカー提案の税込下限。配線キャップ11,990円、キャスター・搬入組立等の総額は未確定'},url:'https://situraemon.com/products/dsk-mlm2-lrs02-bk?variant=59579606138961',photo:'assets/situraemon-reference.jpg'},
  supplierOval:{proposal:true,oak:true,name:'ホワイトオーク突板／Tube T中央＋半円2台',short:'② ホワイトオーク突板・小判配置',maker:'KANADEMONO提案',shape:'capsule',shapeLabel:'長方形1台＋半円2台（半円は連結不可）',mm:[2400,1200,710],height:.710,pinZ:0,status:'提案②｜3台配置・半円は連結不可｜キャスター不可',
-  note:'メーカー提案：中央1200×1200（DSK-K55-DLT-BK）＋半円1200×600（HTB-K46-BK）2台＝全体2400×1200。中央天板は奥行方向に2分割連結、半円2台は連結不可。ホワイトオーク突板・天然木エッジ・30mm厚・マットウレタン。無垢材ではない。面取り加工不可、キャスター不可。中央は黒Tube T脚、半円は参考写真の黒Pin3本脚で表示（脚選択未確定）。高さ700mm＋アジャスター約10mm。脚位置・木目・金具は近似。配線はキャップのみ3,000円〜／台、未選択のため描画なし。配線トレイ条件は未解決。納期は注文・入金から最短8営業日目出荷。梱包状態の搬入可否は未確認。',
-  price:{kind:'from',min:306800,text:'3台合計 ¥306,800〜',basis:'メーカー提案の税込下限。配線キャップ3,000円〜／台、搬入組立等の総額は未確定'},url:'https://kanademono.design/products/dsk-k55-dlt-bk',extraUrl:'https://kanademono.design/products/htb-k46-bk',photo:'assets/tube-t-reference.jpg'}
+  note:'メーカー提案：中央1200×1200（DSK-K55-DLT-BK）＋半円1200×600（HTB-K46-BK）2台＝全体2400×1200。中央天板は奥行方向に2分割連結、半円2台は連結不可。ホワイトオーク突板・天然木エッジ・30mm厚・マットウレタン。無垢材ではない。面取り加工不可、キャスター不可。中央は黒Tube T脚、半円は参考写真の黒Pin3本脚で表示（脚選択未確定）。高さ700mm＋アジャスター約10mm。中央脚は公式900mm幅・端から40mm・内向き140mmの図面を反映。半円Pin脚は写真から位置・外開き角度・断面を近似。木目は公式突板写真を参照（天然木の個体差あり）。配線はキャップのみ3,000円〜／台、未選択のため描画なし。配線トレイ条件は未解決。納期は注文・入金から最短8営業日目出荷。梱包状態の搬入可否は未確認。',
+  price:{kind:'from',min:306800,text:'3台合計 ¥306,800〜',basis:'メーカー提案の税込下限。配線キャップ3,000円〜／台、搬入組立等の総額は未確定'},url:'https://kanademono.design/products/dsk-k55-dlt-bk',extraUrl:'https://kanademono.design/products/htb-k46-bk',photo:'assets/tube-t-reference.jpg',halfPhoto:'assets/half-oak-reference.jpg'}
 };
 const tableMeshes={supplierRect,supplierOval,fmdAsh,fmdWhite,...oakMeshes,...extensionMeshes,tomoPair,httPair,graph,cashew,rughaus,modern:roundTable,oneLux,oneLuxOval,gfield,viena2};
 const fmt=n=>n.toLocaleString('ja-JP');
@@ -2180,7 +2223,7 @@ function renderLedger(){
    if(o.oak&&o.photo){
     const fig=document.createElement('figure');fig.className='oak-reference';
     const img=document.createElement('img');img.src=o.photo;img.alt='提案商品の公式参考写真（表示寸法とは異なる場合があります）';img.loading='lazy';
-    const caption=document.createElement('figcaption');caption.textContent='公式参考写真。3Dは提案寸法240×120cmで表示。色柄・脚の選択や写真のサイズは未確定です。';fig.append(img,caption);more.append(fig);
+    const caption=document.createElement('figcaption');caption.textContent='公式参考写真。3Dは提案寸法240×120cmで表示。色柄・脚の選択や写真のサイズは未確定です。';fig.append(img,caption);if(o.halfPhoto){const half=document.createElement('img');half.src=o.halfPhoto;half.alt='半円テーブルの公式参考写真・Pin脚';half.loading='lazy';fig.append(half);}more.append(fig);
    }
    more.append(dl);li.append(more);
   }
@@ -2261,7 +2304,7 @@ function setLaptops(show){laptopToggle.checked=!!show;equipment.visible=!!show;u
 function setFloor(next){floorFinish=next==='linoleum'?'linoleum':'carpet';officeFloor.material=floorFinish==='carpet'?M.carpet:sheetMaterial;floorGroup.querySelectorAll('input').forEach(input=>input.checked=input.value===floorFinish);render()}
 function interior(){return ['inside','reverse','east','west','doors'].includes(view)}
 function projectPins(){const w=stage.clientWidth,h=stage.clientHeight;for(const p of pins){const v=p.pos.clone().project(camera);p.el.hidden=(p.power&&!powerToggle.checked)||(p.layout&&p.layout!==layout)||interior()||view==='clothes'||view==='shrine'||view==='display'||view==='balcony'||view==='fragrance'||view==='meeting'||(['table','tabletop'].includes(view)&&p===tableDimensionPin)||v.z>1||v.z< -1||Math.abs(v.x)>.97||Math.abs(v.y)>.96;p.el.style.transform=`translate(${(v.x*.5+.5)*w}px,${(-v.y*.5+.5)*h}px) translate(-50%,-100%)`}}
-function render(){const clean=!!(tableOptions[tableChoice]?.oak||tableOptions[tableChoice]?.fmd)&&oakProductOnly;equipment.visible=laptopToggle.checked&&!clean;for(const o of [...officeChairs,...meals,...coffeeCups])o.visible=!clean;renderer.render(scene,camera);projectPins();root.dataset.layout=layout;root.dataset.tableModel=tableChoice;root.dataset.laptops=String(equipment.visible)}
+function render(){const clean=!!(tableOptions[tableChoice]?.oak||tableOptions[tableChoice]?.fmd)&&oakProductOnly;equipment.visible=laptopToggle.checked&&!clean;fargoTap.visible=!clean&&(!tableOptions[tableChoice]?.oak||!!tableOptions[tableChoice]?.proposal);fargoCable.visible=!clean;for(const o of [...officeChairs,...meals,...coffeeCups])o.visible=!clean;renderer.render(scene,camera);projectPins();root.dataset.layout=layout;root.dataset.tableModel=tableChoice;root.dataset.laptops=String(equipment.visible)}
 function updateLabel(){
  layoutLabel.textContent=layout==='B'
   ?`配置B：デスク 西3台・東4台／中央にメッシュチェア4脚＋キャンプチェア2脚／東のブース脇に収納ボックス16個／ノートPC ${equipment.visible?'表示':'非表示'}`
