@@ -131,6 +131,8 @@ button,input,select{font:inherit;color:inherit}
 @media(max-width:760px){.app,.top{min-width:0;max-width:100vw}.views{min-width:0;max-width:100%;overflow:hidden}.views .seg{overflow-x:auto}.views .seg label{flex:0 0 auto;padding:0 8px}.table-card{width:auto}.top h1{font-size:14px}.table-card .price{font-size:12px}}
 
 #melamine-settings{margin:8px 0;font-size:12px}#melamine-settings summary{cursor:pointer;font-weight:650;padding:8px;background:#eee9df;border-radius:6px}.config-scroll{max-height:min(40vh,360px);overflow-y:auto;padding:10px 2px;overscroll-behavior:contain}.config-scroll p{font-size:11px;line-height:1.6;margin:7px 0;color:#685c4c}.config-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}.config-grid label{display:flex;flex-direction:column;gap:4px}.config-grid input,.config-grid select{width:100%;box-sizing:border-box;min-width:0;height:32px;font:inherit;border:1px solid #c8c4ba;border-radius:4px;padding:4px;background:white}#mel-swatches{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin:9px 0}#mel-swatches button{padding:2px;border:2px solid transparent;background:none;cursor:pointer;border-radius:5px}#mel-swatches button[aria-pressed=true]{border-color:#785327}#mel-swatches img{width:100%;height:38px;object-fit:cover;display:block}#mel-swatches span{font-size:8px;display:block;overflow-wrap:anywhere}#mel-reset{display:block;margin-top:8px}.candidate-nav[hidden]{display:none}@media(max-width:760px){.config-scroll{max-height:25vh}}
+
+#mel-value{font-size:12px;margin:8px 0}#mel-value summary{cursor:pointer;font-weight:650;padding:9px;background:#dce7e4;border-radius:6px}.value-scroll{max-height:38vh;overflow:auto;overscroll-behavior:contain;padding:0 2px}.value-scroll p{font-size:11px;line-height:1.6;color:#52635d}#value-advice{padding:8px;background:#f0f4f1;border-radius:5px}#value-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}.size-choice{display:flex;flex-direction:column;text-align:left;gap:3px;cursor:pointer;background:white;border:1px solid #c8d1ca;border-radius:7px;padding:8px;color:#263a32;font:inherit}.size-choice[aria-pressed=true]{border:2px solid #306b58;padding:7px;background:#f2f8f4}.size-choice svg{width:100%;height:78px}.size-choice strong{font-size:14px}.size-choice small{font-size:10px}.size-choice .delta{color:#7c5231}@media(max-width:760px){.value-scroll{max-height:28vh}}
 </style>
 </head>
 <body>
@@ -205,6 +207,7 @@ button,input,select{font:inherit;color:inherit}
         <span class="dims num" id="card-dims"></span>
         <span class="price num" id="card-price"></span>
       </div>
+      <details id="mel-value"><summary>サイズと費用を比較する</summary><div class="value-scroll"><p id="value-basis"></p><p id="value-advice"></p><div id="value-grid"></div><p>図はすべて同じ縮尺。椅子は3＋3の配置例です。1席幅は天板幅÷3の目安で、脚との干渉や通路幅は3Dで確認してください。税込参考価格（2026/11/16確認）。配送・搬入組立費は別途。</p></div></details>
       <details id="melamine-settings"><summary>サイズ・色・脚・配線を変更する</summary>
        <div class="config-scroll">
         <div class="config-grid">
@@ -228,7 +231,7 @@ button,input,select{font:inherit;color:inherit}
         <p>厚さ26mm・同柄樹脂エッジは固定。角丸・面取りは不可。配線トレイは対応未確認のため選択対象外です。</p>
         <p>高さは標準706mm／キャスター743mm。アジャスターの微調整（+5mm）は描画対象外です。脚の位置・傾き、キャスターの細部は写真からの近似。色・質感は照明や画面で異なります。サイズ変更時は搬入経路の再確認が必要です。</p>
         <a id="mel-source" target="_blank" rel="noopener">この仕様の商品ページ ↗</a> · <a href="https://situraemon.com/products/acc-0002" target="_blank" rel="noopener">キャスター ↗</a>
-        <button type="button" id="mel-reset" class="link-btn">240×120cmの初期案に戻す</button>
+        <button type="button" id="mel-reset" class="link-btn">グレージュ・ステンレス・キャスターの初期案に戻す</button>
        </div>
       </details>
       <div class="oak-controls"><label><input type="checkbox" id="oak-product-only"> テーブルだけ見る</label><button type="button" class="link-btn" id="oak-legs-view">脚・継ぎ目を見る</button></div>
@@ -2331,9 +2334,9 @@ new ResizeObserver(resize).observe(stage);
 for(const object of [hangerRack,mediaCart,cartCables,printerCart,sharedDisplay])object.removeFromParent();
 // Official product variants, swatches and product-specific drilling diagrams, checked 2026-11-16.
 const melCatalog=await (await fetch('assets/melamine/catalog.json')).json();
-const melDefaults={width:240,depth:120,kind:'mlm2',color:'TJY2600K',leg:'Square_Bar',metal:'bk',casters:'no',wiring:'square',capColor:'bk',capLayout:'center'};
+const melDefaults={width:240,depth:120,kind:'mlm1',color:'K-6301KN',leg:'Square_Bar',metal:'sus',casters:'yes',wiring:'square',capColor:'bk',capLayout:'center'};
 const melamineConfig={...melDefaults};
-try{const old=JSON.parse(localStorage.getItem('ss-melamine-v1'));if(old)Object.assign(melamineConfig,old)}catch{}
+try{const old=JSON.parse(localStorage.getItem('ss-melamine-v2'));if(old)Object.assign(melamineConfig,old)}catch{}
 const melMaterials={};
 await Promise.all(melCatalog.colors.map(async c=>{
  const img=await new THREE.ImageLoader().loadAsync(c.image),cv=document.createElement('canvas');cv.width=cv.height=512;
@@ -2355,6 +2358,27 @@ function syncMelamineControls(){
  for(const [id,key] of Object.entries(melBindings))$('#'+id).value=c[key];
  $('#mel-cap-color').disabled=$('#mel-cap-layout').disabled=c.wiring==='none';
  $('#mel-swatches').replaceChildren(...colors.map(v=>{const b=document.createElement('button');b.type='button';b.title=v.code;b.setAttribute('aria-label',v.code);b.setAttribute('aria-pressed',String(v.code===c.color));const img=document.createElement('img');img.src=v.image;img.alt='';const label=document.createElement('span');label.textContent=v.code;b.append(img,label);b.onclick=()=>{c.color=v.code;applyMelamine()};return b}));
+}
+function melaminePrice(c){
+ const N=c.width<=240?2:3,band=c.depth===120?'奥行120cm':c.depth<=140?'奥行121~140cm':'奥行141~160cm',handle=`dsk-${c.kind}-lrs0${N}-${c.metal}`;
+ const variant=melCatalog.products[handle].find(v=>v.color===c.color&&v.depth===band&&v.leg===c.leg);
+ if(!variant)throw Error('Unsupported melamine configuration');
+ const capCost=c.wiring==='none'?0:N===2&&c.capLayout==='center'?6050:11990,casterCost=c.casters==='yes'?(N===2?6160:7260):0;
+ return {variant,handle,capCost,casterCost,total:variant.yen+capCost+casterCost};
+}
+function renderValueComparison(){
+ const c=melamineConfig,price=(w,d)=>melaminePrice({...c,width:w,depth:d}).total,base=price(240,120);
+ $('#value-basis').textContent=`現在の色柄・脚・オプションで比較：${c.color}／${{bk:'黒脚',wh:'白脚',sus:'ステンレス脚'}[c.metal]}／${c.casters==='yes'?'キャスターあり':'アジャスター'}。幅241cm以上では脚・配線口の個数も連動。`;
+ $('#value-advice').textContent=`広さと費用の基準は240×120cm（¥${fmt(base)}）。幅201〜240cmは同額。奥行120→121cmで＋¥${fmt(price(240,121)-base)}、幅240→241cmで＋¥${fmt(price(241,120)-base)}。奥行140→141cmの差額は¥${fmt(price(240,141)-price(240,140))}です。`;
+ const sizes=[[210,120],[220,120],[240,120],[240,140],[240,160],[300,120],[300,140],[360,120]];
+ $('#value-grid').replaceChildren(...sizes.map(([w,d])=>{
+  const total=price(w,d),delta=total-base,area=w*d/10000,b=document.createElement('button');b.type='button';b.className='size-choice';b.dataset.width=w;b.dataset.depth=d;b.setAttribute('aria-pressed',String(c.width===w&&c.depth===d));
+  const tw=w*.48,td=d*.48,x=(190-tw)/2,y=(110-td)/2;
+  let seams='';for(let i=1;i<(w<=240?2:3);i++)seams+=`<path d="M${x+tw*i/(w<=240?2:3)} ${y}v${td}" stroke="#99968d"/>`;
+  let chairs='';for(const side of [-1,1])for(const f of [1/6,3/6,5/6])chairs+=`<rect x="${x+tw*f-10}" y="${side<0?y-15:y+td+3}" width="20" height="12" rx="3" fill="#87968f"/>`;
+  b.innerHTML=`<strong>${w}×${d}cm${w===240&&d===120?' ・基準':''}</strong><svg viewBox="0 0 190 110" aria-hidden="true">${chairs}<rect x="${x}" y="${y}" width="${tw}" height="${td}" fill="#c9c4b9" stroke="#716f65"/>${seams}</svg><strong>¥${fmt(total)}</strong><small class="delta">240×120比 ${delta===0?'同額':`＋¥${fmt(delta)}`}</small><small>天板 ${area.toFixed(2)}㎡ · 1席幅 約${Math.round(w/3)}cm</small><small>面積単価 ¥${fmt(Math.round(total/area))}/㎡</small>`;
+  b.onclick=()=>{c.width=w;c.depth=d;applyMelamine();oakSeating='sides';$('#oak-seating').value='sides';updateCentralSeats();render();save()};return b;
+ }));
 }
 function rebuildMelamine(){
  const c=melamineConfig,g=supplierRect,W=c.width/100,D=c.depth/100,N=c.width<=240?2:3,H=c.casters==='yes'?.743:.706,T=.026,lift=c.casters==='yes'?.047:.010;
@@ -2386,10 +2410,7 @@ function rebuildMelamine(){
   for(const [x,zz] of points){const cap=proposalCableCap(g,x,zz,H,Math.PI/2,c.capColor);cap.userData.square.visible=c.wiring==='square';cap.userData.round.visible=c.wiring==='round';caps.push(cap)}
  }
  g.userData.caps=caps;g.userData.panelCount=N;g.userData.legCount=2*(N+1);g.userData.height=H;
- const band=c.depth===120?'奥行120cm':c.depth<=140?'奥行121~140cm':'奥行141~160cm',handle=`dsk-${c.kind}-lrs0${N}-${c.metal}`;
- const variant=melCatalog.products[handle].find(v=>v.color===c.color&&v.depth===band&&v.leg===c.leg);
- if(!variant)throw Error('Unsupported melamine configuration');
- const capCost=c.wiring==='none'?0:N===2&&c.capLayout==='center'?6050:11990,casterCost=c.casters==='yes'?(N===2?6160:7260):0,total=variant.yen+capCost+casterCost;
+ const {variant,handle,capCost,casterCost,total}=melaminePrice(c);
  const url=`https://situraemon.com/products/${handle}?variant=${variant.id}`,o=tableOptions.supplierRect;
  Object.assign(o,{name:`スマート造作テーブル／メラミン ${c.width*10}×${c.depth*10}`,short:`メラミン長方形 ${c.width}×${c.depth}cm`,mm:[c.width*10,c.depth*10,Math.round(H*1000)],height:H,shapeLabel:`長方形・天板${N}分割連結`,status:`${c.color}｜${N}分割・${2*(N+1)}本脚｜${c.casters==='yes'?'キャスターあり':'アジャスター'}`,url,
   note:`メラミン26mm厚・同柄樹脂エッジ。${c.leg}／${{bk:'黒',wh:'白',sus:'ステンレス'}[c.metal]}。配線口${caps.length}個。幅201〜240cmは2分割、241〜360cmは3分割。角丸・面取り不可。脚位置・角度は公式写真からの近似。キャスター取付時は高さ約743mm。大判天板とキャスターの組合せ・搬入組立条件は最終確認が必要。`,
@@ -2399,10 +2420,11 @@ function rebuildMelamine(){
  $('#wiring-note').textContent=`配線口は${caps.length}個。${c.capLayout==='center'?'中央配置（2枚連結は図からの近似）':'各分割天板の中央を挟んで300mm間隔'}の配置図を反映。収納ボックス・トレイは含みません。加工位置の最終寸法は注文時確認。`;
  $('#mel-source').href=url;
 }
-function applyMelamine(initial=false){normalizeMelamine();syncMelamineControls();rebuildMelamine();try{localStorage.setItem('ss-melamine-v1',JSON.stringify(melamineConfig))}catch{}if(!initial){populateSelect();setTable('supplierRect');save()}}
+function applyMelamine(initial=false){normalizeMelamine();syncMelamineControls();rebuildMelamine();renderValueComparison();try{localStorage.setItem('ss-melamine-v2',JSON.stringify(melamineConfig))}catch{}if(!initial){populateSelect();setTable('supplierRect');save()}}
 for(const [id,key] of Object.entries(melBindings))$('#'+id).addEventListener('change',e=>{melamineConfig[key]=e.target.value;applyMelamine()});
 $('#mel-reset').onclick=()=>{Object.assign(melamineConfig,melDefaults);applyMelamine();$('.config-scroll').scrollTop=0};
-$('#melamine-settings').addEventListener('toggle',()=>{if($('#melamine-settings').open)$('.config-scroll').scrollTop=0});
+$('#melamine-settings').addEventListener('toggle',()=>{if($('#melamine-settings').open){$('.config-scroll').scrollTop=0;$('#mel-value').open=false}});
+$('#mel-value').addEventListener('toggle',()=>{if($('#mel-value').open)$('#melamine-settings').open=false});
 applyMelamine(true);
 
 const saved=store.get()||{};
