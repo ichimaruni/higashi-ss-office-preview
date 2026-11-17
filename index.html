@@ -235,6 +235,7 @@ button,input,select{font:inherit;color:inherit}
        </div>
       </details>
       <div class="oak-controls"><label><input type="checkbox" id="oak-product-only"> テーブルだけ見る</label><button type="button" class="link-btn" id="oak-legs-view">脚・継ぎ目を見る</button></div>
+      <div class="oak-controls"><button type="button" class="link-btn" id="mel-surface-view">天板の質感を近くで見る</button><button type="button" class="link-btn" id="mel-metal-view">脚の質感を見る</button></div><p id="material-note" style="font-size:10px;line-height:1.4;color:#685c4c">公式色柄写真＋表面の微細な凹凸・反射の近似。実物の光沢・色の完全再現ではありません。 <a id="mel-material-photo" target="_blank" rel="noopener">公式の色柄写真 ↗</a></p>
       <p id="oak-status" role="status"></p>
       <div class="row3">
         <span id="card-basis"></span>
@@ -278,11 +279,12 @@ button,input,select{font:inherit;color:inherit}
 const root=document.getElementById('ss-office-3d');
 const stage=root.querySelector('.ss-stage'), overlay=root.querySelector('.ss-labels');
 try{
-const [THREE,{OrbitControls},{RoomEnvironment},{Reflector}]=await Promise.all([
+const [THREE,{OrbitControls},{RoomEnvironment},{Reflector},{RoundedBoxGeometry}]=await Promise.all([
   import('https://esm.sh/three@0.180.0'),
   import('https://esm.sh/three@0.180.0/examples/jsm/controls/OrbitControls.js'),
   import('https://esm.sh/three@0.180.0/examples/jsm/environments/RoomEnvironment.js'),
-  import('https://esm.sh/three@0.180.0/examples/jsm/objects/Reflector.js')
+  import('https://esm.sh/three@0.180.0/examples/jsm/objects/Reflector.js'),
+  import('https://esm.sh/three@0.180.0/examples/jsm/geometries/RoundedBoxGeometry.js')
 ]);
 const scene=new THREE.Scene();
 const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
@@ -2337,14 +2339,36 @@ const melCatalog=await (await fetch('assets/melamine/catalog.json')).json();
 const melDefaults={width:240,depth:120,kind:'mlm1',color:'K-6301KN',leg:'Square_Bar',metal:'sus',casters:'yes',wiring:'square',capColor:'bk',capLayout:'center'};
 const melamineConfig={...melDefaults};
 try{const old=JSON.parse(localStorage.getItem('ss-melamine-v2'));if(old)Object.assign(melamineConfig,old)}catch{}
-const melMaterials={};
+// Deterministic microscopic relief; texture scale is independent of tabletop size.
+// These are visual approximations, not measured BRDF/height data.
+function microTexture(brushed=false){
+ const size=512,cv=document.createElement('canvas');cv.width=cv.height=size;const ctx=cv.getContext('2d'),pixels=ctx.createImageData(size,size);let seed=37291;
+ const random=()=>{seed=(Math.imul(seed,1664525)+1013904223)>>>0;return seed/4294967296};
+ const columns=Array.from({length:size},()=>random());
+ for(let y=0;y<size;y++)for(let x=0;x<size;x++){
+  const v=brushed?112+columns[x]*32+random()*8:105+random()*46,i=(y*size+x)*4;
+  pixels.data[i]=pixels.data[i+1]=pixels.data[i+2]=v;pixels.data[i+3]=255;
+ }
+ ctx.putImageData(pixels,0,0);const t=new THREE.CanvasTexture(cv);t.wrapS=t.wrapT=THREE.RepeatWrapping;t.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());return t;
+}
+const melMicro=microTexture();melMicro.channel=1;
+const steelMicro=microTexture(true);
+const melMaterials={},melEdges={};
 await Promise.all(melCatalog.colors.map(async c=>{
- const img=await new THREE.ImageLoader().loadAsync(c.image),cv=document.createElement('canvas');cv.width=cv.height=512;
- // Sample the unlabelled area of each official square material swatch.
- cv.getContext('2d').drawImage(img,0,0,img.width*.85,img.height*.85,0,0,512,512);
+ const img=await new THREE.ImageLoader().loadAsync(c.image),cv=document.createElement('canvas');cv.width=cv.height=1024;
+ // Official material sample, excluding printed labels. Photo is colour reference only.
+ const ctx=cv.getContext('2d');ctx.drawImage(img,0,0,img.width*.85,img.height*.85,0,0,1024,1024);
  const map=new THREE.CanvasTexture(cv);map.colorSpace=THREE.SRGBColorSpace;map.anisotropy=Math.min(8,renderer.capabilities.getMaxAnisotropy());
- melMaterials[c.code]=new THREE.MeshStandardMaterial({map,roughness:.74,color:0xffffff});
+ const finish=new THREE.MeshPhysicalMaterial({map,color:0xd4d4d4,roughness:c.kind==='mlm1'?.62:.68,metalness:0,ior:1.48,bumpMap:melMicro,bumpScale:.00004,envMap:scene.environment,envMapIntensity:.55});
+ finish.name=`${c.code}・微細エンボス／メラミン`;melMaterials[c.code]=finish;
+ // Resin edge is distinct from the top surface. Preserve the sampled average colour.
+ const small=document.createElement('canvas');small.width=small.height=1;const sc=small.getContext('2d');sc.drawImage(cv,0,0,1,1);const rgb=sc.getImageData(0,0,1,1).data;
+ melEdges[c.code]=new THREE.MeshPhysicalMaterial({color:new THREE.Color(`rgb(${rgb[0]},${rgb[1]},${rgb[2]})`),roughness:.48,ior:1.46,envMap:scene.environment,envMapIntensity:.45});
 }));
+function supplierSteel(color){
+ if(color!=='sus')return new THREE.MeshStandardMaterial({color:color==='wh'?0xecece9:0x252629,roughness:.73,metalness:0,bumpMap:steelMicro,bumpScale:.000008});
+ return new THREE.MeshPhysicalMaterial({name:'ヘアライン・ステンレス（写真近似）',color:0xc5c8ca,metalness:1,roughness:.34,anisotropy:.55,anisotropyRotation:Math.PI/2,bumpMap:steelMicro,bumpScale:.000012,envMap:scene.environment,envMapIntensity:.8});
+}
 const melBindings={'mel-width':'width','mel-depth':'depth','mel-kind':'kind','mel-color':'color','mel-leg':'leg','mel-metal':'metal','mel-casters':'casters','proposal-wiring':'wiring','mel-cap-color':'capColor','mel-cap-layout':'capLayout'};
 function normalizeMelamine(){
  const c=melamineConfig;c.width=Math.max(201,Math.min(360,Math.round(Number(c.width)||240)));c.depth=Math.max(120,Math.min(160,Math.round(Number(c.depth)||120)));
@@ -2382,12 +2406,13 @@ function renderValueComparison(){
 }
 function rebuildMelamine(){
  const c=melamineConfig,g=supplierRect,W=c.width/100,D=c.depth/100,N=c.width<=240?2:3,H=c.casters==='yes'?.743:.706,T=.026,lift=c.casters==='yes'?.047:.010;
- for(const child of [...g.children]){child.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)for(const m of Array.isArray(o.material)?o.material:[o.material])if(!Object.values(melMaterials).includes(m)&&m!==M.black)m.dispose()});g.remove(child)}
- const finish=melMaterials[c.color],steel=mat(c.metal==='wh'?0xecece9:c.metal==='sus'?0xb8bec1:0x252629,c.metal==='sus'?.34:.73,c.metal==='sus'?.88:.08);
+ for(const child of [...g.children]){child.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material)for(const m of Array.isArray(o.material)?o.material:[o.material])if(!Object.values(melMaterials).includes(m)&&!Object.values(melEdges).includes(m)&&m!==M.black)m.dispose()});g.remove(child)}
+ const finish=melMaterials[c.color],steel=supplierSteel(c.metal);
  for(let i=0;i<N;i++){
   const z=-W/2+(i+.5)*W/N,geo=roundedTableGeometry(D,W/N-.0008,.001,T,0),pos=geo.attributes.position,uv=geo.attributes.uv,n=geo.attributes.normal;
   for(let j=0;j<pos.count;j++)uv.setXY(j,(pos.getZ(j)+W/N/2)/(W/N),(pos.getX(j)+D/2)/D);
-  const top=tabletop(g,geo,H,[finish,finish],T);top.position.z=z;top.name='分割天板';
+  const microUV=new Float32Array(pos.count*2);for(let j=0;j<pos.count;j++){microUV[j*2]=pos.getX(j)/.064;microUV[j*2+1]=pos.getZ(j)/.064}geo.setAttribute('uv1',new THREE.BufferAttribute(microUV,2));
+  const top=tabletop(g,geo,H,[finish,melEdges[c.color]],T);top.position.z=z;top.name='分割天板';
  }
  const foot=(x,z)=>{
   if(c.casters==='no'){const f=new THREE.Mesh(new THREE.CylinderGeometry(.014,.014,.010,20),M.black);f.position.set(x,.005,z);f.name='アジャスター';g.add(f);return}
@@ -2401,7 +2426,7 @@ function rebuildMelamine(){
   const bx=side*(outer?D/2-.0625:D/2-.30),bz=z;
   const pin=outer&&c.leg==='Tube_Pin',tx=bx-(pin?side*.14:0),tz=bz-(pin?Math.sign(z)*.14:0);
   const a=new THREE.Vector3(tx,H-T-.005,tz),b=new THREE.Vector3(bx,lift,bz),delta=a.clone().sub(b);
-  const leg=box(g,pin?.04:.05,delta.length(),pin?.04:.05,...a.clone().add(b).multiplyScalar(.5).toArray(),steel,pin?'Tube Pin・外側斜め脚':'Square Bar・垂直脚');leg.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),delta.normalize());
+  const leg=box(g,pin?.04:.05,delta.length(),pin?.04:.05,...a.clone().add(b).multiplyScalar(.5).toArray(),steel,pin?'Tube Pin・外側斜め脚':'Square Bar・垂直脚');leg.geometry.dispose();leg.geometry=new RoundedBoxGeometry(pin?.04:.05,delta.length(),pin?.04:.05,3,.001);leg.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),delta.normalize());
   box(g,.085,.005,.085,tx,H-T-.0025,tz,steel,'取付プレート・近似');foot(bx,bz);
  }
  const caps=[];
@@ -2418,12 +2443,20 @@ function rebuildMelamine(){
  $('#mel-cost').textContent=`本体 ¥${fmt(variant.yen)} ＋ 配線口 ¥${fmt(capCost)} ＋ キャスター ¥${fmt(casterCost)} ＝ ¥${fmt(total)}（税込参考・2026/11/16）${variant.available?'':'／この仕様は公式サイトで在庫なし'}。正式見積ではありません。`;
  $('#mel-parts').textContent=`天板 ${N}枚・1枚あたり約${Math.round(W/N*1000)}×${c.depth*10}×26mm。脚 ${2*(N+1)}本${c.casters==='yes'?`／キャスター${N===2?'3個セット×2':'4個セット×2'}`:''}。幅240→241cm、奥行120→121cm・140→141cmで価格区分が変わります。`;
  $('#wiring-note').textContent=`配線口は${caps.length}個。${c.capLayout==='center'?'中央配置（2枚連結は図からの近似）':'各分割天板の中央を挟んで300mm間隔'}の配置図を反映。収納ボックス・トレイは含みません。加工位置の最終寸法は注文時確認。`;
- $('#mel-source').href=url;
+ $('#mel-source').href=url;$('#mel-material-photo').href=melCatalog.colors.find(v=>v.code===c.color).image;
 }
 function applyMelamine(initial=false){normalizeMelamine();syncMelamineControls();rebuildMelamine();renderValueComparison();try{localStorage.setItem('ss-melamine-v2',JSON.stringify(melamineConfig))}catch{}if(!initial){populateSelect();setTable('supplierRect');save()}}
 for(const [id,key] of Object.entries(melBindings))$('#'+id).addEventListener('change',e=>{melamineConfig[key]=e.target.value;applyMelamine()});
 $('#mel-reset').onclick=()=>{Object.assign(melamineConfig,melDefaults);applyMelamine();$('.config-scroll').scrollTop=0};
 $('#melamine-settings').addEventListener('toggle',()=>{if($('#melamine-settings').open){$('.config-scroll').scrollTop=0;$('#mel-value').open=false}});
+function focusMaterial(leg=false){
+ setView('table');oakProductOnly=true;$('#oak-product-only').checked=true;$('#melamine-settings').open=false;$('#mel-value').open=false;
+ const center=roundGroup.position,H=tableOptions.supplierRect.height,D=melamineConfig.depth/100,W=melamineConfig.width/100;
+ const target=new THREE.Vector3(center.x+D/2-.08,leg?H*.56:H-.015,center.z+W/2-.13);
+ controls.minDistance=.25;controls.target.copy(target);camera.position.copy(target).add(new THREE.Vector3(leg?.38:.22,leg?.10:.18,leg?.40:.32));controls.update();render();
+}
+$('#mel-surface-view').onclick=()=>focusMaterial(false);
+$('#mel-metal-view').onclick=()=>focusMaterial(true);
 $('#mel-value').addEventListener('toggle',()=>{if($('#mel-value').open)$('#melamine-settings').open=false});
 applyMelamine(true);
 
